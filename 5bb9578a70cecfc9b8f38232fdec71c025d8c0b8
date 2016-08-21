@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "baa041b7_3b4bb061",
+        "filename": "docker-compose.yaml",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1009089
+      },
+      "writtenOn": "2016-08-21T12:40:15Z",
+      "side": 1,
+      "message": "the usual nit stuff... :) extra blanks",
+      "revId": "5bb9578a70cecfc9b8f38232fdec71c025d8c0b8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_1b50ec09",
+        "filename": "master/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1009089
+      },
+      "writtenOn": "2016-08-21T12:40:15Z",
+      "side": 1,
+      "message": "extra space ...",
+      "revId": "5bb9578a70cecfc9b8f38232fdec71c025d8c0b8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_fb5428ff",
+        "filename": "master/replication.config",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1009089
+      },
+      "writtenOn": "2016-08-21T12:40:15Z",
+      "side": 1,
+      "message": "extra spaces..",
+      "revId": "5bb9578a70cecfc9b8f38232fdec71c025d8c0b8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa041b7_bb3fc0b4",
+        "filename": "slave/server-git.conf",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1009089
+      },
+      "writtenOn": "2016-08-21T12:40:15Z",
+      "side": 1,
+      "message": "some extra spaces and spaces instead tabs",
+      "revId": "5bb9578a70cecfc9b8f38232fdec71c025d8c0b8",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": false
+    }
+  ]
+}
