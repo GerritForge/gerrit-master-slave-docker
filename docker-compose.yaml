@@ -8,23 +8,28 @@ services:
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=reviewdb
 
-  master:
-    build: master
+  gerrit-master:
+    image: gerrit-master
     ports:
       - "18080:8080"
       - "29418:29418"
     links:
       - postgres
+      - gerrit-slave-nginx
+      - gerrit-slave-httpd
     depends_on:
       - postgres
 
-  slave:
-    build: slave
+  gerrit-slave-nginx:
+    image: gerrit-slave-nginx
     ports:
       - "18081:8080"
-      - "29419:29418"
     links:
       - postgres
-    depends_on:
-      - master
 
+  gerrit-slave-httpd:
+    image: gerrit-slave-httpd
+    ports:
+      - "18082:8080"
+    links:
+      - postgres
