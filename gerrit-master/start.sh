@@ -3,8 +3,10 @@
 chown -R gerrit: /var/gerrit/.ssh
 chmod 600 /var/gerrit/.ssh/id_rsa
 
-wait-for-it.sh slave:22 -- echo "Slave is up"
-sudo -u gerrit ssh -oStrictHostKeyChecking=no slave exit
+wait-for-it.sh gerrit-slave-nginx:22 -- echo "Slave is up"
+sudo -u gerrit ssh -oStrictHostKeyChecking=no gerrit-slave-nginx exit
+wait-for-it.sh gerrit-slave-httpd:22 -- echo "Slave is up"
+sudo -u gerrit ssh -oStrictHostKeyChecking=no gerrit-slave-httpd exit
 
 wait-for-it.sh postgres:5432 -- echo "Postgres is up"
 sudo -u gerrit rm -Rf /var/gerrit/git/*
