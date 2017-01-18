@@ -11,7 +11,7 @@ services:
       - gerrit-net
 
   gerrit-master:
-    image: gerrit-master
+    build: gerrit-master/
     ports:
       - "18080:8080"
       - "29418:29418"
@@ -21,14 +21,14 @@ services:
       - postgres
 
   gerrit-slave-nginx:
-    image: gerrit-slave-nginx
+    build: gerrit-slave-nginx/
     ports:
       - "18081:8080"
     networks:
       - gerrit-net
 
   gerrit-slave-httpd:
-    image: gerrit-slave-httpd
+    build: gerrit-slave-httpd/
     ports:
       - "18082:8080"
     networks:
