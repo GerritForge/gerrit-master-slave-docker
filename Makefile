@@ -1,4 +1,4 @@
-PROJECTS=gerrit-master gerrit-slave gerrit-slave-nginx gerrit-slave-httpd
+PROJECTS=gerrit-master gerrit-master-nginx gerrit-slave gerrit-slave-nginx gerrit-slave-httpd gerrit-haproxy
 
 start: build
 	docker-compose up -d
