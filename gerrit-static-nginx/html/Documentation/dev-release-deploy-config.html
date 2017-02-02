@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Deploy Gerrit Artifacts</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Deploy Gerrit Artifacts</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#deploy-configuration-setting-maven-central">Deploy Configuration settings for Maven Central</a></li>
+<li><a href="#deploy-configuration-settings-xml">Deploy Configuration in Maven <code>settings.xml</code></a>
+<ul class="sectlevel2">
+<li><a href="#deploy-configuration-subprojects">Gerrit Subprojects</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="deploy-configuration-setting-maven-central">Deploy Configuration settings for Maven Central</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Some Gerrit artifacts (e.g. the Gerrit WAR file, the Gerrit Plugin API
+and the Gerrit Extension API) are published on Maven Central in the
+<code>com.google.gerrit</code> repository.</p>
+</div>
+<div class="paragraph">
+<p>To be able to publish artifacts to Maven Central some preparations must
+be done:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Create an account on
+<a href="https://issues.sonatype.org/secure/Signup!default.jspa">Sonatype&#8217;s Jira</a>.</p>
+<div class="paragraph">
+<p>Sonatype is the company that runs Maven Central and you need a Sonatype
+account to be able to upload artifacts to Maven Central.</p>
+</div>
+</li>
+<li>
+<p>Configure your Sonatype user and password in <code>~/.m2/settings.xml</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;server&gt;
+  &lt;id&gt;sonatype-nexus-staging&lt;/id&gt;
+  &lt;username&gt;USER&lt;/username&gt;
+  &lt;password&gt;PASSWORD&lt;/password&gt;
+&lt;/server&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Request permissions to upload artifacts to the <code>com.google.gerrit</code>
+repository on Maven Central:</p>
+<div class="paragraph">
+<p>Ask for this permission by adding a comment on the
+<a href="https://issues.sonatype.org/browse/OSSRH-7392">OSSRH-7392</a> Jira
+ticket at Sonatype.</p>
+</div>
+<div class="paragraph">
+<p>The request needs to be approved by someone who already has this
+permission by commenting on the same issue.</p>
+</div>
+</li>
+<li>
+<p>Generate and publish a PGP key</p>
+<div class="paragraph">
+<p>Generate and publish a PGP key as described in
+<a href="http://central.sonatype.org/pages/working-with-pgp-signatures.html">
+Working with PGP Signatures</a>.</p>
+</div>
+<div class="paragraph">
+<p>Please be aware that after publishing your public key it may take a
+while until it is visible to the Sonatype server.</p>
+</div>
+<div class="paragraph">
+<p>The PGP key is needed to be able to sign the artifacts before the
+upload to Maven Central.</p>
+</div>
+<div class="paragraph">
+<p>The PGP passphrase can be put in <code>~/.m2/settings.xml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;settings&gt;
+  &lt;profiles&gt;
+    &lt;profile&gt;
+      &lt;id&gt;gpg&lt;/id&gt;
+      &lt;properties&gt;
+        &lt;gpg.executable&gt;gpg2&lt;/gpg.executable&gt;
+        &lt;gpg.passphrase&gt;mypassphrase&lt;/gpg.passphrase&gt;
+      &lt;/properties&gt;
+    &lt;/profile&gt;
+  &lt;/profiles&gt;
+  &lt;activeProfiles&gt;
+    &lt;activeProfile&gt;gpg&lt;/activeProfile&gt;
+  &lt;/activeProfiles&gt;
+&lt;/settings&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It can also be included in the key chain on OS X.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="deploy-configuration-settings-xml">Deploy Configuration in Maven <code>settings.xml</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit Subproject Artifacts are stored on
+<a href="https://developers.google.com/storage/">Google Cloud Storage</a>.
+Via the <a href="https://console.developers.google.com/project/164060093628">Developers Console</a> the
+Gerrit maintainers have access to the <code>Gerrit Code Review</code> project.
+This projects host several buckets for storing Gerrit artifacts:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>gerrit-api</code>:</p>
+<div class="paragraph">
+<p>Bucket to store the Gerrit Extension API Jar and the Gerrit Plugin API
+Jar.</p>
+</div>
+</li>
+<li>
+<p><code>gerrit-maven</code>:</p>
+<div class="paragraph">
+<p>Bucket to store Gerrit Subproject Artifacts (e.g. <code>gwtjsonrpc</code> etc.).</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To upload artifacts to a bucket the user must authenticate with a
+username and password. The username and password need to be retrieved
+from the <a href="https://console.cloud.google.com/storage/settings?project=api-project-164060093628">
+Storage Setting in the Google Cloud Platform Console</a>:</p>
+</div>
+<div class="paragraph">
+<p>Select the <code>Interoperability</code> tab, and if no keys are listed under
+<code>Interoperable storage access keys</code>, select 'Create a new key'.</p>
+</div>
+<div class="paragraph">
+<p>Using <code>Access Key</code> as username and <code>Secret</code> as the password, add the
+configuration in the <code>~/.m2/settings.xml</code> file to make the credentials
+known to Maven:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd"&gt;
+    &lt;servers&gt;
+      &lt;server&gt;
+        &lt;id&gt;gerrit-api-repository&lt;/id&gt;
+        &lt;username&gt;GOOG..EXAMPLE.....EXAMPLE&lt;/username&gt;
+        &lt;password&gt;EXAMPLE..EXAMPLE..EXAMPLE&lt;/password&gt;
+      &lt;/server&gt;
+      &lt;server&gt;
+        &lt;id&gt;gerrit-maven-repository&lt;/id&gt;
+        &lt;username&gt;GOOG..EXAMPLE.....EXAMPLE&lt;/username&gt;
+        &lt;password&gt;EXAMPLE..EXAMPLE..EXAMPLE&lt;/password&gt;
+      &lt;/server&gt;
+      &lt;server&gt;
+        &lt;id&gt;gerrit-plugins-repository&lt;/id&gt;
+        &lt;username&gt;GOOG..EXAMPLE.....EXAMPLE&lt;/username&gt;
+        &lt;password&gt;EXAMPLE..EXAMPLE..EXAMPLE&lt;/password&gt;
+      &lt;/server&gt;
+    &lt;/servers&gt;
+  &lt;/settings&gt;</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="deploy-configuration-subprojects">Gerrit Subprojects</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>You will need to have the following in the <code>pom.xml</code> to make it
+deployable to the <code>gerrit-maven</code> storage bucket:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;distributionManagement&gt;
+    &lt;repository&gt;
+      &lt;id&gt;gerrit-maven-repository&lt;/id&gt;
+      &lt;name&gt;Gerrit Maven Repository&lt;/name&gt;
+      &lt;url&gt;gs://gerrit-maven&lt;/url&gt;
+      &lt;uniqueVersion&gt;true&lt;/uniqueVersion&gt;
+    &lt;/repository&gt;
+  &lt;/distributionManagement&gt;</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In case of JGit the <code>pom.xml</code> already contains a <code>distributionManagement</code>
+section.  To deploy the artifacts to the <code>gerrit-maven</code> repository, replace
+the existing <code>distributionManagement</code> section with this snippet.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add these two snippets to the <code>pom.xml</code> to enable the wagon provider:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;pluginRepositories&gt;
+    &lt;pluginRepository&gt;
+      &lt;id&gt;gerrit-maven&lt;/id&gt;
+      &lt;url&gt;https://gerrit-maven.commondatastorage.googleapis.com&lt;/url&gt;
+    &lt;/pluginRepository&gt;
+  &lt;/pluginRepositories&gt;</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;build&gt;
+    &lt;extensions&gt;
+      &lt;extension&gt;
+        &lt;groupId&gt;com.googlesource.gerrit&lt;/groupId&gt;
+        &lt;artifactId&gt;gs-maven-wagon&lt;/artifactId&gt;
+        &lt;version&gt;3.3&lt;/version&gt;
+      &lt;/extension&gt;
+    &lt;/extensions&gt;
+  &lt;/build&gt;</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

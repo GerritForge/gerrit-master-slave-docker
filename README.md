@@ -8,7 +8,8 @@ This docker compose configuration creates the following scenario:
 - First Gerrit slave listening to port 18081 (Git/HTTP) 
 - Second Gerrit slave listening to port 18082 (Git/HTTP)
 - Gerrit user 'admin' with password 'secret'
-- HaProxy listening on port 80 that redirects traffic to either the master or slaves
+- Nginx web server listening to port 80 to serve gerrit static assets
+- HaProxy listening on port 80 that redirects traffic to either the master, slaves, or static servers
 
 ## Pre-requisites
 
@@ -41,13 +42,14 @@ To display list of docker VMs active type 'make status'
 Example:
 ```
 $ docker-compose ps
-                    Name                                   Command               State                         Ports
-------------------------------------------------------------------------------------------------------------------------------------------
-gerritmasterslavedocker_gerrit-haproxy_1        /docker-entrypoint.sh hapr ...   Up      0.0.0.0:80->80/tcp
-gerritmasterslavedocker_gerrit-master-nginx_1   /bin/sh -c /bin/start.sh         Up      0.0.0.0:29418->29418/tcp, 0.0.0.0:18080->8080/tcp
-gerritmasterslavedocker_gerrit-slave-httpd_1    /bin/sh -c /bin/start.sh         Up      29418/tcp, 0.0.0.0:18082->8080/tcp
-gerritmasterslavedocker_gerrit-slave-nginx_1    /bin/sh -c /bin/start.sh         Up      29418/tcp, 0.0.0.0:18081->8080/tcp
-gerritmasterslavedocker_postgres_1              /docker-entrypoint.sh postgres   Up      5432/tcp
+                     Name                                   Command               State                         Ports
+-------------------------------------------------------------------------------------------------------------------------------------------
+gerritmasterslavedocker_gerrit-haproxy_1         /docker-entrypoint.sh hapr ...   Up      0.0.0.0:80->80/tcp
+gerritmasterslavedocker_gerrit-master-nginx_1    /bin/sh -c /bin/start.sh         Up      0.0.0.0:29418->29418/tcp, 0.0.0.0:18080->8080/tcp
+gerritmasterslavedocker_gerrit-slave-httpd_1     /bin/sh -c /bin/start.sh         Up      29418/tcp, 0.0.0.0:18082->8080/tcp
+gerritmasterslavedocker_gerrit-slave-nginx_1     /bin/sh -c /bin/start.sh         Up      29418/tcp, 0.0.0.0:18081->8080/tcp
+gerritmasterslavedocker_gerrit-static-nginx_1    nginx -g daemon off;             Up      443/tcp, 0.0.0.0:18083->80/tcp
+gerritmasterslavedocker_postgres_1               /docker-entrypoint.sh postgres   Up      5432/tcp
 ```
 
 ## Display the logs
@@ -107,8 +109,9 @@ Enter the "test-project" in the Project Name, select "Create initial empty commi
 
 ### Load balance
 
-There is a haproxy frontend that will redirect all git clones/fetch requests to the slaves while everything else gets
-redirected to the master.  Traffic to slaves are load balanced in round robin manner.
+There is a haproxy frontend that will redirect all git clones/fetch requests to the slaves, all documentation requests
+to nginx web server and everything else gets redirected to the gerrit master.  Traffic to the servers are load balanced
+in round robin manner.
 
 - Cloning/Pushing: http://localhost/test-project
 - Haproxy stats: http://localhost/haproxy?stats

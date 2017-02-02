@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>gerrit review</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>gerrit review</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_access">ACCESS</a></li>
+<li><a href="#_scripting">SCRIPTING</a></li>
+<li><a href="#_examples">EXAMPLES</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>gerrit review - Apply reviews to one or more patch sets</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>ssh</em> -p &lt;port&gt; &lt;host&gt; <em>gerrit review</em>
+  [--project &lt;PROJECT&gt; | -p &lt;PROJECT&gt;]
+  [--branch &lt;BRANCH&gt; | -b &lt;BRANCH&gt;]
+  [--message &lt;MESSAGE&gt; | -m &lt;MESSAGE&gt;]
+  [--notify &lt;NOTIFYHANDLING&gt; | -n &lt;NOTIFYHANDLING&gt;]
+  [--submit | -s]
+  [--abandon | --restore]
+  [--rebase]
+  [--move &lt;BRANCH&gt;]
+  [--publish]
+  [--json | -j]
+  [--delete]
+  [--verified &lt;N&gt;] [--code-review &lt;N&gt;]
+  [--label Label-Name=&lt;N&gt;]
+  [--tag TAG]
+  {COMMIT | CHANGEID,PATCHSET}&#8230;&#8203;</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Updates the current user&#8217;s approval status of the specified patch
+sets and/or submits them for merging, sending out email
+notifications and updating the database.</p>
+</div>
+<div class="paragraph">
+<p>Patch sets may be specified in 'CHANGEID,PATCHSET' format, such as
+'8242,2', or 'COMMIT' format.</p>
+</div>
+<div class="paragraph">
+<p>If a patch set is specified with the 'COMMIT' format, the complete
+or abbreviated commit SHA-1 may be used.  If the same commit is available
+in multiple projects the <code>--project</code> option may be used to limit where
+Gerrit searches for the change to only the contents of the specified project.
+If the same commit is available in multiple branches the <code>--branch</code> option
+may be used to limit where Gerrit searches for changes to only the specified
+branch.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--project</dt>
+<dt class="hdlist1">-p</dt>
+<dd>
+<p>Name of the project the intended changes are contained
+within.  This option must be supplied before the commit
+SHA-1 in order to take effect.</p>
+</dd>
+<dt class="hdlist1">--branch</dt>
+<dt class="hdlist1">-b</dt>
+<dd>
+<p>Name of the branch the intended changes are contained
+within.  This option must be supplied before the commit
+SHA-1 in order to take effect.</p>
+</dd>
+<dt class="hdlist1">--message</dt>
+<dt class="hdlist1">-m</dt>
+<dd>
+<p>Optional cover letter to include as part of the message
+sent to reviewers when the approval states are updated.
+(option is mutually exclusive with --json)</p>
+</dd>
+<dt class="hdlist1">--json</dt>
+<dt class="hdlist1">-j</dt>
+<dd>
+<p>Read review input from JSON file. See
+<a href="rest-api-changes.html#review-input">ReviewInput</a> entity for the
+format.
+(option is mutually exclusive with --submit, --restore, --publish, --delete,
+--abandon, --message, --rebase and --move)</p>
+</dd>
+<dt class="hdlist1">--notify</dt>
+<dt class="hdlist1">-n</dt>
+<dd>
+<p>Who to send email notifications to after the review is stored.
+This option only applies for storing the review, but not for any
+other action (abandon, restore etc.) done by this command.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>NONE: send no email</p>
+</li>
+<li>
+<p>OWNER: send email to change owners</p>
+</li>
+<li>
+<p>OWNER_REVIEWERS: send email to change owners and reviewers</p>
+</li>
+<li>
+<p>ALL: send email to all (change owners, reviewers, watchers and any
+user who has starred the change)</p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1">--help</dt>
+<dt class="hdlist1">-h</dt>
+<dd>
+<p>Display site-specific usage information, including the
+complete listing of supported approval categories and values.</p>
+</dd>
+<dt class="hdlist1">--abandon</dt>
+<dd>
+<p>Abandon the specified change(s).
+(option is mutually exclusive with --submit, --restore, --publish, --delete,
+--rebase, --move and --json)</p>
+</dd>
+<dt class="hdlist1">--restore</dt>
+<dd>
+<p>Restore the specified abandoned change(s).
+(option is mutually exclusive with --abandon and --json)</p>
+</dd>
+<dt class="hdlist1">--rebase</dt>
+<dd>
+<p>Rebase the specified change(s).
+(option is mutually exclusive with --abandon, --submit, --delete and --json)</p>
+</dd>
+<dt class="hdlist1">--move</dt>
+<dd>
+<p>Move the specified change(s).
+(option is mutually exclusive with --json and --abandon)</p>
+</dd>
+<dt class="hdlist1">--submit</dt>
+<dt class="hdlist1">-s</dt>
+<dd>
+<p>Submit the specified patch set(s) for merging.
+(option is mutually exclusive with --abandon, --publish --delete, --rebase
+and --json)</p>
+</dd>
+<dt class="hdlist1">--publish</dt>
+<dd>
+<p>Publish the specified draft patch set(s).
+(option is mutually exclusive with --submit, --restore, --abandon, --delete
+and --json)</p>
+</dd>
+<dt class="hdlist1">--delete</dt>
+<dd>
+<p>Delete the specified draft patch set(s).
+(option is mutually exclusive with --submit, --restore, --abandon, --publish,
+--rebase and --json)</p>
+</dd>
+<dt class="hdlist1">--code-review</dt>
+<dt class="hdlist1">--verified</dt>
+<dd>
+<p>Set the label to the value 'N'.  The exact option names
+supported and the range of values permitted differs per site,
+check the output of --help, or contact your site administrator
+for further details.  These options are only available for the
+labels that are defined in the 'All-Projects' root project and
+that are valid for all projects; for other labels, see --label.
+Votes that are not permitted for the user are silently ignored.</p>
+</dd>
+<dt class="hdlist1">--label</dt>
+<dd>
+<p>Set a label by name to the value 'N'.  Invalid votes (invalid label
+or invalid value) and votes that are not permitted for the user are
+silently ignored.</p>
+</dd>
+<dt class="hdlist1">--strict-labels</dt>
+<dd>
+<p>Require ability to vote on all specified labels before reviewing change.
+If the vote is invalid (invalid label or invalid name), the vote is not
+permitted for the user, or the vote is on an outdated or closed patch set,
+return an error instead of silently discarding the vote.</p>
+</dd>
+<dt class="hdlist1">--tag</dt>
+<dt class="hdlist1">-t</dt>
+<dd>
+<p>Apply a 'TAG' to the change message, votes, and inline comments. The 'TAG'
+can represent an external system like CI that does automated verification
+of the change. Comments with specific 'TAG' values can be filtered out in
+the web UI.
+Note that to apply different tags on on different votes/comments, multiple
+invocations of the SSH command are required.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_access">ACCESS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Any user who has configured an SSH key.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scripting">SCRIPTING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command is intended to be used in scripts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">EXAMPLES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Approve the change with commit c0ff33 as "Verified +1"</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit review --verified +1 c0ff33</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vote on the project specific label "mylabel":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit review --label mylabel=+1 c0ff33</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Append the message "Build Successful". Notice two levels of quoting is
+required, one for the local shell, and another for the argument parser
+inside the Gerrit server:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit review -m '"Build Successful"' c0ff33</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Mark the unmerged commits both "Verified +1" and "Code-Review +2" and
+submit them for merging:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 review.example.com gerrit review \
+    --verified +1 \
+    --code-review +2 \
+    --submit \
+    --project this/project \
+    $(git rev-list origin/master..HEAD)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Abandon an active change:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 review.example.com gerrit review --abandon c0ff33</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html">Access Controls</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

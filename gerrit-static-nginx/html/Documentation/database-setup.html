@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Database Setup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#createdb">Database Setup</a>
+<ul class="sectlevel2">
+<li><a href="#createdb_h2">H2</a></li>
+<li><a href="#createdb_derby">Apache Derby</a></li>
+<li><a href="#createdb_postgres">PostgreSQL</a></li>
+<li><a href="#createdb_mysql">MySQL</a></li>
+<li><a href="#createdb_oracle">Oracle</a></li>
+<li><a href="#createdb_maxdb">SAP MaxDB</a></li>
+<li><a href="#createdb_db2">DB2</a></li>
+<li><a href="#createdb_hana">SAP HANA</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="createdb">Database Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>During the init phase of Gerrit you will need to specify which database to use.</p>
+</div>
+<div class="sect2">
+<h3 id="createdb_h2">H2</h3>
+<div class="paragraph">
+<p>If you choose H2, Gerrit will automatically set up the embedded H2 database as
+backend so no set up or configuration is necessary.</p>
+</div>
+<div class="paragraph">
+<p>Using the embedded H2 database is the easiest way to get a Gerrit
+site up and running, making it ideal for proof of concepts or small team
+servers.  On the flip side, H2 is not the recommended option for large
+corporate installations. This is because there is no easy way to interact
+with the database while Gerrit is offline, it&#8217;s not easy to backup the data,
+and it&#8217;s not possible to set up H2 in a load balanced/hotswap configuration.</p>
+</div>
+<div class="paragraph">
+<p>If this option interests you, you might want to consider <a href="install-quick.html">the quick guide</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_derby">Apache Derby</h3>
+<div class="paragraph">
+<p>If Derby is selected, Gerrit will automatically set up the embedded Derby
+database as backend so no set up or configuration is necessary.</p>
+</div>
+<div class="paragraph">
+<p>Currently only support for embedded mode is added. There are two other
+deployment options for Apache Derby that can be added later:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://db.apache.org/derby/papers/DerbyTut/ns_intro.html#Network+Server+Options">
+Derby Network Server (standalone mode)</a></p>
+</li>
+<li>
+<p><a href="http://db.apache.org/derby/papers/DerbyTut/ns_intro.html#Embedded+Server">
+Embedded Server (hybrid mode)</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_postgres">PostgreSQL</h3>
+<div class="paragraph">
+<p>This option is more complicated than the H2 option but is recommended
+for larger installations. It&#8217;s the database backend with the largest userbase
+in the Gerrit community.</p>
+</div>
+<div class="paragraph">
+<p>Create a user for the web application within PostgreSQL, assign it a
+password, create a database to store the metadata, and grant the user
+full rights on the newly created database:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ createuser --username=postgres -RDIElPS gerrit2
+  $ createdb --username=postgres -E UTF-8 -O gerrit2 reviewdb</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit PostgreSQL&#8217;s <a href="http://www.postgresql.org/docs/9.1/interactive/index.html">documentation</a> for further information regarding
+using PostgreSQL.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_mysql">MySQL</h3>
+<div class="paragraph">
+<p>This option is also more complicated than the H2 option. Just as with
+PostgreSQL it&#8217;s also recommended for larger installations.</p>
+</div>
+<div class="paragraph">
+<p>Create a user for the web application within the database, assign it a
+password, create a database, and give the newly created user full
+rights on it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  mysql
+
+  CREATE USER 'gerrit2'@'localhost' IDENTIFIED BY 'secret';
+  CREATE DATABASE reviewdb;
+  GRANT ALL ON reviewdb.* TO 'gerrit2'@'localhost';
+  FLUSH PRIVILEGES;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit MySQL&#8217;s <a href="http://dev.mysql.com/doc/">documentation</a> for further
+information regarding using MySQL.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_oracle">Oracle</h3>
+<div class="paragraph">
+<p>PostgreSQL or H2 is the recommended database for Gerrit Code Review.
+Oracle is supported for environments where running on an existing Oracle
+installation simplifies administrative overheads, such as database backups.</p>
+</div>
+<div class="paragraph">
+<p>Create a user for the web application within sqlplus, assign it a
+password, and grant the user full rights on the newly created database:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  SQL&gt; create user gerrit2 identified by secret_password default tablespace users;
+  SQL&gt; grant connect, resources to gerrit2;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>JDBC driver ojdbc6.jar must be obtained from your Oracle distribution. Gerrit
+initialization process tries to copy it from a known location:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/u01/app/oracle/product/11.2.0/xe/jdbc/lib/ojdbc6.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If this file can not be located at this place, then the alternative location
+can be provided.</p>
+</div>
+<div class="paragraph">
+<p>Instance name is the Oracle SID. Sample database section in
+$site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = oracle
+        instance = xe
+        hostname = localhost
+        username = gerrit2
+        port = 1521</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sample database section in $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = secret_pasword</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_maxdb">SAP MaxDB</h3>
+<div class="paragraph">
+<p>SAP MaxDB is a supported database for running Gerrit Code Review. However it is
+recommended only for environments where you intend to run Gerrit on an existing
+MaxDB installation to reduce administrative overhead.</p>
+</div>
+<div class="paragraph">
+<p>In the MaxDB studio or using the SQLCLI command line interface create a user
+'gerrit2' with the user class 'RESOURCE' and a password &lt;secret password&gt;. This
+will also create an associated schema on the database.</p>
+</div>
+<div class="paragraph">
+<p>To run Gerrit on MaxDB, you need to obtain the MaxDB JDBC driver. It can be
+found in your MaxDB installation at the following location:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>on Windows 64bit at "C:\Program Files\sdb\MaxDB\runtime\jar\sapdbc.jar"</p>
+</li>
+<li>
+<p>on Linux at "/opt/sdb/MaxDB/runtime/jar/sapdbc.jar"</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It needs to be stored in the 'lib' folder of the review site.</p>
+</div>
+<div class="paragraph">
+<p>In the following sample database section it is assumed that the database name is
+'reviewdb' and the database is installed on localhost:</p>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = maxdb
+        database = reviewdb
+        hostname = localhost
+        username = gerrit2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = &lt;secret password&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit SAP MaxDB&#8217;s <a href="http://maxdb.sap.com/documentation/">documentation</a> for further
+information regarding using SAP MaxDB.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_db2">DB2</h3>
+<div class="paragraph">
+<p>IBM DB2 is a supported database for running Gerrit Code Review. However it is
+recommended only for environments where you intend to run Gerrit on an existing
+DB2 installation to reduce administrative overhead.</p>
+</div>
+<div class="paragraph">
+<p>Create a system wide user for the Gerrit application, and grant the user
+full rights on the newly created database:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  db2 =&gt; create database gerrit
+  db2 =&gt; connect to gerrit
+  db2 =&gt; grant connect,accessctrl,dataaccess,dbadm,secadm on database to gerrit2;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>JDBC driver db2jcc4.jar and db2jcc_license_cu.jar must be obtained
+from your DB2 distribution. Gerrit initialization process tries to copy
+it from a known location:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/ibm/db2/V10.5/java/db2jcc4.jar
+/opt/ibm/db2/V10.5/java/db2jcc_license_cu.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If these files cannot be located at this place, then an alternative location
+can be provided during init step execution.</p>
+</div>
+<div class="paragraph">
+<p>Sample database section in $site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = db2
+        database = gerrit
+        hostname = localhost
+        username = gerrit2
+        port = 50001</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sample database section in $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = secret_pasword</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_hana">SAP HANA</h3>
+<div class="paragraph">
+<p>SAP HANA is a supported database for running Gerrit Code Review. However it is
+recommended only for environments where you intend to run Gerrit on an existing
+HANA installation to reduce administrative overhead.</p>
+</div>
+<div class="paragraph">
+<p>In the HANA studio or the SAP HANA Web-based Development Workbench create a user
+'GERRIT2' with the role 'RESTRICTED_USER_JDBC_ACCESS' and a password
+&lt;secret password&gt;. This will also create an associated schema on the database.
+As this user would be required to change the password upon first login you might
+want to to disable the password lifetime check by executing
+'ALTER USER GERRIT2 DISABLE PASSWORD LIFETIME'.</p>
+</div>
+<div class="paragraph">
+<p>To run Gerrit on HANA, you need to obtain the HANA JDBC driver. It can be found
+as described
+<a href="http://help.sap.com/saphelp_hanaplatform/helpdata/en/ff/15928cf5594d78b841fbbe649f04b4/frameset.htm">here</a>.
+It needs to be stored in the 'lib' folder of the review site.</p>
+</div>
+<div class="paragraph">
+<p>In the following sample database section it is assumed that HANA is running on
+the host 'hana.host' with the instance number 00 where a schema/user GERRIT2
+was created:</p>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = hana
+        instance = 00
+        hostname = hana.host
+        username = GERRIT2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = &lt;secret password&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit SAP HANA&#8217;s <a href="http://help.sap.com/hana_appliance/">documentation</a> for
+further information regarding using SAP HANA.</p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

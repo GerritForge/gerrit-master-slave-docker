@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>init</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>init</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_context">CONTEXT</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>init - Initialize a new Gerrit server installation or upgrade an existing
+installation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>java</em> -jar gerrit.war <em>init</em>
+  -d &lt;SITE_PATH&gt;
+  [--batch]
+  [--delete-caches]
+  [--no-auto-start]
+  [--skip-plugins]
+  [--list-plugins]
+  [--install-plugin=&lt;PLUGIN_NAME&gt;]
+  [--install-all-plugins]
+  [--secure-store-lib]
+  [--dev]
+  [--skip-all-downloads]
+  [--skip-download=&lt;LIBRARY_NAME&gt;]</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Creates a new Gerrit server installation, interactively prompting
+for some basic setup prior to writing default configuration files
+into a newly created <code>$site_path</code>.</p>
+</div>
+<div class="paragraph">
+<p>If run in an existing <code>$site_path</code>, init upgrades existing resources
+(e.g. DB schema, plugins) as necessary.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">-b</dt>
+<dt class="hdlist1">--batch</dt>
+<dd>
+<p>Run in batch mode, skipping interactive prompts. For a fresh
+install, reasonable configuration defaults are chosen based
+on the whims of the Gerrit developers. On upgrades, the existing
+settings in <code>gerrit.config</code> are respected.</p>
+<div class="paragraph">
+<p>If during a schema migration unused objects (e.g. tables, columns)
+are detected, they are <strong>not</strong> automatically dropped; a list of SQL
+statements to drop these objects is provided. To drop the unused
+objects these SQL statements must be executed manually.</p>
+</div>
+</dd>
+<dt class="hdlist1">--delete-caches</dt>
+<dd>
+<p>Force deletion of all persistent cache files. Note that
+re-creation of these caches may be expensive.</p>
+</dd>
+<dt class="hdlist1">--no-auto-start</dt>
+<dd>
+<p>Don&#8217;t automatically start the daemon after initializing a
+newly created site path.  This permits the administrator
+to inspect and modify the configuration before the daemon
+is started.</p>
+</dd>
+<dt class="hdlist1">-d</dt>
+<dt class="hdlist1">--site-path</dt>
+<dd>
+<p>Location of the <code>gerrit.config</code> file, and all other per-site
+configuration data, supporting libraries and log files.</p>
+</dd>
+<dt class="hdlist1">--skip-plugins</dt>
+<dd>
+<p>Entirely skip installation and initialization of plugins. This option
+is needed when initializing a gerrit site without an archive. That
+happens when running gerrit acceptance or integration tests in a
+debugger, using classes. Supplying this option leads to ignoring the
+<code>--install-plugin</code> and <code>--install-all-plugins</code> options, if supplied as well.</p>
+</dd>
+<dt class="hdlist1">--list-plugins</dt>
+<dd>
+<p>Print names of plugins that can be installed during init process.</p>
+</dd>
+<dt class="hdlist1">--install-all-plugins</dt>
+<dd>
+<p>Automatically install all plugins from gerrit.war without asking.
+This option also works in batch mode. This option cannot be supplied
+alongside <code>--install-plugin</code>.</p>
+</dd>
+<dt class="hdlist1">--secure-store-lib</dt>
+<dd>
+<p>Path to the jar providing the chosen
+<a href="dev-plugins.html#secure-store">SecureStore</a> implementation class.
+This option is used in the same way as the <code>--new-secure-store-lib</code> option
+documented in <a href="pgm-SwitchSecureStore.html">SwitchSecureStore</a>.</p>
+</dd>
+<dt class="hdlist1">--install-plugin</dt>
+<dd>
+<p>Automatically install plugin with given name without asking.
+This option also works in batch mode. This option may be supplied
+more than once to install multiple plugins. This option cannot be
+supplied alongside <code>--install-all-plugins</code>.</p>
+</dd>
+<dt class="hdlist1">--dev</dt>
+<dd>
+<p>Install in developer mode. Default configuration settings are
+chosen to run the Gerrit server as a developer.</p>
+</dd>
+<dt class="hdlist1">--skip-all-downloads</dt>
+<dd>
+<p>Do not automatically download and install required libraries. The
+administrator must manually install the required libraries in the <code>lib/</code>
+folder.</p>
+</dd>
+<dt class="hdlist1">--skip-download</dt>
+<dd>
+<p>Do not automatically download and install the library with the given name.
+The administrator must manually install the required library in the <code>lib/</code>
+folder.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_context">CONTEXT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command can only be run on a server which has direct
+connectivity to the metadata database, and local access to the
+managed Git repositories.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

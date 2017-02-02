@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Command Line Tools</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Command Line Tools</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_client">Client</a>
+<ul class="sectlevel2">
+<li><a href="#__a_id_client_commands_a_commands"><a id="client_commands"></a>Commands</a></li>
+<li><a href="#__a_id_client_hooks_a_hooks"><a id="client_hooks"></a>Hooks</a></li>
+</ul>
+</li>
+<li><a href="#_server">Server</a>
+<ul class="sectlevel2">
+<li><a href="#__a_id_user_commands_a_user_commands"><a id="user_commands"></a>User Commands</a></li>
+<li><a href="#__a_id_admin_commands_a_administrator_commands"><a id="admin_commands"></a>Administrator Commands</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_client">Client</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Client commands and hooks can be downloaded via scp, wget or curl
+from Gerrit&#8217;s daemon, and then executed on the client system.</p>
+</div>
+<div class="paragraph">
+<p>To download a client command or hook, use scp or an http client:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ scp -p -P 29418 john.doe@review.example.com:bin/gerrit-cherry-pick ~/bin/
+  $ scp -p -P 29418 john.doe@review.example.com:hooks/commit-msg .git/hooks/
+
+  $ curl -Lo ~/bin/gerrit-cherry-pick http://review.example.com/tools/bin/gerrit-cherry-pick
+  $ curl -Lo .git/hooks/commit-msg http://review.example.com/tools/hooks/commit-msg</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For more details on how to determine the correct SSH port number,
+see <a href="user-upload.html#test_ssh">Testing Your SSH Connection</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="__a_id_client_commands_a_commands"><a id="client_commands"></a>Commands</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="cmd-cherry-pick.html">gerrit-cherry-pick</a></dt>
+<dd>
+<p>Download and cherry-pick one or more changes (commits).</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="__a_id_client_hooks_a_hooks"><a id="client_hooks"></a>Hooks</h3>
+<div class="paragraph">
+<p>Client hooks can be installed into a local Git repository, improving
+the developer experience when working with a Gerrit Code Review
+server.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="cmd-hook-commit-msg.html">commit-msg</a></dt>
+<dd>
+<p>Automatically generate `Change-Id: ` tags in commit messages.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_server">Server</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Aside from the standard Git server side actions, Gerrit supports
+several other commands over its internal SSH daemon.  As Gerrit does
+not provide an interactive shell, the commands must be triggered
+from an ssh client, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 review.example.com gerrit ls-projects</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For more details on how to determine the correct SSH port number,
+see <a href="user-upload.html#test_ssh">Testing Your SSH Connection</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="__a_id_user_commands_a_user_commands"><a id="user_commands"></a>User Commands</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="cmd-apropos.html">gerrit apropos</a></dt>
+<dd>
+<p>Search Gerrit documentation index.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-ban-commit.html">gerrit ban-commit</a></dt>
+<dd>
+<p>Bans a commit from a project&#8217;s repository.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-create-branch.html">gerrit create-branch</a></dt>
+<dd>
+<p>Create a new project branch.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-ls-groups.html">gerrit ls-groups</a></dt>
+<dd>
+<p>List groups visible to the caller.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-ls-members.html">gerrit ls-members</a></dt>
+<dd>
+<p>List the membership of a group visible to the caller.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-ls-projects.html">gerrit ls-projects</a></dt>
+<dd>
+<p>List projects visible to the caller.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-query.html">gerrit query</a></dt>
+<dd>
+<p>Query the change database.</p>
+</dd>
+<dt class="hdlist1">'gerrit receive-pack'</dt>
+<dd>
+<p>'Deprecated alias for <code>git receive-pack</code>.'</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-rename-group.html">gerrit rename-group</a></dt>
+<dd>
+<p>Rename an account group.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-review.html">gerrit review</a></dt>
+<dd>
+<p>Verify, approve and/or submit a patch set from the command line.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-set-head.html">gerrit set-head</a></dt>
+<dd>
+<p>Change the HEAD reference of a project.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-set-reviewers.html">gerrit set-reviewers</a></dt>
+<dd>
+<p>Add or remove reviewers on a change.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-stream-events.html">gerrit stream-events</a></dt>
+<dd>
+<p>Monitor events occurring in real time.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-version.html">gerrit version</a></dt>
+<dd>
+<p>Show the currently executing version of Gerrit.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-receive-pack.html">git receive-pack</a></dt>
+<dd>
+<p>Standard Git server side command for client side <code>git push</code>.</p>
+<div class="paragraph">
+<p>Also implements the magic associated with uploading commits for
+review.  See <a href="user-upload.html#push_create">Creating Changes</a>.</p>
+</div>
+</dd>
+<dt class="hdlist1">git upload-pack</dt>
+<dd>
+<p>Standard Git server side command for client side <code>git fetch</code>.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="__a_id_admin_commands_a_administrator_commands"><a id="admin_commands"></a>Administrator Commands</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="cmd-close-connection.html">gerrit close-connection</a></dt>
+<dd>
+<p>Close the specified SSH connection.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-create-account.html">gerrit create-account</a></dt>
+<dd>
+<p>Create a new user account.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-create-group.html">gerrit create-group</a></dt>
+<dd>
+<p>Create a new account group.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-create-project.html">gerrit create-project</a></dt>
+<dd>
+<p>Create a new project and associated Git repository.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-flush-caches.html">gerrit flush-caches</a></dt>
+<dd>
+<p>Flush some/all server caches from memory.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-gc.html">gerrit gc</a></dt>
+<dd>
+<p>Run the Git garbage collection.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-gsql.html">gerrit gsql</a></dt>
+<dd>
+<p>Administrative interface to active database.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-index-activate.html">gerrit index activate</a></dt>
+<dd>
+<p>Activate the latest index version available.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-index-start.html">gerrit index start</a></dt>
+<dd>
+<p>Start the online indexer.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-index-changes.html">gerrit index changes</a></dt>
+<dd>
+<p>Index one or more changes.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-logging-ls-level.html">gerrit logging ls-level</a></dt>
+<dd>
+<p>List loggers and their logging level.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-logging-set-level.html">gerrit logging set-level</a></dt>
+<dd>
+<p>Set the logging level of loggers.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-ls-user-refs.html">gerrit ls-user-refs</a></dt>
+<dd>
+<p>Lists refs visible for a specified user.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-plugin-install.html">gerrit plugin add</a></dt>
+<dd>
+<p>Alias for 'gerrit plugin install'.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-plugin-enable.html">gerrit plugin enable</a></dt>
+<dd>
+<p>Enable plugins.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-plugin-install.html">gerrit plugin install</a></dt>
+<dd>
+<p>Install/Add a plugin.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-plugin-ls.html">gerrit plugin ls</a></dt>
+<dd>
+<p>List the installed plugins.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-plugin-reload.html">gerrit plugin reload</a></dt>
+<dd>
+<p>Reload/Restart plugins.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-plugin-remove.html">gerrit plugin remove</a></dt>
+<dd>
+<p>Disable plugins.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-plugin-remove.html">gerrit plugin rm</a></dt>
+<dd>
+<p>Alias for 'gerrit plugin remove'.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-set-account.html">gerrit set-account</a></dt>
+<dd>
+<p>Change an account&#8217;s settings.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-set-members.html">gerrit set-members</a></dt>
+<dd>
+<p>Set group members.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-set-project.html">gerrit set-project</a></dt>
+<dd>
+<p>Change a project&#8217;s settings.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-set-project-parent.html">gerrit set-project-parent</a></dt>
+<dd>
+<p>Change the project permissions are inherited from.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-show-caches.html">gerrit show-caches</a></dt>
+<dd>
+<p>Display current cache statistics.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-show-connections.html">gerrit show-connections</a></dt>
+<dd>
+<p>Display active client SSH connections.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-show-queue.html">gerrit show-queue</a></dt>
+<dd>
+<p>Display the background work queues, including replication.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-test-submit-rule.html">gerrit test-submit rule</a></dt>
+<dd>
+<p>Test prolog submit rules.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-test-submit-type.html">gerrit test-submit type</a></dt>
+<dd>
+<p>Test prolog submit type.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-kill.html">kill</a></dt>
+<dd>
+<p>Kills a scheduled or running task.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-show-queue.html">ps</a></dt>
+<dd>
+<p>Alias for 'gerrit show-queue'.</p>
+</dd>
+<dt class="hdlist1"><a href="cmd-suexec.html">suexec</a></dt>
+<dd>
+<p>Execute a command as any registered user account.</p>
+</dd>
+</dl>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

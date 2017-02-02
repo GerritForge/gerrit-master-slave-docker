@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Superproject subscription to submodules updates</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Superproject subscription to submodules updates</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#automatic_update">Description</a></li>
+<li><a href="#_git_submodules_overview">Git submodules overview</a></li>
+<li><a href="#_creating_a_new_subscription">Creating a new subscription</a>
+<ul class="sectlevel2">
+<li><a href="#_ensure_the_subscription_is_allowed">Ensure the subscription is allowed</a></li>
+<li><a href="#_defining_the_submodule_branch">Defining the submodule branch</a></li>
+<li><a href="#acl_refspec">The RefSpec in the allowSuperproject section</a></li>
+<li><a href="#_subscription_limitations">Subscription Limitations</a></li>
+<li><a href="#_relative_submodules">Relative submodules</a></li>
+</ul>
+</li>
+<li><a href="#_removing_subscriptions">Removing Subscriptions</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="automatic_update">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit supports a custom git superproject feature for tracking submodules.
+This feature is useful for automatic updates on superprojects whenever
+a change is merged on tracked submodules.</p>
+</div>
+<div class="paragraph">
+<p>When a superproject is subscribed to a submodule, it is not
+required to push/merge commits to this superproject to update the
+gitlink to the submodule. Whenever a commit is merged in a submodule,
+its subscribed superproject is updated by Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>Imagine a superproject called 'super' having a branch called 'dev'
+having subscribed to a submodule 'sub' on a branch 'dev-of-sub'. When a commit
+is merged in branch 'dev-of-sub' of 'sub' project, Gerrit automatically
+creates a new commit on branch 'dev' of 'super' updating the gitlink
+to point to the just merged commit.</p>
+</div>
+<div class="paragraph">
+<p>To take advantage of this feature, one should:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>ensure superproject subscriptions are enabled on the server via
+<a href="config-gerrit.html#submodule.enableSuperProjectSubscriptions">submodule.enableSuperProjectSubscriptions</a></p>
+</li>
+<li>
+<p>configure the submodule to allow having a superproject subscribed</p>
+</li>
+<li>
+<p>ensure the .gitmodules file of the superproject includes</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>a branch field</p>
+</li>
+<li>
+<p>a url that starts with the <a href="config-gerrit.html#gerrit.canonicalWebUrl"><code>gerrit.canonicalWebUrl</code></a></p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>When a commit in a project is merged, Gerrit checks for superprojects
+that are subscribed to the the project and automatically updates those
+superprojects with a commit that updates the gitlink for the project.</p>
+</div>
+<div class="paragraph">
+<p>This feature is enabled by default and can be disabled
+via <a href="config-gerrit.html#submodule.enableSuperProjectSubscriptions">submodule.enableSuperProjectSubscriptions</a>
+in the server configuration.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git_submodules_overview">Git submodules overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Submodules are a Git feature that allows an external repository to be
+attached inside a repository at a specific path. The objective here
+is to provide a brief overview, further details can be found
+in the official Git submodule documentation.</p>
+</div>
+<div class="paragraph">
+<p>Imagine a repository called 'super' and another one called 'sub'.
+Also consider 'sub' available in a running Gerrit instance on "server".
+With this feature, one could attach 'sub' inside of 'super' repository
+at path 'sub' by executing the following command when being inside
+'super':</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git submodule add ssh://server/sub sub</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Still considering the above example, after its execution notice that
+inside the local repository 'super' the 'sub' folder is considered a
+gitlink to the external repository 'sub'. Also notice a file called
+.gitmodules is created (it is a configuration file containing the
+subscription of 'sub'). To provide the SHA-1 each gitlink points to in
+the external repository, one should use the command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git submodule status</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the example provided, if 'sub' is updated and 'super' is supposed
+to see the latest SHA-1 (considering here 'sub' has only the master
+branch), one should then commit the modified gitlink for 'sub' in
+the 'super' project. Actually it would not even need to be an
+external update, one could move to 'sub' folder (inside 'super'),
+modify its content, commit, then move back to 'super' and
+commit the modified gitlink for 'sub'.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_creating_a_new_subscription">Creating a new subscription</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_ensure_the_subscription_is_allowed">Ensure the subscription is allowed</h3>
+<div class="paragraph">
+<p>Gerrit has a complex access control system, where different repositories
+can be accessed by different groups of people. To ensure that the submodule
+related information is allowed to be exposed in the superproject,
+the submodule needs to be configured to enable the superproject subscription.
+In a submodule client, checkout the refs/meta/config branch and edit
+the subscribe capabilities in the 'project.config' file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    git fetch &lt;remote&gt; refs/meta/config:refs/meta/config
+    git checkout refs/meta/config
+    $EDITOR project.config</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and add the following lines:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [allowSuperproject "&lt;superproject&gt;"]
+    matching = &lt;refspec&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where the 'superproject' should be the exact project name of the superproject.
+The refspec defines which branches of the submodule are allowed to be
+subscribed to which branches of the superproject. See below for
+<a href="#acl_refspec">details</a>. Push the configuration for review and
+submit the change:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git add project.config
+  git commit -m "Allow &lt;superproject&gt; to subscribe"
+  git push &lt;remote&gt; HEAD:refs/for/refs/meta/config</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After the change is integrated a superproject subscription is possible.</p>
+</div>
+<div class="paragraph">
+<p>The configuration is inherited from parent projects, such that you can have
+a configuration in the "All-Projects" project like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    [allowSuperproject "my-only-superproject"]
+        matching = refs/heads/*:refs/heads/*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and then you don&#8217;t have to worry about configuring the individual projects
+any more. Child projects cannot negate the parent&#8217;s configuration.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_defining_the_submodule_branch">Defining the submodule branch</h3>
+<div class="paragraph">
+<p>Since Gerrit manages subscriptions in the branch scope, we could have
+a scenario having a project called 'super' having a branch 'integration'
+subscribed to a project called 'sub' in branch 'integration', and also
+having the same 'super' project but in branch 'dev' subscribed to the 'sub'
+project in a branch called 'local-dev'.</p>
+</div>
+<div class="paragraph">
+<p>After adding the git submodule to a super project, one should edit
+the .gitmodules file to add a branch field to each submodule
+section which is supposed to be subscribed.</p>
+</div>
+<div class="paragraph">
+<p>As the branch field is a Gerrit-specific field it will not be filled
+automatically by the git submodule command, so one needs to edit it
+manually. Its value should indicate the branch of a submodule project
+that when updated will trigger automatic update of its registered
+gitlink.</p>
+</div>
+<div class="paragraph">
+<p>The branch value could be "'.'" if the submodule project branch
+has the same name as the destination branch of the commit having
+gitlinks/.gitmodules file.</p>
+</div>
+<div class="paragraph">
+<p>If the intention is to make use of the Gerrit feature described
+here, one should always be sure to update the .gitmodules file after
+adding submodules to a super project.</p>
+</div>
+<div class="paragraph">
+<p>If a git submodule is added but the branch field is not added to the
+.gitmodules file, Gerrit will not create a subscription for the
+submodule and there will be no automatic updates to the superproject.</p>
+</div>
+<div class="paragraph">
+<p>Whenever a commit is merged to a project, its project config is checked
+to see if any potential superprojects are allowed to subscribe to it.
+If so, the superproject is checked if a valid subscription exists
+by checking the .gitmodules file for the a submodule which includes
+a <code>branch</code> field and a url pointing to this server.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="acl_refspec">The RefSpec in the allowSuperproject section</h3>
+<div class="paragraph">
+<p>There are two options for specifying which branches can be subscribed
+to. The most common is to set <code>allowSuperproject.&lt;superproject&gt;.matching</code>
+to a Git-style refspec, which has the same syntax as the refspecs used
+for pushing in Git. Regular expressions as found in the ACL configuration
+are not supported.</p>
+</div>
+<div class="paragraph">
+<p>The most restrictive refspec is allowing one specific branch of the
+submodule to be subscribed to one specific branch of the superproject:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [allowSuperproject "&lt;superproject&gt;"]
+    matching = refs/heads/&lt;submodule-branch&gt;:refs/heads/&lt;superproject-branch&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you want to allow for a 1:1 mapping, i.e. 'master' maps to 'master',
+'stable' maps to 'stable', but not allowing 'master' to be subscribed to
+'stable':</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [allowSuperproject "&lt;superproject&gt;"]
+    matching = refs/heads/*:refs/heads/*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To allow all refs matching one pattern to subscribe to all refs
+matching another pattern, set <code>allowSuperproject.&lt;superproject&gt;.all</code>
+to the patterns concatenated with a colon. For example, to make a
+single branch available for subscription from all branches of the
+superproject:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [allowSuperproject "&lt;superproject&gt;"]
+     all = refs/heads/&lt;submodule-branch&gt;:refs/heads/*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To make all branches available for subscription from all branches of
+the superproject:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [allowSuperproject "&lt;superproject&gt;"]
+     all = refs/heads/*:refs/heads/*</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_subscription_limitations">Subscription Limitations</h3>
+<div class="paragraph">
+<p>Gerrit will only automatically update superprojects where the
+submodules are hosted on the same Gerrit instance as the
+superproject. Gerrit determines this by checking that the URL of the
+submodule specified in the .gitmodules file starts with
+<a href="config-gerrit.html#gerrit.canonicalWebUrl"><code>gerrit.canonicalWebUrl</code></a>.
+The protocol part is ignored in this check.</p>
+</div>
+<div class="paragraph">
+<p>It is currently not possible to use the submodule subscription feature
+with a canonical web URL that differs from the first part  of
+the submodule URL. Instead relative submodules should be used.</p>
+</div>
+<div class="paragraph">
+<p>The Gerrit instance administrator should ensure that the canonical web
+URL value is specified in its configuration file. Users should ensure
+that they use the correct hostname of the running Gerrit instance when
+adding submodule subscriptions.</p>
+</div>
+<div class="paragraph">
+<p>When converting an existing submodule to use subscription by adding
+a <code>branch</code> field into the .gitmodules file, Gerrit does not change
+the revision of the submodule (i.e. update the superproject&#8217;s gitlink)
+until the next time the branch of the submodule advances. In other words,
+if the currently used revision of the submodule is not the branch&#8217;s head,
+adding a subscription will not cause an immediate update to the head. In
+this case the revision must be manually updated at the same time as adding
+the subscription.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_relative_submodules">Relative submodules</h3>
+<div class="paragraph">
+<p>To enable easier usage of Gerrit mirrors and/or distribution over
+several protocols, such as plain git and HTTP(S) as well as SSH, one
+can use relative submodules. This means that instead of providing the
+entire URL to the submodule a relative path is stated in the
+.gitmodules file.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit will try to match the entire project name of the submodule
+including directories. Therefore it is important to supply the full
+path name of the Gerrit project, not only relative to the super
+repository. See the following example:</p>
+</div>
+<div class="paragraph">
+<p>We have a super repository placed under a sub directory.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>product/super_repository.git</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To this repository we wish add a submodule "deeper" into the directory
+structure.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>product/framework/subcomponent.git</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we need to edit the .gitmodules to include the complete path to
+the Gerrit project. Observe that we need to use two "../" to include
+the complete Gerrit project path.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>path = subcomponent.git
+url = ../../product/framework/subcomponent.git
+branch = master</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In contrast the following will not setup proper submodule
+subscription, even if the submodule will be successfully cloned by git
+from Gerrit.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>path = subcomponent.git
+url = ../framework/subcomponent.git
+branch = master</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_removing_subscriptions">Removing Subscriptions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To remove a subscription, either disable the subscription from the
+submodules configuration or remove the submodule or information thereof
+(such as the branch field) in the superproject.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

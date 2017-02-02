@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - IntelliJ Setup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - IntelliJ Setup</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_prerequisites">Prerequisites</a></li>
+<li><a href="#_installation_of_the_bazel_plugin">Installation of the Bazel plugin</a></li>
+<li><a href="#_creation_of_intellij_project">Creation of IntelliJ project</a></li>
+<li><a href="#_recommended_settings">Recommended settings</a>
+<ul class="sectlevel2">
+<li><a href="#_code_style">Code style</a></li>
+<li><a href="#_copyright">Copyright</a></li>
+<li><a href="#_file_header">File header</a></li>
+<li><a href="#_commit_message">Commit message</a></li>
+</ul>
+</li>
+<li><a href="#_run_configurations">Run configurations</a>
+<ul class="sectlevel2">
+<li><a href="#_pre_configured_run_configurations">Pre-configured run configurations</a></li>
+<li><a href="#_unit_tests">Unit tests</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_prerequisites">Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You need an installation of IntelliJ of version 2016.2.</p>
+</div>
+<div class="paragraph">
+<p>In addition, Java 8 must be specified on your path or via <code>JAVA_HOME</code> so that
+building with Bazel via the Bazel plugin is possible.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If the synchronization of the project with the BUILD files using the Bazel
+plugin fails and IntelliJ reports the error <strong>Could not get Bazel roots</strong>, this
+indicates that the Bazel plugin couldn&#8217;t find Java 8.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Bazel must be installed as described by
+<a href="dev-bazel.html#installation">Building with Bazel - Installation</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation_of_the_bazel_plugin">Installation of the Bazel plugin</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <strong>File &#8594; Settings &#8594; Plugins</strong>.</p>
+</li>
+<li>
+<p>Click on <strong>Browse Repositories</strong>.</p>
+</li>
+<li>
+<p>Search for the plugin <code>IntelliJ with Bazel</code>.</p>
+</li>
+<li>
+<p>Install it.</p>
+</li>
+<li>
+<p>Restart IntelliJ.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_creation_of_intellij_project">Creation of IntelliJ project</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <strong>File &#8594; Import Bazel Project</strong>.</p>
+</li>
+<li>
+<p>For <strong>Use existing bazel workspace &#8594; Workspace</strong>, select the directory
+containing the Gerrit source code.</p>
+</li>
+<li>
+<p>Choose <strong>Import from workspace</strong> and select the <code>.bazelproject</code> file which is
+located in the top directory of the Gerrit source code.</p>
+</li>
+<li>
+<p>Adjust the path of the project data directory and the name of the project if
+desired.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+The project data directory can be separate from the source code. One
+advantage of this is that project files don&#8217;t need to be excluded from version
+control.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Unfortunately, the created project seems to have a broken output path. To fix
+it, please complete the following steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <strong>File &#8594; Project Structure &#8594; Project Settings &#8594; Modules</strong>.</p>
+</li>
+<li>
+<p>Switch to the tab <strong>Paths</strong>.</p>
+</li>
+<li>
+<p>Click on <strong>Inherit project compile output path</strong>.</p>
+</li>
+<li>
+<p>Click on <strong>Use module compile output path</strong>.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_recommended_settings">Recommended settings</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_code_style">Code style</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <strong>File &#8594; Settings &#8594; Editor &#8594; Code Style</strong>.</p>
+</li>
+<li>
+<p>Click on <strong>Manage</strong>.</p>
+</li>
+<li>
+<p>Click on <strong>Import</strong>.</p>
+</li>
+<li>
+<p>Choose <code>IntelliJ IDEA Code Style XML</code>.</p>
+</li>
+<li>
+<p>Select the file <code>$(gerrit_source_code)/tools/intellij/Gerrit_Code_Style.xml</code>.</p>
+</li>
+<li>
+<p>Make sure that <code>Google Format (Gerrit)</code> is chosen as <strong>Scheme</strong>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In addition, the EditorConfig settings (which ensure a consistent style between
+Eclipse, IntelliJ, and other editors) should be applied on top of that. Those
+settings are in the file <code>.editorconfig</code> of the Gerrit source code. IntelliJ
+will automatically pick up those settings if the EditorConfig plugin is enabled
+and configured correctly as can be verified by:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <strong>File &#8594; Settings &#8594; Plugins</strong>.</p>
+</li>
+<li>
+<p>Ensure that the EditorConfig plugin is enabled.</p>
+</li>
+<li>
+<p>Go to <strong>File &#8594; Settings &#8594; Editor &#8594; Code Style</strong>.</p>
+</li>
+<li>
+<p>Ensure that <strong>Enable EditorConfig support</strong> is checked.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If IntelliJ notifies you later on that the EditorConfig settings override
+the code style settings, simply confirm that.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_copyright">Copyright</h3>
+<div class="paragraph">
+<p>Copy the folder <code>$(gerrit_source_code)/tools/intellij/copyright</code> (not just the
+contents) to <code>$(project_data_directory)/.idea</code>. If it already exists, replace
+it.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_file_header">File header</h3>
+<div class="paragraph">
+<p>By default, IntelliJ adds a file header containing the name of the author and
+the current date to new files. To disable that, follow these steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <strong>File &#8594; Settings &#8594; Editor &#8594; File and Code Templates</strong>.</p>
+</li>
+<li>
+<p>Select the tab <strong>Includes</strong>.</p>
+</li>
+<li>
+<p>Select <strong>File Header</strong>.</p>
+</li>
+<li>
+<p>Remove the template code in the right editor.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_commit_message">Commit message</h3>
+<div class="paragraph">
+<p>To simplify the creation of commit messages which are compliant with the
+<a href="dev-contributing.html#commit-message">Commit Message</a> format, do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <strong>File &#8594; Settings &#8594; Version Control</strong>.</p>
+</li>
+<li>
+<p>Check <strong>Commit message right margin (columns)</strong>.</p>
+</li>
+<li>
+<p>Make sure that 72 is specified as value.</p>
+</li>
+<li>
+<p>Check <strong>Wrap when typing reaches right margin</strong>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In addition, you should follow the instructions of
+<a href="dev-contributing.html#git_commit_settings">this section</a> (if you haven&#8217;t
+done so already):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Install the Git hook for the <code>Change-Id</code> line.</p>
+</li>
+<li>
+<p>Set up the HTTP access.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Setting up the HTTP access will allow you to commit changes via IntelliJ without
+specifying your credentials. The Git hook won&#8217;t be noticeable during a commit
+as it&#8217;s executed after the commit dialog of IntelliJ was closed.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_run_configurations">Run configurations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Run configurations can be accessed on the toolbar. To edit them or add new ones,
+choose <strong>Edit Configurations</strong> on the drop-down list of the run configurations
+or go to <strong>Run &#8594; Edit Configurations</strong>.</p>
+</div>
+<div class="sect2">
+<h3 id="_pre_configured_run_configurations">Pre-configured run configurations</h3>
+<div class="paragraph">
+<p>In order to be able to use the pre-configured run configurations, the following
+steps are necessary:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Make sure that the folder <code>runConfigurations</code> exists within
+<code>$(project_data_directory)/.idea</code>. If it doesn&#8217;t exist, create it.</p>
+</li>
+<li>
+<p>Specify the IntelliJ path variable <code>GERRIT_TESTSITE</code>. (This configuration is
+shared among all IntelliJ projects.)</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Go to <strong>Settings &#8594; Appearance &amp; Behavior &#8594; Path Variables</strong>.</p>
+</li>
+<li>
+<p>Click on the <strong>+</strong> to add a new path variable.</p>
+</li>
+<li>
+<p>Specify <code>GERRIT_TESTSITE</code> as name and the path to your local test site as
+value.</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The copied run configurations will be added automatically to the available run
+configurations of the IntelliJ project.</p>
+</div>
+<div class="sect3">
+<h4 id="_gerrit_daemon">Gerrit Daemon</h4>
+<div class="paragraph">
+<p>Copy <code>$(gerrit_source_code)/tools/intellij/gerrit_daemon.xml</code> to
+<code>$(project_data_directory)/.idea/runConfigurations/</code>.</p>
+</div>
+<div class="paragraph">
+<p>This run configuration starts the Gerrit daemon similarly as
+<a href="dev-readme.html#run_daemon">Running the Daemon</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <a href="dev-readme.html#init">Site Initialization</a> has to be completed
+before this run configuration works properly.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_unit_tests">Unit tests</h3>
+<div class="paragraph">
+<p>To create run configurations for unit tests, run or debug them via a right-click
+on a method, class, file, or package. The created run configuration is a
+temporary one and can be saved to make it permanent.</p>
+</div>
+<div class="paragraph">
+<p>Normally, this approach generates JUnit run configurations. When the Bazel
+plugin manages a project, it intercepts the creation and creates a Bazel test
+run configuration instead, which can be used just like the standard ones.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you would like to execute a test in NoteDb mode, add
+<code>--test_env=GERRIT_NOTEDB=READ_WRITE</code> to the <strong>Bazel flags</strong> of your run
+configuration.
+</td>
+</tr>
+</table>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

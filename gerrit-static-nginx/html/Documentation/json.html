@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - JSON Data</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - JSON Data</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#change">change</a></li>
+<li><a href="#trackingid">trackingid</a></li>
+<li><a href="#account">account</a></li>
+<li><a href="#patchSet">patchSet</a></li>
+<li><a href="#approval">approval</a></li>
+<li><a href="#refUpdate">refUpdate</a></li>
+<li><a href="#submitRecord">submitRecord</a></li>
+<li><a href="#label">label</a></li>
+<li><a href="#dependency">dependency</a></li>
+<li><a href="#message">message</a></li>
+<li><a href="#patchsetcomment">patchsetComment</a></li>
+<li><a href="#file">file</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Some commands produce JSON data streams intended for other
+applications to consume.  The structures are documented below.
+Note that any field may be missing in the JSON messages, so consumers
+of this JSON stream should deal with that appropriately.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="change">change</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Gerrit change being reviewed, or that was already reviewed.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">project</dt>
+<dd>
+<p>Project path in Gerrit.</p>
+</dd>
+<dt class="hdlist1">branch</dt>
+<dd>
+<p>Branch name within project.</p>
+</dd>
+<dt class="hdlist1">topic</dt>
+<dd>
+<p>Topic name specified by the uploader for this change series.</p>
+</dd>
+<dt class="hdlist1">id</dt>
+<dd>
+<p>Change identifier, as scraped out of the Change-Id field in
+the commit message, or as assigned by the server if it was missing.</p>
+</dd>
+<dt class="hdlist1">number</dt>
+<dd>
+<p>Change number (deprecated).</p>
+</dd>
+<dt class="hdlist1">subject</dt>
+<dd>
+<p>Description of change.</p>
+</dd>
+<dt class="hdlist1">owner</dt>
+<dd>
+<p>Owner in <a href="#account">account attribute</a>.</p>
+</dd>
+<dt class="hdlist1">url</dt>
+<dd>
+<p>Canonical URL to reach this change.</p>
+</dd>
+<dt class="hdlist1">commitMessage</dt>
+<dd>
+<p>The full commit message for the change&#8217;s current patch
+set.</p>
+</dd>
+<dt class="hdlist1">createdOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this change
+was created.</p>
+</dd>
+<dt class="hdlist1">lastUpdated</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this change
+was last updated.</p>
+</dd>
+<dt class="hdlist1">open</dt>
+<dd>
+<p>Boolean indicating if the change is still open for review.</p>
+</dd>
+<dt class="hdlist1">status</dt>
+<dd>
+<p>Current state of this change.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NEW</dt>
+<dd>
+<p>Change is still being reviewed.</p>
+</dd>
+<dt class="hdlist1">DRAFT</dt>
+<dd>
+<p>Change is a draft change that only consists of draft patchsets.</p>
+</dd>
+<dt class="hdlist1">MERGED</dt>
+<dd>
+<p>Change has been merged to its branch.</p>
+</dd>
+<dt class="hdlist1">ABANDONED</dt>
+<dd>
+<p>Change was abandoned by its owner or administrator.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">comments</dt>
+<dd>
+<p>All inline/file comments for this change in <a href="#message">message attributes</a>.</p>
+</dd>
+<dt class="hdlist1">trackingIds</dt>
+<dd>
+<p>Issue tracking system links in
+<a href="#trackingid">trackingid attributes</a>, scraped out of the commit
+message based on the server&#8217;s
+<a href="config-gerrit.html#trackingid">trackingid</a> sections.</p>
+</dd>
+<dt class="hdlist1">currentPatchSet</dt>
+<dd>
+<p>Current <a href="#patchSet">patchSet attribute</a>.</p>
+</dd>
+<dt class="hdlist1">patchSets</dt>
+<dd>
+<p>All <a href="#patchSet">patchSet attributes</a> for this change.</p>
+</dd>
+<dt class="hdlist1">dependsOn</dt>
+<dd>
+<p>List of changes that this change depends on in <a href="#dependency">dependency attributes</a>.</p>
+</dd>
+<dt class="hdlist1">neededBy</dt>
+<dd>
+<p>List of changes that depend on this change in <a href="#dependency">dependency attributes</a>.</p>
+</dd>
+<dt class="hdlist1">submitRecords</dt>
+<dd>
+<p>The <a href="#submitRecord">submitRecord attribute</a> contains
+information about whether this change has been or can be submitted.</p>
+</dd>
+<dt class="hdlist1">allReviewers</dt>
+<dd>
+<p>List of all reviewers in <a href="#account">account attribute</a>
+which are added to a change.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="trackingid">trackingid</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A link to an issue tracking system.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">system</dt>
+<dd>
+<p>Name of the system.  This comes straight from the
+gerrit.config file.</p>
+</dd>
+<dt class="hdlist1">id</dt>
+<dd>
+<p>Id number as scraped out of the commit message.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="account">account</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A user account.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">name</dt>
+<dd>
+<p>User&#8217;s full name, if configured.</p>
+</dd>
+<dt class="hdlist1">email</dt>
+<dd>
+<p>User&#8217;s preferred email address.</p>
+</dd>
+<dt class="hdlist1">username</dt>
+<dd>
+<p>User&#8217;s username, if configured.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="patchSet">patchSet</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Refers to a specific patchset within a <a href="#change">change</a>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">number</dt>
+<dd>
+<p>The patchset number.</p>
+</dd>
+<dt class="hdlist1">revision</dt>
+<dd>
+<p>Git commit for this patchset.</p>
+</dd>
+<dt class="hdlist1">parents</dt>
+<dd>
+<p>List of parent revisions.</p>
+</dd>
+<dt class="hdlist1">ref</dt>
+<dd>
+<p>Git reference pointing at the revision.  This reference is
+available through the Gerrit Code Review server&#8217;s Git interface
+for the containing change.</p>
+</dd>
+<dt class="hdlist1">uploader</dt>
+<dd>
+<p>Uploader of the patch set in <a href="#account">account attribute</a>.</p>
+</dd>
+<dt class="hdlist1">author</dt>
+<dd>
+<p>Author of this patchset in <a href="#account">account attribute</a>.</p>
+</dd>
+<dt class="hdlist1">createdOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this patchset
+was created.</p>
+</dd>
+<dt class="hdlist1">isDraft</dt>
+<dd>
+<p>Whether or not the patch set is a draft patch set.</p>
+</dd>
+<dt class="hdlist1">kind</dt>
+<dd>
+<p>Kind of change uploaded.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">REWORK</dt>
+<dd>
+<p>Nontrivial content changes.</p>
+</dd>
+<dt class="hdlist1">TRIVIAL_REBASE</dt>
+<dd>
+<p>Conflict-free merge between the new parent and the prior patch set.</p>
+</dd>
+<dt class="hdlist1">MERGE_FIRST_PARENT_UPDATE</dt>
+<dd>
+<p>Conflict-free change of first (left) parent of a merge commit.</p>
+</dd>
+<dt class="hdlist1">NO_CODE_CHANGE</dt>
+<dd>
+<p>No code changed; same tree and same parent tree.</p>
+</dd>
+<dt class="hdlist1">NO_CHANGE</dt>
+<dd>
+<p>No changes; same commit message, same tree and same parent tree.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">approvals</dt>
+<dd>
+<p>The <a href="#approval">approval attribute</a> granted.</p>
+</dd>
+<dt class="hdlist1">comments</dt>
+<dd>
+<p>All comments for this patchset in <a href="#patchsetcomment">patchsetComment attributes</a>.</p>
+</dd>
+<dt class="hdlist1">files</dt>
+<dd>
+<p>All changed files in this patchset in <a href="#file">file attributes</a>.</p>
+</dd>
+<dt class="hdlist1">sizeInsertions</dt>
+<dd>
+<p>Size information of insertions of this patchset.</p>
+</dd>
+<dt class="hdlist1">sizeDeletions</dt>
+<dd>
+<p>Size information of deletions of this patchset.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="approval">approval</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Records the code review approval granted to a patch set.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>Internal name of the approval given.</p>
+</dd>
+<dt class="hdlist1">description</dt>
+<dd>
+<p>Human readable category of the approval.</p>
+</dd>
+<dt class="hdlist1">value</dt>
+<dd>
+<p>Value assigned by the approval, usually a numerical score.</p>
+</dd>
+<dt class="hdlist1">oldValue</dt>
+<dd>
+<p>The previous approval score, only present if the value changed as a result of this event.</p>
+</dd>
+<dt class="hdlist1">grantedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this approval
+was added or last updated.</p>
+</dd>
+<dt class="hdlist1">by</dt>
+<dd>
+<p>Reviewer of the patch set in <a href="#account">account attribute</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="refUpdate">refUpdate</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Information about a ref that was updated.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">oldRev</dt>
+<dd>
+<p>The old value of the ref, prior to the update.</p>
+</dd>
+<dt class="hdlist1">newRev</dt>
+<dd>
+<p>The new value the ref was updated to.</p>
+</dd>
+<dt class="hdlist1">refName</dt>
+<dd>
+<p>Full ref name within project.</p>
+</dd>
+<dt class="hdlist1">project</dt>
+<dd>
+<p>Project path in Gerrit.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="submitRecord">submitRecord</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Information about the submit status of a change.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">status</dt>
+<dd>
+<p>Current submit status.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">OK</dt>
+<dd>
+<p>The change is ready for submission or already submitted.</p>
+</dd>
+<dt class="hdlist1">NOT_READY</dt>
+<dd>
+<p>The change is missing a required label.</p>
+</dd>
+<dt class="hdlist1">RULE_ERROR</dt>
+<dd>
+<p>An internal server error occurred preventing computation.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">labels</dt>
+<dd>
+<p>This describes the state of each code review
+<a href="#label">label attribute</a>, unless the status is RULE_ERROR.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="label">label</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Information about a code review label for a change.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">label</dt>
+<dd>
+<p>The name of the label.</p>
+</dd>
+<dt class="hdlist1">status</dt>
+<dd>
+<p>The status of the label.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">OK</dt>
+<dd>
+<p>This label provides what is necessary for submission.</p>
+</dd>
+<dt class="hdlist1">REJECT</dt>
+<dd>
+<p>This label prevents the change from being submitted.</p>
+</dd>
+<dt class="hdlist1">NEED</dt>
+<dd>
+<p>The label is required for submission, but has not
+been satisfied.</p>
+</dd>
+<dt class="hdlist1">MAY</dt>
+<dd>
+<p>The label may be set, but it&#8217;s neither necessary for
+submission nor does it block submission if set.</p>
+</dd>
+<dt class="hdlist1">IMPOSSIBLE</dt>
+<dd>
+<p>The label is required for submission, but is impossible
+to complete.  The likely cause is access has not been granted
+correctly by the project owner or site administrator.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">by</dt>
+<dd>
+<p>The <a href="#account">account</a> that applied the label.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="dependency">dependency</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Information about a change or patchset dependency.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">id</dt>
+<dd>
+<p>Change identifier.</p>
+</dd>
+<dt class="hdlist1">number</dt>
+<dd>
+<p>Change number.</p>
+</dd>
+<dt class="hdlist1">revision</dt>
+<dd>
+<p>Patchset revision.</p>
+</dd>
+<dt class="hdlist1">ref</dt>
+<dd>
+<p>Ref name.</p>
+</dd>
+<dt class="hdlist1">isCurrentPatchSet</dt>
+<dd>
+<p>If the revision is the current patchset of the change.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="message">message</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Comment added on a change by a reviewer.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">timestamp</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this comment
+was added.</p>
+</dd>
+<dt class="hdlist1">reviewer</dt>
+<dd>
+<p>The <a href="#account">account</a> that added the comment.</p>
+</dd>
+<dt class="hdlist1">message</dt>
+<dd>
+<p>The comment text.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="patchsetcomment">patchsetComment</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Comment added on a patchset by a reviewer.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">file</dt>
+<dd>
+<p>The name of the file on which the comment was added.</p>
+</dd>
+<dt class="hdlist1">line</dt>
+<dd>
+<p>The line number at which the comment was added.</p>
+</dd>
+<dt class="hdlist1">reviewer</dt>
+<dd>
+<p>The <a href="#account">account</a> that added the comment.</p>
+</dd>
+<dt class="hdlist1">message</dt>
+<dd>
+<p>The comment text.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="file">file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Information about a patch on a file.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">file</dt>
+<dd>
+<p>The name of the file.  If the file is renamed, the new name.</p>
+</dd>
+<dt class="hdlist1">fileOld</dt>
+<dd>
+<p>The old name of the file, if the file is renamed.</p>
+</dd>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>The type of change.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">ADDED</dt>
+<dd>
+<p>The file is being created/introduced by this patch.</p>
+</dd>
+<dt class="hdlist1">MODIFIED</dt>
+<dd>
+<p>The file already exists, and has updated content.</p>
+</dd>
+<dt class="hdlist1">DELETED</dt>
+<dd>
+<p>The file existed, but is being removed by this patch.</p>
+</dd>
+<dt class="hdlist1">RENAMED</dt>
+<dd>
+<p>The file is renamed.</p>
+</dd>
+<dt class="hdlist1">COPIED</dt>
+<dd>
+<p>The file is copied from another file.</p>
+</dd>
+<dt class="hdlist1">REWRITE</dt>
+<dd>
+<p>Sufficient amount of content changed to claim the file was rewritten.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">insertions</dt>
+<dd>
+<p>number of insertions of this patch.</p>
+</dd>
+<dt class="hdlist1">deletions</dt>
+<dd>
+<p>number of deletions of this patch.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="cmd-stream-events.html">gerrit stream-events</a></p>
+</li>
+<li>
+<p><a href="cmd-query.html">gerrit query</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

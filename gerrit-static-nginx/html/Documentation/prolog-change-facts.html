@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Prolog Facts for Gerrit Changes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Prolog Facts for Gerrit Changes</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+</div>
+<div id="content">
+<div class="paragraph">
+<p>Prior to invoking the <code>submit_rule(X)</code> query for a change, Gerrit initializes
+the Prolog engine with a set of facts (current data) about this change.
+The following table provides an overview of the provided facts.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+All the terms listed below are defined in the <code>gerrit</code> package. To use any
+of them we must use a qualified name like <code>gerrit:change_branch(X)</code>.
+</td>
+</tr>
+</table>
+</div>
+<table class="tableblock frame-all grid-cols spread">
+<caption class="title">Table 1. Prolog facts about the current change</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Fact</th>
+<th class="tableblock halign-left valign-top">Example</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_branch/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_branch('refs/heads/master').</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Destination Branch for the change as string atom</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_owner/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_owner(user(1000000)).</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Owner of the change as <code>user(ID)</code> term. ID is the numeric account ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_project/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_project('full/project/name').</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the project as string atom</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_topic/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change_topic('plugins').</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Topic name as string atom</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_author/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_author(user(100000)).</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Author of the commit as <code>user(ID)</code> term. ID is the numeric account ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_author/3</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_author(user(100000), 'John Doe', '<a href="mailto:john.doe@example.com">john.doe@example.com</a>').</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ID, full name and the email of the commit author.  The full name and the
+    email are string atoms</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_committer/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_committer()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Committer of the commit as <code>user(ID)</code> term. ID is the numeric account ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_committer/3</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_committer()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ID, full name and the email of the commit committer. The full name and the
+    email are string atoms</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top" rowspan="2"><p class="tableblock"><code>commit_label/2</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_label(label('Code-Review', 2), user(1000000)).</code></p></td>
+<td class="tableblock halign-left valign-top" rowspan="2"><p class="tableblock">Set of votes on the last patch-set</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_label(label('Verified', -1), user(1000001)).</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_message/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_message('Fix bug X').</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Commit message as string atom</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_stats/3</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_stats(5,20,50).</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of files modified, number of insertions and the number of deletions.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top" rowspan="4"><p class="tableblock"><code>current_user/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>current_user(user(1000000)).</code></p></td>
+<td class="tableblock halign-left valign-top" rowspan="4"><p class="tableblock">Current user as one of the four given possibilities</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>current_user(user(anonymous)).</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>current_user(user(peer_daemon)).</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>current_user(user(replication)).</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uploader/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uploader(user(1000000)).</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uploader as <code>user(ID)</code> term. ID is the numeric account ID</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>In addition Gerrit provides a set of built-in helper predicates that can be used
+when implementing the <code>submit_rule</code> predicate. The most common ones are listed in
+the following table.</p>
+</div>
+<table class="tableblock frame-all grid-cols spread">
+<caption class="title">Table 2. Built-in Prolog helper predicates</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Predicate</th>
+<th class="tableblock halign-left valign-top">Example usage</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_delta/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_delta('\\.java$').</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">True if any file name from the last patch set matches the given regex.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_delta/3</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_delta('\\.java$', T, P)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Returns the change type (via <code>T</code>) and path (via <code>P</code>), if the change type
+    is <code>rename</code>, it also returns the old path. If the change type is <code>rename</code>, it
+    returns a delete for old path and an add for new path. If the change type
+    is <code>copy</code>, an add is returned along with new path.
+</p><p class="tableblock">    Possible values for the change type are the following symbols: <code>add</code>,
+    <code>modify</code>, <code>delete</code>, <code>rename</code>, <code>copy</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_delta/4</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_delta('\\.java$', T, P, O)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Like <code>commit_delta/3</code> plus the old path (via <code>O</code>) if applicable.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_edits/2</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_edits('/pom.xml$', 'dependency')</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">True if any of the files matched by the file name regex (first parameter)
+    have edited lines that match the regex in the second parameter. This
+    example will be true if there is a modification of a <code>pom.xml</code> file such
+    that an edited line contains or contained the string <code>'dependency'</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_message_matches/1</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_message_matches('^Bug fix')</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">True if the commit message matches the given regex.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+For a complete list of built-in helpers read the <code>gerrit_common.pl</code> and
+all Java classes whose name matches <code>PRED_*.java</code> from Gerrit&#8217;s source code.
+</td>
+</tr>
+</table>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

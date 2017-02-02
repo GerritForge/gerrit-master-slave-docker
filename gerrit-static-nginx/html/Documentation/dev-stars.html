@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Stars</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Stars</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#star-api">Star API</a></li>
+<li><a href="#default-star">Default Star</a></li>
+<li><a href="#ignore-star">Ignore Star</a></li>
+<li><a href="#query-stars">Query Stars</a></li>
+<li><a href="#syntax">Syntax</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Changes can be starred with labels that behave like private hashtags.
+Any label can be applied to a change, but these labels are only visible
+to the user for which the labels have been set.</p>
+</div>
+<div class="paragraph">
+<p>Stars allow users to categorize changes by self-defined criteria and
+then build <a href="user-dashboards.html">dashboards</a> for them by making use
+of the <a href="#query-stars">star query operators</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="star-api">Star API</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <a href="rest-api-accounts.html#star-endpoints">star REST API</a> supports:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="rest-api-accounts.html#get-stars">
+get star labels from a change</a></p>
+</li>
+<li>
+<p><a href="rest-api-accounts.html#set-stars">
+update star labels on a change</a></p>
+</li>
+<li>
+<p><a href="rest-api-accounts.html#get-starred-changes">
+list changes that are starred by any label</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Star labels are also included in
+<a href="rest-api-changes.html#change-info">ChangeInfo</a> entities that are
+returned by the <a href="rest-api-changes.html">changes REST API</a>.</p>
+</div>
+<div class="paragraph">
+<p>There are <a href="rest-api-accounts.html#default-star-endpoints">
+additional REST endpoints</a> for the <a href="#default-star">default star</a>.</p>
+</div>
+<div class="paragraph">
+<p>Only the <a href="#default-star">default star</a> is shown in the WebUI and
+can be updated from there. Other stars do not show up in the WebUI.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="default-star">Default Star</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the default star is set by a user, this user is automatically
+notified by email whenever updates are made to that change.</p>
+</div>
+<div class="paragraph">
+<p>The default star is the star that is shown in the WebUI and which can
+be updated from there.</p>
+</div>
+<div class="paragraph">
+<p>The default star is represented by the special star label 'star'.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ignore-star">Ignore Star</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the ignore star is set by a user, this user gets no email
+notifications for updates of that change, even if this user is a
+reviewer of the change or the change is matched by a project watch of
+the user.</p>
+</div>
+<div class="paragraph">
+<p>Since changes can only be ignored once they are created, users that
+watch a project will always get the email notifications for the change
+creation. Only then the change can be ignored.</p>
+</div>
+<div class="paragraph">
+<p>Users that are added as reviewer to a change that they have ignored
+will be notified about this, so that they know about the review
+request. They can the decide to remove the ignore star.</p>
+</div>
+<div class="paragraph">
+<p>The ignore star is represented by the special star label 'ignore'.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="query-stars">Query Stars</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are several query operators to find changes with stars:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="user-search.html#star">star:&lt;LABEL&gt;</a>:
+Matches any change that was starred by the current user with the
+label <code>&lt;LABEL&gt;</code>.</p>
+</li>
+<li>
+<p><a href="user-search.html#has-stars">has:stars</a>:
+Matches any change that was starred by the current user with any
+label.</p>
+</li>
+<li>
+<p><a href="user-search.html#is-starred">is:starred</a> /
+<a href="user-search.html#has-star">has:star</a>:
+Matches any change that was starred by the current user with the
+<a href="#default-star">default star</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="syntax">Syntax</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Star labels cannot contain whitespace characters. All other characters
+are allowed.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

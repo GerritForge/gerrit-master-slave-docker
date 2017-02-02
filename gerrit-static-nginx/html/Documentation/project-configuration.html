@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Project Configuration</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Project Configuration</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#project-creation">Project Creation</a>
+<ul class="sectlevel2">
+<li><a href="#manual_project_creation">Manual Project Creation</a></li>
+</ul>
+</li>
+<li><a href="#project_options">Project Options</a>
+<ul class="sectlevel2">
+<li><a href="#submit_type">Submit Type</a></li>
+<li><a href="#project-state">State</a></li>
+<li><a href="#_use_target_branch_when_determining_new_changes_to_open">Use target branch when determining new changes to open</a></li>
+<li><a href="#require-change-id">Require Change-Id</a></li>
+<li><a href="#_maximum_git_object_size_limit">Maximum Git Object Size Limit</a></li>
+<li><a href="#_require_signed_off_by">Require Signed-off-by</a></li>
+</ul>
+</li>
+<li><a href="#branch-admin">Branch Administration</a>
+<ul class="sectlevel2">
+<li><a href="#branch-creation">Branch Creation</a></li>
+<li><a href="#branch-deletion">Branch Deletion</a></li>
+<li><a href="#default-branch">Default Branch</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="project-creation">Project Creation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are several ways to create a new project in Gerrit:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>in the Web UI under 'Projects' &gt; 'Create Project'</p>
+</li>
+<li>
+<p>via the <a href="rest-api-projects.html#create-project">Create Project</a>
+REST endpoint</p>
+</li>
+<li>
+<p>via the <a href="cmd-create-project.html">create-project</a> SSH command</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To be able to create new projects the global capability
+<a href="access-control.html#capability_createProject">Create Project</a> must
+be granted.</p>
+</div>
+<div class="paragraph">
+<p>In addition, projects can be created <a href="#manual_project_creation">
+manually</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="manual_project_creation">Manual Project Creation</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Create a Git repository under <code>gerrit.basePath</code>:</p>
+<div class="listingblock">
+<div class="content">
+<pre>  git --git-dir=$base_path/new/project.git init</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+By tradition the repository directory name should have a <code>.git</code>
+suffix.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To also make this repository available over the anonymous git://
+protocol, don&#8217;t forget to create a <code>git-daemon-export-ok</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  touch $base_path/new/project.git/git-daemon-export-ok</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Register Project</p>
+<div class="paragraph">
+<p>Either restart the server, or flush the <code>project_list</code> cache:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  ssh -p 29418 localhost gerrit flush-caches --cache project_list</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project_options">Project Options</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="submit_type">Submit Type</h3>
+<div class="paragraph">
+<p>The method Gerrit uses to submit a change to a project can be
+modified by any project owner through the project console, <code>Projects</code> &gt;
+<code>List</code> &gt; my/project. In general, a submitted change is only merged if all
+its dependencies are also submitted, with exceptions documented below.
+The following submit types are supported:</p>
+</div>
+<div id="fast_forward_only" class="ulist">
+<ul>
+<li>
+<p>Fast Forward Only</p>
+<div class="paragraph">
+<p>With this method no merge commits are produced. All merges must
+be handled on the client, prior to uploading to Gerrit for review.</p>
+</div>
+<div class="paragraph">
+<p>To submit a change, the change must be a strict superset of the
+destination branch.  That is, the change must already contain the
+tip of the destination branch at submit time.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="merge_if_necessary" class="ulist">
+<ul>
+<li>
+<p>Merge If Necessary</p>
+<div class="paragraph">
+<p>This is the default for a new project.</p>
+</div>
+<div class="paragraph">
+<p>If the change being submitted is a strict superset of the destination
+branch, then the branch is fast-forwarded to the change.  If not,
+then a merge commit is automatically created.  This is identical
+to the classical <code>git merge</code> behavior, or <code>git merge --ff</code>.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="always_merge" class="ulist">
+<ul>
+<li>
+<p>Always Merge</p>
+<div class="paragraph">
+<p>Always produce a merge commit, even if the change is a strict
+superset of the destination branch.  This is identical to the
+behavior of <code>git merge --no-ff</code>, and may be useful if the
+project needs to follow submits with <code>git log --first-parent</code>.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="cherry_pick" class="ulist">
+<ul>
+<li>
+<p>Cherry Pick</p>
+<div class="paragraph">
+<p>Always cherry pick the patch set, ignoring the parent lineage
+and instead creating a brand new commit on top of the current
+branch head.</p>
+</div>
+<div class="paragraph">
+<p>When cherry picking a change, Gerrit automatically appends onto the
+end of the commit message a short summary of the change&#8217;s approvals,
+and a URL link back to the change on the web.  The committer header
+is also set to the submitter, while the author header retains the
+original patch set author.</p>
+</div>
+<div class="paragraph">
+<p>Note that Gerrit ignores dependencies between changes when using this
+submit type unless
+<a href="config-gerrit.html#change.submitWholeTopic"><code>change.submitWholeTopic</code></a>
+is enabled and depending changes share the same topic. So generally
+submitters must remember to submit changes in the right order when using this
+submit type. If all you want is extra information in the commit message,
+consider using the Rebase Always submit strategy.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="rebase_if_necessary" class="ulist">
+<ul>
+<li>
+<p>Rebase If Necessary</p>
+<div class="paragraph">
+<p>If the change being submitted is a strict superset of the destination
+branch, then the branch is fast-forwarded to the change.  If not,
+then the change is automatically rebased and then the branch is
+fast-forwarded to the change.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When Gerrit tries to do a merge, by default the merge will only
+succeed if there is no path conflict.  A path conflict occurs when
+the same file has also been changed on the other side of the merge.</p>
+</div>
+<div id="rebase_always" class="ulist">
+<ul>
+<li>
+<p>Rebase Always</p>
+<div class="paragraph">
+<p>Basically, the same as Rebase If Necessary, but it creates a new patchset even
+if fast forward is possible AND like Cherry Pick it ensures footers such as
+Change-Id, Reviewed-On, and others are present in resulting commit that is
+merged.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Thus, Rebase Always can be considered similar to Cherry Pick, but with
+the important distinction that Rebase Always does not ignore dependencies.</p>
+</div>
+<div id="content_merge" class="paragraph">
+<p>If <code>Allow content merges</code> is enabled, Gerrit will try
+to do a content merge when a path conflict occurs.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="project-state">State</h3>
+<div class="paragraph">
+<p>This setting defines the state of the project. A project can have the
+following states:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Active</code>:</p>
+<div class="paragraph">
+<p>The project is active and users can see and modify the project according
+to their access rights on the project.</p>
+</div>
+</li>
+<li>
+<p><code>Read Only</code>:</p>
+<div class="paragraph">
+<p>The project is read only and all modifying operations on it are
+disabled. E.g. this means that pushing to this project fails for all
+users even if they have push permissions assigned on it.</p>
+</div>
+<div class="paragraph">
+<p>Setting a project to this state is an easy way to temporary close a
+project, as you can keep all write access rights in place and they will
+become active again as soon as the project state is set back to
+<code>Active</code>.</p>
+</div>
+<div class="paragraph">
+<p>This state also makes sense if a project was moved to another location.
+In this case all new development should happen in the new project and
+you want to prevent that somebody accidentally works on the old
+project, while keeping the old project around for old references.</p>
+</div>
+</li>
+<li>
+<p><code>Hidden</code>:</p>
+<div class="paragraph">
+<p>The project is hidden and only visible to project owners. Other users
+are not able to see the project even if they have read permissions
+granted on the project.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_use_target_branch_when_determining_new_changes_to_open">Use target branch when determining new changes to open</h3>
+<div class="paragraph">
+<p>The <code>create-new-change-for-all-not-in-target</code> option provides a
+convenience for selecting <a href="user-upload.html#base">the merge base</a>
+by setting it automatically to the target branch&#8217;s tip so you can
+create new changes for all commits not in the target branch.</p>
+</div>
+<div class="paragraph">
+<p>This option is disabled if the tip of the push is a merge commit.</p>
+</div>
+<div class="paragraph">
+<p>This option also only works if there are no merge commits in the
+commit chain, in such cases it fails warning the user that such
+pushes can only be performed by manually specifying
+<a href="user-upload.html#base">bases</a></p>
+</div>
+<div class="paragraph">
+<p>This option is useful if you want to push a change to your personal
+branch first and for review to another branch for example. Or in cases
+where a commit is already merged into a branch and you want to create
+a new open change for that commit on another branch.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="require-change-id">Require Change-Id</h3>
+<div class="paragraph">
+<p>The <code>Require Change-Id in commit message</code> option defines whether a
+<a href="user-changeid.html">Change-Id</a> in the commit message is required
+for pushing a commit for review. If this option is set, trying to push
+a commit for review that doesn&#8217;t contain a Change-Id in the commit
+message fails with <a href="error-missing-changeid.html">missing Change-Id
+in commit message footer</a>.</p>
+</div>
+<div class="paragraph">
+<p>It is recommended to set this option and use a
+<a href="user-changeid.html#create">commit-msg hook</a> (or other client side
+tooling like EGit) to automatically generate Change-Id&#8217;s for new
+commits. This way the Change-Id is automatically in place when changes
+are reworked or rebased and uploading new patch sets gets easy.</p>
+</div>
+<div class="paragraph">
+<p>If this option is not set, commits can be uploaded without a Change-Id,
+but then users have to remember to copy the assigned Change-Id from the
+change screen and insert it manually into the commit message when they
+want to upload a second patch set.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_maximum_git_object_size_limit">Maximum Git Object Size Limit</h3>
+<div class="paragraph">
+<p>This option defines the maximum allowed Git object size that
+receive-pack will accept. If an object is larger than the given size
+the pack-parsing will abort and the push operation will fail.</p>
+</div>
+<div class="paragraph">
+<p>With this option users can be prevented from uploading commits that
+contain files which are too large.</p>
+</div>
+<div class="paragraph">
+<p>Normally the <a href="config-gerrit.html#receive.maxObjectSizeLimit">maximum
+Git object size limit</a> is configured globally for a Gerrit server. At
+the project level, the maximum Git object size limit can be further
+reduced, but not extended. The displayed effective limit shows the
+maximum Git object size limit that is actually used on the project.</p>
+</div>
+<div class="paragraph">
+<p>The defined maximum Git object size limit is inherited by any child
+project.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_require_signed_off_by">Require Signed-off-by</h3>
+<div class="paragraph">
+<p>The <code>Require Signed-off-by in commit message</code> option defines whether a
+<a href="user-signedoffby.html">Signed-off-by</a> line in the commit message is
+required for pushing a commit. If this option is set, trying to push a
+commit that doesn&#8217;t contain a Signed-off-by line in the commit message
+fails with <a href="error-not-signed-off-by.html">not Signed-off-by
+author/committer/uploader in commit message footer</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="branch-admin">Branch Administration</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="branch-creation">Branch Creation</h3>
+<div class="paragraph">
+<p>There are several ways to create a new branch in a project:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>in the Web UI under 'Projects' &gt; 'List' &gt; &lt;project&gt; &gt; 'Branches'</p>
+</li>
+<li>
+<p>via the <a href="rest-api-projects.html#create-branch">Create Branch</a>
+REST endpoint</p>
+</li>
+<li>
+<p>via the <a href="cmd-create-branch.html">create-branch</a> SSH command</p>
+</li>
+<li>
+<p>by using a git client to push a commit to a non-existing branch</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To be able to create new branches the user must have the
+<a href="access-control.html#category_create">Create Reference</a> access
+right. In addition, project owners and Gerrit administrators can create
+new branches from the Web UI or via REST even without having the
+<code>Create Reference</code> access right.</p>
+</div>
+<div class="paragraph">
+<p>When using the Web UI, the REST endpoint or the SSH command it is only
+possible to create branches on commits that already exist in the
+repository.</p>
+</div>
+<div class="paragraph">
+<p>If a branch name does not start with <code>refs/</code> it is automatically
+prefixed with <code>refs/heads/</code>.</p>
+</div>
+<div class="paragraph">
+<p>The starting revision for a new branch can be any valid SHA-1
+expression, as long as it resolves to a commit. Abbreviated SHA-1s
+are not supported.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="branch-deletion">Branch Deletion</h3>
+<div class="paragraph">
+<p>There are several ways to delete a branch:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>in the Web UI under 'Projects' &gt; 'List' &gt; &lt;project&gt; &gt; 'Branches'</p>
+</li>
+<li>
+<p>via the <a href="rest-api-projects.html#delete-branch">Delete Branch</a>
+REST endpoint</p>
+</li>
+<li>
+<p>by using a git client to force push nothing to an existing branch</p>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git push --force origin :refs/heads/&lt;branch-to-delete&gt;</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To be able to delete branches, the user must have the
+<a href="access-control.html#category_push">Push</a> access right with the
+<code>force</code> option. In addition, project owners and Gerrit administrators
+can delete branches from the Web UI or via REST even without having the
+<code>Force Push</code> access right.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="default-branch">Default Branch</h3>
+<div class="paragraph">
+<p>The default branch of a remote repository is defined by its <code>HEAD</code>.
+For convenience reasons, when the repository is cloned Git creates a
+local branch for this default branch and checks it out.</p>
+</div>
+<div class="paragraph">
+<p>Project owners can set <code>HEAD</code></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>in the Web UI under 'Projects' &gt; 'List' &gt; &lt;project&gt; &gt; 'Branches' or</p>
+</li>
+<li>
+<p>via the <a href="rest-api-projects.html#set-head">Set HEAD</a> REST endpoint</p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

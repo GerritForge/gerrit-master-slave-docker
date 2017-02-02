@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>same Change-Id in multiple changes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>same Change-Id in multiple changes</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_example">Example</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>With this error message Gerrit rejects to push a commit if it
+contains the same Change-Id as a predecessor commit.</p>
+</div>
+<div class="paragraph">
+<p>The reason for rejecting such a commit is that it would introduce, for
+the corresponding change in Gerrit, a dependency upon itself. Gerrit
+prevents such dependencies between patch sets within the same change
+to keep the review process simple. Otherwise reviewers would not only
+have to review the latest patch set but also all the patch sets the
+latest one depends on.</p>
+</div>
+<div class="paragraph">
+<p>This error is quite common, it appears when a user tries to address
+review comments and creates a new commit instead of amending the
+existing commit. Another possibility for this error, although less
+likely, is that the user tried to create a patch series with multiple
+changes to be reviewed and accidentally included the same Change-Id
+into the different commit messages.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_example">Example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Here an example about how the push is failing. Please note that the
+two commits 'one commit' and 'another commit' both have the same
+Change-Id (of course in real life it can happen that there are more
+than two commits that have the same Change-Id).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git log
+  commit 13d381265ffff88088e1af88d0e2c2c1143743cd
+  Author: John Doe &lt;john.doe@example.com&gt;
+  Date:   Thu Dec 16 10:15:48 2010 +0100
+
+      another commit
+
+      Change-Id: I93478acac09965af91f03c82e55346214811ac79
+
+  commit ca45e125145b12fe9681864b123bc9daea501bf7
+  Author: John Doe &lt;john.doe@example.com&gt;
+  Date:   Thu Dec 16 10:12:54 2010 +0100
+
+      one commit
+
+      Change-Id: I93478acac09965af91f03c82e55346214811ac79
+
+  $ git push ssh://JohnDoe@host:29418/myProject HEAD:refs/for/master
+  Counting objects: 8, done.
+  Delta compression using up to 2 threads.
+  Compressing objects: 100% (2/2), done.
+  Writing objects: 100% (6/6), 558 bytes, done.
+  Total 6 (delta 0), reused 0 (delta 0)
+  To ssh://JohnDoe@host:29418/myProject
+  ! [remote rejected] HEAD -&gt; refs/for/master (same Change-Id in multiple changes.
+  Squash the commits with the same Change-Id or ensure Change-Ids are unique for each commit)
+  error: failed to push some refs to 'ssh://JohnDoe@host:29418/myProject'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If it was the intention to rework a change and push a new patch
+set, the problem can be fixed by squashing the commits that contain the
+same Change-Id. The squashed commit can then be pushed to Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>To squash the commits, use <code>git rebase -i</code> to do an interactive rebase. For
+the example above where the last two commits have the same Change-Id,
+this means an interactive rebase for the last two commits should be
+done. For further details about the git rebase command please check
+the <a href="http://www.kernel.org/pub/software/scm/git/docs/git-rebase.html">Git documentation for rebase</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git rebase -i HEAD~2
+
+  pick ca45e12 one commit
+  squash 13d3812 another commit
+
+  [detached HEAD ab37207] squashed commit
+   1 files changed, 3 insertions(+), 0 deletions(-)
+  Successfully rebased and updated refs/heads/master.
+
+  $ git log
+  commit ab37207d33647685801dba36cb4fd51f3eb73507
+  Author: John Doe &lt;john.doe@example.com&gt;
+  Date:   Thu Dec 16 10:12:54 2010 +0100
+
+      squashed commit
+
+      Change-Id: I93478acac09965af91f03c82e55346214811ac79
+
+  $ git push ssh://JohnDoe@host:29418/myProject HEAD:refs/for/master
+  Counting objects: 5, done.
+  Writing objects: 100% (3/3), 307 bytes, done.
+  Total 3 (delta 0), reused 0 (delta 0)
+  To ssh://JohnDoe@host:29418/myProject
+   * [new branch]      HEAD -&gt; refs/for/master</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If it was the intention to create a patch series with multiple
+changes to be reviewed, each commit message should contain the
+Change-Id of the corresponding change in Gerrit.  If a change in
+Gerrit does not exist yet, the Change-Id should be generated (either
+by using a <a href="cmd-hook-commit-msg.html">commit hook</a> or by using EGit) or the Change-Id could be
+removed (not recommended since then amending this commit to create
+subsequent patch sets is more error prone). To change the Change-Id
+of an existing commit do an interactive <a href="http://www.kernel.org/pub/software/scm/git/docs/git-rebase.html">git rebase</a> and fix the
+affected commit messages.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="error-messages.html">Gerrit Error Messages</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

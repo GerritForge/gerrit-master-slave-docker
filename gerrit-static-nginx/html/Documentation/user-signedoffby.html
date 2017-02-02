@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Signed-off-by Lines</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Signed-off-by Lines</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#Signed-off-by">Signed-off-by:</a></li>
+<li><a href="#Cc">Acked-by:, Cc:</a></li>
+<li><a href="#Reviewed-by">Reported-by:, Tested-by: and Reviewed-by:</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This document was literally taken from <a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob;f=Documentation/SubmittingPatches;hb=4e8a2372f9255a1464ef488ed925455f53fbdaa1">linux-2.6 Documentation/SubmittingPatches</a>
+and is covered by the GPLv2.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Signed-off-by">Signed-off-by:</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To improve tracking of who did what, especially with patches that can
+percolate to their final resting place in the kernel through several
+layers of maintainers, we&#8217;ve introduced a "sign-off" procedure on
+patches that are being emailed around.</p>
+</div>
+<div class="paragraph">
+<p>The sign-off is a simple line at the end of the explanation for the
+patch, which certifies that you wrote it or otherwise have the right to
+pass it on as a open-source patch.  The rules are pretty simple: if you
+can certify the below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        Developer's Certificate of Origin 1.1
+
+        By making a contribution to this project, I certify that:
+
+        (a) The contribution was created in whole or in part by me and I
+            have the right to submit it under the open source license
+            indicated in the file; or
+
+        (b) The contribution is based upon previous work that, to the best
+            of my knowledge, is covered under an appropriate open source
+            license and I have the right under that license to submit that
+            work with modifications, whether created in whole or in part
+            by me, under the same open source license (unless I am
+            permitted to submit under a different license), as indicated
+            in the file; or
+
+        (c) The contribution was provided directly to me by some other
+            person who certified (a), (b) or (c) and I have not modified
+            it.
+
+        (d) I understand and agree that this project and the contribution
+            are public and that a record of the contribution (including all
+            personal information I submit with it, including my sign-off) is
+            maintained indefinitely and may be redistributed consistent with
+            this project or the open source license(s) involved.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then you just add a line saying</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	Signed-off-by: Random J Developer &lt;random@developer.example.org&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>using your real name (sorry, no pseudonyms or anonymous contributions.)</p>
+</div>
+<div class="paragraph">
+<p>Some people also put extra tags at the end.  They&#8217;ll just be ignored for
+now, but you can do this to mark internal company procedures or just
+point out some special detail about the sign-off.</p>
+</div>
+<div class="paragraph">
+<p>If you are a subsystem or branch maintainer, sometimes you need to slightly
+modify patches you receive in order to merge them, because the code is not
+exactly the same in your tree and the submitters'. If you stick strictly to
+rule (c), you should ask the submitter to rediff, but this is a totally
+counter-productive waste of time and energy. Rule (b) allows you to adjust
+the code, but then it is very impolite to change one submitter&#8217;s code and
+make him endorse your bugs. To solve this problem, it is recommended that
+you add a line between the last Signed-off-by header and yours, indicating
+the nature of your changes. While there is nothing mandatory about this, it
+seems like prepending the description with your mail and/or name, all
+enclosed in square brackets, is noticeable enough to make it obvious that
+you are responsible for last-minute changes. Example :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	Signed-off-by: Random J Developer &lt;random@developer.example.org&gt;
+	[lucky@maintainer.example.org: struct foo moved from foo.c to foo.h]
+	Signed-off-by: Lucky K Maintainer &lt;lucky@maintainer.example.org&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This practice is particularly helpful if you maintain a stable branch and
+want at the same time to credit the author, track changes, merge the fix,
+and protect the submitter from complaints. Note that under no circumstances
+can you change the author&#8217;s identity (the From header), as it is the one
+which appears in the changelog.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Cc">Acked-by:, Cc:</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Signed-off-by: tag indicates that the signer was involved in the
+development of the patch, or that he/she was in the patch&#8217;s delivery path.</p>
+</div>
+<div class="paragraph">
+<p>If a person was not directly involved in the preparation or handling of a
+patch but wishes to signify and record their approval of it then they can
+arrange to have an Acked-by: line added to the patch&#8217;s changelog.</p>
+</div>
+<div class="paragraph">
+<p>Acked-by: is often used by the maintainer of the affected code when that
+maintainer neither contributed to nor forwarded the patch.</p>
+</div>
+<div class="paragraph">
+<p>Acked-by: is not as formal as Signed-off-by:.  It is a record that the acker
+has at least reviewed the patch and has indicated acceptance.  Hence patch
+mergers will sometimes manually convert an acker&#8217;s "yep, looks good to me"
+into an Acked-by:.</p>
+</div>
+<div class="paragraph">
+<p>Acked-by: does not necessarily indicate acknowledgment of the entire patch.
+For example, if a patch affects multiple subsystems and has an Acked-by: from
+one subsystem maintainer then this usually indicates acknowledgment of just
+the part which affects that maintainer&#8217;s code.  Judgment should be used here.
+When in doubt people should refer to the original discussion in the mailing
+list archives.</p>
+</div>
+<div class="paragraph">
+<p>If a person has had the opportunity to comment on a patch, but has not
+provided such comments, you may optionally add a "Cc:" tag to the patch.
+This is the only tag which might be added without an explicit action by the
+person it names.  This tag documents that potentially interested parties
+have been included in the discussion</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Reviewed-by">Reported-by:, Tested-by: and Reviewed-by:</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If this patch fixes a problem reported by somebody else, consider adding a
+Reported-by: tag to credit the reporter for their contribution.  Please
+note that this tag should not be added without the reporter&#8217;s permission,
+especially if the problem was not reported in a public forum.  That said,
+if we diligently credit our bug reporters, they will, hopefully, be
+inspired to help us again in the future.</p>
+</div>
+<div class="paragraph">
+<p>A Tested-by: tag indicates that the patch has been successfully tested (in
+some environment) by the person named.  This tag informs maintainers that
+some testing has been performed, provides a means to locate testers for
+future patches, and ensures credit for the testers.</p>
+</div>
+<div class="paragraph">
+<p>Reviewed-by:, instead, indicates that the patch has been reviewed and found
+acceptable according to the Reviewer&#8217;s Statement:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	Reviewer's statement of oversight
+
+	By offering my Reviewed-by: tag, I state that:
+
+ 	 (a) I have carried out a technical review of this patch to
+	     evaluate its appropriateness and readiness for inclusion into
+	     the mainline kernel.
+
+	 (b) Any problems, concerns, or questions relating to the patch
+	     have been communicated back to the submitter.  I am satisfied
+	     with the submitter's response to my comments.
+
+	 (c) While there may be things that could be improved with this
+	     submission, I believe that it is, at this time, (1) a
+	     worthwhile modification to the kernel, and (2) free of known
+	     issues which would argue against its inclusion.
+
+	 (d) While I have reviewed the patch and believe it to be sound, I
+	     do not (unless explicitly stated elsewhere) make any
+	     warranties or guarantees that it will achieve its stated
+	     purpose or function properly in any given situation.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A Reviewed-by tag is a statement of opinion that the patch is an
+appropriate modification of the kernel without any remaining serious
+technical issues.  Any interested reviewer (who has done the work) can
+offer a Reviewed-by tag for a patch.  This tag serves to give credit to
+reviewers and to inform maintainers of the degree of review which has been
+done on the patch.  Reviewed-by: tags, when supplied by reviewers known to
+understand the subject area and to perform thorough reviews, will normally
+increase the likelihood of your patch getting into the kernel.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

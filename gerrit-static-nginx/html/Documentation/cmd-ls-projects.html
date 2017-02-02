@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>gerrit ls-projects</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>gerrit ls-projects</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_access">ACCESS</a></li>
+<li><a href="#_scripting">SCRIPTING</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_http">HTTP</a></li>
+<li><a href="#_examples">EXAMPLES</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>gerrit ls-projects - List projects visible to caller</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>ssh</em> -p &lt;port&gt; &lt;host&gt; <em>gerrit ls-projects</em>
+  [--show-branch &lt;BRANCH&gt; &#8230;&#8203;]
+  [--description | -d]
+  [--tree | -t]
+  [--type {code | permissions | all}]
+  [--format {text | json | json_compact}]
+  [--all]
+  [--limit &lt;N&gt;]
+  [--has-acl-for GROUP]</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Displays the list of project names, one per line, that the
+calling user account has been granted 'READ' access to.</p>
+</div>
+<div class="paragraph">
+<p>If the caller is a member of the privileged 'Administrators'
+group, all projects are listed.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_access">ACCESS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Any user who has configured an SSH key, or by an user over HTTP.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scripting">SCRIPTING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command is intended to be used in scripts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--show-branch</dt>
+<dt class="hdlist1">-b</dt>
+<dd>
+<p>Branch for which the command will display the sha of each project.
+The command may have multiple --show-branch parameters, in this case
+sha will be shown for each of the branches.
+If the user does not have READ access to some branch or the branch does not
+exist then stub (40 <code>-</code> symbols) is shown.
+If the user does not have access to any branch in the project then the
+whole project is not shown.</p>
+</dd>
+<dt class="hdlist1">--description</dt>
+<dt class="hdlist1">-d</dt>
+<dd>
+<p>Allows listing of projects together with their respective
+description.</p>
+<div class="paragraph">
+<p>For text format output, all non-printable characters (ASCII value 31 or
+less) are escaped according to the conventions used in languages like C,
+Python, and Perl, employing standard sequences like <code>\n</code> and <code>\t</code>, and
+<code>\xNN</code> for all others. In shell scripts, the <code>printf</code> command can be
+used to unescape the output.</p>
+</div>
+</dd>
+<dt class="hdlist1">--tree</dt>
+<dt class="hdlist1">-t</dt>
+<dd>
+<p>Displays project inheritance in a tree-like format.
+This option does not work together with the show-branch option.</p>
+</dd>
+<dt class="hdlist1">--type</dt>
+<dd>
+<p>Display only projects of the specified type.  If not
+specified, defaults to <code>all</code>. Supported types:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>code</code></dt>
+<dd>
+<p>Any project likely to contain user files.</p>
+</dd>
+<dt class="hdlist1"><code>permissions</code></dt>
+<dd>
+<p>Projects created with the <code>--permissions-only</code> flag.</p>
+</dd>
+<dt class="hdlist1"><code>all</code></dt>
+<dd>
+<p>Any type of project.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">--format</dt>
+<dd>
+<p>What output format to display the results in.</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>text</code></dt>
+<dd>
+<p>Simple text based format.</p>
+</dd>
+<dt class="hdlist1"><code>json</code></dt>
+<dd>
+<p>Map of JSON objects describing each project.</p>
+</dd>
+<dt class="hdlist1"><code>json_compact</code></dt>
+<dd>
+<p>Minimized JSON output.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">--all</dt>
+<dd>
+<p>Display all projects that are accessible by the calling user
+account. Besides the projects that the calling user account has
+been granted 'READ' access to, this includes all projects that
+are owned by the calling user account (even if for these projects
+the 'READ' access right is not assigned to the calling user
+account).</p>
+</dd>
+<dt class="hdlist1">--limit</dt>
+<dd>
+<p>Cap the number of results to the first N matches.</p>
+</dd>
+<dt class="hdlist1">--has-acl-for</dt>
+<dd>
+<p>Display only projects on which access rights for this group are
+directly assigned. Projects which only inherit access rights for
+this group are not listed.</p>
+<div class="paragraph">
+<p>With this option you can find out on which projects a group is used.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_http">HTTP</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command is also available over HTTP, as <code>/projects/</code> for
+anonymous access and <code>/a/projects/</code> for authenticated access.
+Named options are available as query parameters. Results can
+be limited to projects matching a prefix by supplying the prefix
+as part of the URL, for example <code>/projects/external/</code> lists only
+projects whose name start with the string <code>external/</code>.</p>
+</div>
+<div class="paragraph">
+<p>Over HTTP the <code>json_compact</code> output format is assumed if the client
+explicitly asks for JSON using HTTP header <code>Accept: application/json</code>.
+When any JSON output format is used on HTTP, readers must skip the
+first line produced. The first line is a garbage JSON string crafted
+to prevent a browser from executing the response in a script tag.</p>
+</div>
+<div class="paragraph">
+<p>Output will be gzip compressed if <code>Accept-Encoding: gzip</code> was used
+by the client in the request headers.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">EXAMPLES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>List visible projects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit ls-projects
+	platform/manifest
+	tools/gerrit
+	tools/gwtorm
+
+	$ curl http://review.example.com/projects/
+	platform/manifest
+	tools/gerrit
+	tools/gwtorm
+
+	$ curl http://review.example.com/projects/tools/
+	tools/gerrit
+	tools/gwtorm</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Clone any project visible to the user:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	for p in `ssh -p 29418 review.example.com gerrit ls-projects`
+	do
+	  mkdir -p `dirname "$p"`
+	  git clone --bare "ssh://review.example.com:29418/$p.git" "$p.git"
+	done</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html">Access Controls</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

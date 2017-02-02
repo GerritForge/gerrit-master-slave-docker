@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>daemon</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>daemon</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_context">CONTEXT</a></li>
+<li><a href="#_logging">LOGGING</a></li>
+<li><a href="#_known_issues">KNOWN ISSUES</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>daemon - Gerrit network server</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>java</em> -jar gerrit.war <em>daemon</em>
+  -d &lt;SITE_PATH&gt;
+  [--enable-httpd | --disable-httpd]
+  [--enable-sshd | --disable-sshd]
+  [--console-log]
+  [--slave]
+  [--headless]
+  [--init]
+  [-s]</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Runs the Gerrit network daemon on the local system, configured as
+per the local copy of <a href="config-gerrit.html">gerrit.config</a>.</p>
+</div>
+<div class="paragraph">
+<p>The path to gerrit.config is read from the metadata database,
+which requires that all slaves (and master) reading from the same
+database must place gerrit.config at the same location on the local
+filesystem.  However, any option within gerrit.config, including
+<a href="config-gerrit.html#gerrit.basePath">gerrit.basePath</a> may be set
+to different values.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">-d</dt>
+<dt class="hdlist1">--site-path</dt>
+<dd>
+<p>Location of the gerrit.config file, and all other per-site
+configuration data, supporting libraries and log files.</p>
+</dd>
+<dt class="hdlist1">--enable-httpd</dt>
+<dt class="hdlist1">--disable-httpd</dt>
+<dd>
+<p>Enable (or disable) the internal HTTP daemon, answering
+web requests. Enabled by default when --slave is not used.</p>
+</dd>
+<dt class="hdlist1">--enable-sshd</dt>
+<dt class="hdlist1">--disable-sshd</dt>
+<dd>
+<p>Enable (or disable) the internal SSH daemon, answering SSH
+clients and remotely executed commands.  Enabled by default.</p>
+</dd>
+<dt class="hdlist1">--slave</dt>
+<dd>
+<p>Run in slave mode, permitting only read operations
+   by clients.  Commands which modify state such as
+   <a href="cmd-receive-pack.html">receive-pack</a> (creates new changes
+   or updates existing ones) or <a href="cmd-review.html">review</a>
+   (sets approve marks) are disabled.</p>
+<div class="paragraph">
+<p>This option automatically implies '--enable-sshd'.</p>
+</div>
+</dd>
+<dt class="hdlist1">--console-log</dt>
+<dd>
+<p>Send log messages to the console, instead of to the standard
+log file '$site_path/logs/error_log'.</p>
+</dd>
+<dt class="hdlist1">--headless</dt>
+<dd>
+<p>Don&#8217;t start the default Gerrit UI. May be useful when Gerrit is
+run with an alternative UI.</p>
+</dd>
+<dt class="hdlist1">--init</dt>
+<dd>
+<p>Run init before starting the daemon. This will create a new site or
+upgrade an existing site.</p>
+</dd>
+<dt class="hdlist1">--s</dt>
+<dd>
+<p>Start <a href="dev-inspector.html">Gerrit Inspector</a> on the console, a
+built-in interactive inspection environment to assist debugging and
+troubleshooting of Gerrit code.</p>
+<div class="paragraph">
+<p>This options requires 'jython.jar' from the <a href="http://www.jython.org">Jython distribution</a>
+to be present in '$site_path/lib' directory.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_context">CONTEXT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command can only be run on a server which has direct
+connectivity to the metadata database, and local access to the
+managed Git repositories.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_logging">LOGGING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Error and warning messages from the server are automatically written
+to the log file under '$site_path/logs/error_log'.  This log file
+is automatically rotated at 12:00 AM GMT each day, allowing an
+external log cleaning service to clean up the prior logs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_known_issues">KNOWN ISSUES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Slave daemon caches can quickly become out of date when modifications
+are made on the master.  The following configuration is suggested in
+a slave to reduce the maxAge for each cache entry, so that changes
+are recognized in a reasonable period of time:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[cache "accounts"]
+  maxAge = 5 min
+[cache "accounts_byemail"]
+  maxAge = 5 min
+[cache "diff"]
+  maxAge = 5 min
+[cache "groups"]
+  maxAge = 5 min
+[cache "projects"]
+  maxAge = 5 min
+[cache "sshkeys"]
+  maxAge = 5 min</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and if LDAP support was enabled, also include:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[cache "ldap_groups"]
+  maxAge = 5 min
+[cache "ldap_usernames"]
+  maxAge = 5 min</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Automatic cache coherency between master and slave systems is
+planned to be implemented in a future version.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - REST API</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - REST API</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_endpoints">Endpoints</a></li>
+<li><a href="#_protocol_details">Protocol Details</a>
+<ul class="sectlevel2">
+<li><a href="#authentication">Authentication</a></li>
+<li><a href="#preconditions">Preconditions</a></li>
+<li><a href="#output">Output Format</a></li>
+<li><a href="#timestamp">Timestamp</a></li>
+<li><a href="#encoding">Encoding</a></li>
+<li><a href="#response-codes">Response Codes</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit Code Review comes with a REST like API available over HTTP.
+The API is suitable for automated tools to build upon, as well as
+supporting some ad-hoc scripting use cases.</p>
+</div>
+<div class="paragraph">
+<p>See also: <a href="dev-rest-api.html">REST API Developers' Notes</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_endpoints">Endpoints</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="rest-api-access.html">/access/</a></dt>
+<dd>
+<p>Access Right related REST endpoints</p>
+</dd>
+<dt class="hdlist1"><a href="rest-api-accounts.html">/accounts/</a></dt>
+<dd>
+<p>Account related REST endpoints</p>
+</dd>
+<dt class="hdlist1"><a href="rest-api-changes.html">/changes/</a></dt>
+<dd>
+<p>Change related REST endpoints</p>
+</dd>
+<dt class="hdlist1"><a href="rest-api-config.html">/config/</a></dt>
+<dd>
+<p>Config related REST endpoints</p>
+</dd>
+<dt class="hdlist1"><a href="rest-api-groups.html">/groups/</a></dt>
+<dd>
+<p>Group related REST endpoints</p>
+</dd>
+<dt class="hdlist1"><a href="rest-api-plugins.html">/plugins/</a></dt>
+<dd>
+<p>Plugin related REST endpoints</p>
+</dd>
+<dt class="hdlist1"><a href="rest-api-projects.html">/projects/</a></dt>
+<dd>
+<p>Project related REST endpoints</p>
+</dd>
+<dt class="hdlist1"><a href="rest-api-documentation.html">/Documentation/</a></dt>
+<dd>
+<p>Documentation related REST endpoints</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_protocol_details">Protocol Details</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="authentication">Authentication</h3>
+<div class="paragraph">
+<p>By default all REST endpoints assume anonymous access and filter
+results to correspond to what anonymous users can read (which may
+be nothing at all).</p>
+</div>
+<div class="paragraph">
+<p>Users (and programs) may authenticate by prefixing the endpoint URL with
+<code>/a/</code>. For example to authenticate to <code>/projects/</code>, request the URL
+<code>/a/projects/</code>.</p>
+</div>
+<div class="paragraph">
+<p>By default Gerrit uses HTTP digest authentication with the HTTP password
+from the user&#8217;s account settings page. HTTP basic authentication is used
+if <a href="config-gerrit.html#auth.gitBasicAuth"><code>auth.gitBasicAuth</code></a> is set
+to true in the Gerrit configuration.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="preconditions">Preconditions</h3>
+<div class="paragraph">
+<p>Clients can request PUT to create a new resource and not overwrite
+an existing one by adding <code>If-None-Match: *</code> to the request HTTP
+headers. If the named resource already exists the server will respond
+with HTTP 412 Precondition Failed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="output">Output Format</h3>
+<div class="paragraph">
+<p>JSON responses are encoded using UTF-8 and use content type
+<code>application/json</code>.</p>
+</div>
+<div class="paragraph">
+<p>By default most APIs return pretty-printed JSON, which uses extra
+whitespace to make the output more readable for humans.</p>
+</div>
+<div class="paragraph">
+<p>Compact JSON can be requested by setting the <code>pp=0</code> query parameter,
+or by setting the <code>Accept</code> HTTP request header to include <code>application/json</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  GET /projects/ HTTP/1.0
+  Accept: application/json</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Producing (and parsing) the non-pretty compact format is more efficient,
+so tools should request it whenever possible.</p>
+</div>
+<div class="paragraph">
+<p>To prevent against Cross Site Script Inclusion (XSSI) attacks, the JSON
+response body starts with a magic prefix line that must be stripped before
+feeding the rest of the response body to a JSON parser:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  )]}'
+  [ ... valid JSON ... ]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Responses will be gzip compressed by the server if the HTTP
+<code>Accept-Encoding</code> request header is set to <code>gzip</code>. This may
+save on network transfer time for larger responses.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="timestamp">Timestamp</h3>
+<div class="paragraph">
+<p>Timestamps are given in UTC and have the format
+"'yyyy-mm-dd hh:mm:ss.fffffffff'" where "'ffffffffff'" represents
+nanoseconds.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="encoding">Encoding</h3>
+<div class="paragraph">
+<p>All IDs that appear in the URL of a REST call (e.g. project name, group name)
+must be URL encoded.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="response-codes">Response Codes</h3>
+<div class="paragraph">
+<p>The Gerrit REST endpoints use HTTP status codes as described
+in the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html">
+HTTP specification</a>.</p>
+</div>
+<div class="paragraph">
+<p>In most cases, the response body of an error response will be a
+plaintext, human-readable error message.</p>
+</div>
+<div class="paragraph">
+<p>Here are examples that show how HTTP status codes are used in the
+context of the Gerrit REST API.</p>
+</div>
+<div class="sect3">
+<h4 id="_400_bad_request">400 Bad Request</h4>
+<div class="paragraph">
+<p>&#8220;400 Bad Request&#8221; is returned if the request is not understood by the
+server due to malformed syntax.</p>
+</div>
+<div class="paragraph">
+<p>E.g. &#8220;400 Bad Request&#8221; is returned if JSON input is expected but the
+'Content-Type' of the request is not 'application/json' or the request
+body doesn&#8217;t contain valid JSON.</p>
+</div>
+<div class="paragraph">
+<p>&#8220;400 Bad Request&#8221; is also returned if required input fields are not set or
+if options are set which cannot be used together.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_403_forbidden">403 Forbidden</h4>
+<div class="paragraph">
+<p>&#8220;403 Forbidden&#8221; is returned if the operation is not allowed because the
+calling user does not have sufficient permissions.</p>
+</div>
+<div class="paragraph">
+<p>E.g. some REST endpoints require that the calling user has certain
+<a href="access-control.html#global_capabilities">global capabilities</a>
+assigned.</p>
+</div>
+<div class="paragraph">
+<p>&#8220;403 Forbidden&#8221; is also returned if <code>self</code> is used as account ID and the
+REST call was done without authentication.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_404_not_found">404 Not Found</h4>
+<div class="paragraph">
+<p>&#8220;404 Not Found&#8221; is returned if the resource that is specified by the
+URL is not found or is not visible to the calling user. A resource
+cannot be found if the URL contains a non-existing ID or view.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_405_method_not_allowed">405 Method Not Allowed</h4>
+<div class="paragraph">
+<p>&#8220;405 Method Not Allowed&#8221; is returned if the resource exists but doesn&#8217;t
+support the operation.</p>
+</div>
+<div class="paragraph">
+<p>E.g. some of the <code>/groups/</code> endpoints are only supported for Gerrit
+internal groups; if they are invoked for an external group the response
+is &#8220;405 Method Not Allowed&#8221;.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_409_conflict">409 Conflict</h4>
+<div class="paragraph">
+<p>&#8220;409 Conflict&#8221; is returned if the request cannot be completed because the
+current state of the resource doesn&#8217;t allow the operation.</p>
+</div>
+<div class="paragraph">
+<p>E.g. if you try to submit a change that is abandoned, this fails with
+&#8220;409 Conflict&#8221; because the state of the change doesn&#8217;t allow the submit
+operation.</p>
+</div>
+<div class="paragraph">
+<p>&#8220;409 Conflict&#8221; is also returned if you try to create a resource but the
+name is already occupied by an existing resource.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_412_precondition_failed">412 Precondition Failed</h4>
+<div class="paragraph">
+<p>&#8220;412 Precondition Failed&#8221; is returned if a precondition from the request
+header fields is not fulfilled, as described in the <a href="#preconditions">
+Preconditions</a> section.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_422_unprocessable_entity">422 Unprocessable Entity</h4>
+<div class="paragraph">
+<p>&#8220;422 Unprocessable Entity&#8221; is returned if the ID of a resource that is
+specified in the request body cannot be resolved.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

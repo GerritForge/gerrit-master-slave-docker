@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - JavaScript API</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - JavaScript API</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_entry_point">Entry Point</a></li>
+<li><a href="#self">Plugin Instance</a>
+<ul class="sectlevel2">
+<li><a href="#self_delete">self.delete() / self.del()</a></li>
+<li><a href="#self_get">self.get()</a></li>
+<li><a href="#self_getServerInfo">self.getServerInfo()</a></li>
+<li><a href="#self_getCurrentUser">self.getCurrentUser()</a></li>
+<li><a href="#Gerrit_getUserPreferences">Gerrit.getUserPreferences()</a></li>
+<li><a href="#Gerrit_refreshUserPreferences">Gerrit.refreshUserPreferences()</a></li>
+<li><a href="#self_getPluginName">self.getPluginName()</a></li>
+<li><a href="#self_post">self.post()</a></li>
+<li><a href="#self_put">self.put()</a></li>
+<li><a href="#self_on">self.on()</a></li>
+<li><a href="#self_onAction">self.onAction()</a></li>
+<li><a href="#self_screen">self.screen()</a></li>
+<li><a href="#self_settingsScreen">self.settingsScreen()</a></li>
+<li><a href="#self_panel">self.panel()</a></li>
+<li><a href="#self_url">self.url()</a></li>
+</ul>
+</li>
+<li><a href="#ActionContext">Action Context</a>
+<ul class="sectlevel2">
+<li><a href="#context_action">context.action</a></li>
+<li><a href="#context_call">context.call()</a></li>
+<li><a href="#context_change">context.change</a></li>
+<li><a href="#context_delete">context.delete()</a></li>
+<li><a href="#context_get">context.get()</a></li>
+<li><a href="#context_go">context.go()</a></li>
+<li><a href="#context_hide">context.hide()</a></li>
+<li><a href="#context_post">context.post()</a></li>
+<li><a href="#context_popup">context.popup()</a></li>
+<li><a href="#context_put">context.put()</a></li>
+<li><a href="#context_refresh">context.refresh()</a></li>
+<li><a href="#context_revision">context.revision</a></li>
+<li><a href="#context_project">context.project</a></li>
+<li><a href="#_html_helpers">HTML Helpers</a></li>
+</ul>
+</li>
+<li><a href="#ScreenContext">Screen Context</a>
+<ul class="sectlevel2">
+<li><a href="#screen_body">screen.body</a></li>
+<li><a href="#screen_token">screen.token</a></li>
+<li><a href="#screen_token_match">screen.token_match</a></li>
+<li><a href="#screen_onUnload">screen.onUnload()</a></li>
+<li><a href="#screen.setTitle">screen.setTitle()</a></li>
+<li><a href="#screen.setWindowTitle">screen.setWindowTitle()</a></li>
+<li><a href="#screen_show">screen.show()</a></li>
+</ul>
+</li>
+<li><a href="#SettingsScreenContext">Settings Screen Context</a>
+<ul class="sectlevel2">
+<li><a href="#settingsScreen_body">settingsScreen.body</a></li>
+<li><a href="#settingsScreen_onUnload">settingsScreen.onUnload()</a></li>
+<li><a href="#settingsScreen.setTitle">settingsScreen.setTitle()</a></li>
+<li><a href="#settingsScreen.setWindowTitle">settingsScreen.setWindowTitle()</a></li>
+<li><a href="#settingsScreen_show">settingsScreen.show()</a></li>
+</ul>
+</li>
+<li><a href="#PanelContext">Panel Context</a>
+<ul class="sectlevel2">
+<li><a href="#panel_body">panel.body</a></li>
+<li><a href="#PanelProperties">Properties</a></li>
+</ul>
+</li>
+<li><a href="#Gerrit">Gerrit</a>
+<ul class="sectlevel2">
+<li><a href="#Gerrit_css">Gerrit.css()</a></li>
+<li><a href="#Gerrit_delete">Gerrit.delete()</a></li>
+<li><a href="#Gerrit_get">Gerrit.get()</a></li>
+<li><a href="#Gerrit_getCurrentUser">Gerrit.getCurrentUser()</a></li>
+<li><a href="#Gerrit_getPluginName">Gerrit.getPluginName()</a></li>
+<li><a href="#Gerrit_go">Gerrit.go()</a></li>
+<li><a href="#Gerrit_html">Gerrit.html()</a></li>
+<li><a href="#Gerrit_injectCss">Gerrit.injectCss()</a></li>
+<li><a href="#Gerrit_install">Gerrit.install()</a></li>
+<li><a href="#Gerrit_post">Gerrit.post()</a></li>
+<li><a href="#Gerrit_put">Gerrit.put()</a></li>
+<li><a href="#Gerrit_onAction">Gerrit.onAction()</a></li>
+<li><a href="#Gerrit_screen">Gerrit.screen()</a></li>
+<li><a href="#Gerrit_refresh">Gerrit.refresh()</a></li>
+<li><a href="#Gerrit_refreshMenuBar">Gerrit.refreshMenuBar()</a></li>
+<li><a href="#Gerrit_isSignedIn">Gerrit.isSignedIn()</a></li>
+<li><a href="#Gerrit_url">Gerrit.url()</a></li>
+<li><a href="#Gerrit_showError">Gerrit.showError(message)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit Code Review supports an API for JavaScript plugins to interact
+with the web UI and the server process.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_entry_point">Entry Point</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>JavaScript is loaded using a standard <code>&lt;script src='&#8230;&#8203;'&gt;</code> HTML tag.
+Plugins should protect the global namespace by defining their code
+within an anonymous function passed to <code>Gerrit.install()</code>. The plugin
+will be passed an object describing its registration with Gerrit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.install(function (self) {
+  // ... plugin JavaScript code here ...
+});</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="self">Plugin Instance</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The plugin instance is passed to the plugin&#8217;s initialization function
+and provides a number of utility services to plugin authors.</p>
+</div>
+<div class="sect2">
+<h3 id="self_delete">self.delete() / self.del()</h3>
+<div class="paragraph">
+<p>Issues a DELETE REST API request to the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.delete(url, callback)
+Gerrit.del(url, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the plugin&#8217;s URL space. The JavaScript
+library prefixes the supplied URL with <code>/plugins/{getPluginName}/</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed
+JSON result of the API call. DELETE methods often return
+<code>204 No Content</code>, which is passed as null.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_get">self.get()</h3>
+<div class="paragraph">
+<p>Issues a GET REST API request to the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.get(url, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the plugin&#8217;s URL space. The JavaScript
+library prefixes the supplied URL with <code>/plugins/{getPluginName}/</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_getServerInfo">self.getServerInfo()</h3>
+<div class="paragraph">
+<p>Returns the server&#8217;s <a href="rest-api-config.html#server-info">ServerInfo</a>
+data.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_getCurrentUser">self.getCurrentUser()</h3>
+<div class="paragraph">
+<p>Returns the currently signed in user&#8217;s AccountInfo data; empty account
+data if no user is currently signed in.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_getUserPreferences">Gerrit.getUserPreferences()</h3>
+<div class="paragraph">
+<p>Returns the preferences of the currently signed in user; the default
+preferences if no user is currently signed in.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_refreshUserPreferences">Gerrit.refreshUserPreferences()</h3>
+<div class="paragraph">
+<p>Refreshes the preferences of the current user.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_getPluginName">self.getPluginName()</h3>
+<div class="paragraph">
+<p>Returns the name this plugin was installed as by the server
+administrator. The plugin name is required to access REST API
+views installed by the plugin, or to access resources.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_post">self.post()</h3>
+<div class="paragraph">
+<p>Issues a POST REST API request to the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.post(url, input, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the plugin&#8217;s URL space. The JavaScript
+library prefixes the supplied URL with <code>/plugins/{getPluginName}/</code>.</p>
+</li>
+<li>
+<p>input: JavaScript object to serialize as the request payload.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.post(
+  '/my-servlet',
+  {start_build: true, platform_type: 'Linux'},
+  function (r) {});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_put">self.put()</h3>
+<div class="paragraph">
+<p>Issues a PUT REST API request to the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.put(url, input, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the plugin&#8217;s URL space. The JavaScript
+library prefixes the supplied URL with <code>/plugins/{getPluginName}/</code>.</p>
+</li>
+<li>
+<p>input: JavaScript object to serialize as the request payload.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.put(
+  '/builds',
+  {start_build: true, platform_type: 'Linux'},
+  function (r) {});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_on">self.on()</h3>
+<div class="paragraph">
+<p>Register a JavaScript callback to be invoked when events occur within
+the web interface.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.on(event, callback);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>event: A supported event type. See below for description.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked when event happens.
+Arguments may be passed to this function, depending on the event.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Supported events:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>history</code>: Invoked when the view is changed to a new screen within
+the Gerrit web application.  The token after "#" is passed as the
+argument to the callback function, for example "/c/42/" while
+showing change 42.</p>
+</li>
+<li>
+<p><code>showchange</code>: Invoked when a change is made visible. A
+<a href="rest-api-changes.html#change-info">ChangeInfo</a> and
+<a href="rest-api-changes.html#revision-info">RevisionInfo</a>
+are passed as arguments.</p>
+</li>
+<li>
+<p><code>submitchange</code>: Invoked when the submit button is clicked
+on a change. A <a href="rest-api-changes.html#change-info">ChangeInfo</a>
+and <a href="rest-api-changes.html#revision-info">RevisionInfo</a> are
+passed as arguments. Similar to a form submit validation, the
+function must return true to allow the operation to continue, or
+false to prevent it.</p>
+</li>
+<li>
+<p><code>comment</code>: Invoked when a DOM element that represents a comment is
+created. This DOM element is passed as argument. This DOM element
+contains nested elements that Gerrit uses to format the comment. The
+DOM structure may differ between comment types such as inline
+comments, file-level comments and summary comments, and it may change
+with new Gerrit versions.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_onAction">self.onAction()</h3>
+<div class="paragraph">
+<p>Register a JavaScript callback to be invoked when the user clicks
+on a button associated with a server side <code>UiAction</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.onAction(type, view_name, callback);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>type: <code>'change'</code>, <code>'edit'</code>, <code>'revision'</code>, <code>'project'</code>, or <code>'branch'</code>
+indicating which type of resource the <code>UiAction</code> was bound to
+in the server.</p>
+</li>
+<li>
+<p>view_name: string appearing in URLs to name the view. This is the
+second argument of the <code>get()</code>, <code>post()</code>, <code>put()</code>, and <code>delete()</code>
+binding methods in a <code>RestApiModule</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to invoke when the user clicks. The
+function will be passed a <a href="#ActionContext">action context</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_screen">self.screen()</h3>
+<div class="paragraph">
+<p>Register a JavaScript callback to be invoked when the user navigates
+to an extension screen provided by the plugin. Extension screens are
+usually linked from the <a href="dev-plugins.html#top-menu-extensions">top menu</a>.
+The callback can populate the DOM with the screen&#8217;s contents.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.screen(pattern, callback);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>pattern: URL token pattern to identify the screen. Argument can be
+either a string (<code>'index'</code>) or a RegExp object (<code>/list\/(.*)/</code>).
+If a RegExp is used the matching groups will be available inside of
+the context as <code>token_match</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to invoke when the user navigates to
+the screen. The function will be passed a <a href="#ScreenContext">screen context</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_settingsScreen">self.settingsScreen()</h3>
+<div class="paragraph">
+<p>Register a JavaScript callback to be invoked when the user navigates
+to an extension settings screen provided by the plugin. Extension settings
+screens are automatically linked from the settings menu under the given
+menu entry.
+The callback can populate the DOM with the screen&#8217;s contents.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.settingsScreen(path, menu, callback);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>path: URL path to identify the settings screen.</p>
+</li>
+<li>
+<p>menu: The name of the menu entry in the settings menu that should
+link to the settings screen.</p>
+</li>
+<li>
+<p>callback: JavaScript function to invoke when the user navigates to
+the settings screen. The function will be passed a
+<a href="#SettingsScreenContext">settings screen context</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_panel">self.panel()</h3>
+<div class="paragraph">
+<p>Register a JavaScript callback to be invoked when a screen with the
+given extension point is loaded.
+The callback can populate the DOM with the panel&#8217;s contents.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.panel(extensionpoint, callback);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>extensionpoint: The name of the extension point that marks the
+position where the panel is added to an existing screen. The
+available extension points are described in the
+<a href="dev-plugins.html#panels">plugin development documentation</a>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to invoke when a screen with the
+extension point is loaded. The function will be passed a
+<a href="#PanelContext">panel context</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="self_url">self.url()</h3>
+<div class="paragraph">
+<p>Returns a URL within the plugin&#8217;s URL space. If invoked with no
+parameter the URL of the plugin is returned. If passed a string
+the argument is appended to the plugin URL.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.url();                    // "https://gerrit-review.googlesource.com/plugins/demo/"
+self.url('/static/icon.png');  // "https://gerrit-review.googlesource.com/plugins/demo/static/icon.png"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ActionContext">Action Context</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A new action context is passed to the <code>onAction</code> callback function
+each time the associated action button is clicked by the user. A
+context is initialized with sufficient state to issue the associated
+REST API RPC.</p>
+</div>
+<div class="sect2">
+<h3 id="context_action">context.action</h3>
+<div class="paragraph">
+<p>An <a href="rest-api-changes.html#action-info">ActionInfo</a> object instance
+supplied by the server describing the UI button the user used to
+invoke the action.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_call">context.call()</h3>
+<div class="paragraph">
+<p>Issues the REST API call associated with the action. The HTTP method
+used comes from <code>context.action.method</code>, hiding the JavaScript from
+needing to care.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.call(input, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>input: JavaScript object to serialize as the request payload. This
+parameter is ignored for GET and DELETE methods.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.call(
+  {message: "..."},
+  function (result) {
+    // ... use result here ...
+  });</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_change">context.change</h3>
+<div class="paragraph">
+<p>When the action is invoked on a change a
+<a href="rest-api-changes.html#change-info">ChangeInfo</a> object instance
+describing the change. Available fields of the ChangeInfo may vary
+based on the options used by the UI when it loaded the change.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_delete">context.delete()</h3>
+<div class="paragraph">
+<p>Issues a DELETE REST API call to the URL associated with the action.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.delete(callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed
+JSON result of the API call. DELETE methods often return
+<code>204 No Content</code>, which is passed as null.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.delete(function () {});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_get">context.get()</h3>
+<div class="paragraph">
+<p>Issues a GET REST API call to the URL associated with the action.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.get(callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.get(function (result) {
+  // ... use result here ...
+});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_go">context.go()</h3>
+<div class="paragraph">
+<p>Go to a screen. Shorthand for <a href="#Gerrit_go"><code>Gerrit.go()</code></a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_hide">context.hide()</h3>
+<div class="paragraph">
+<p>Hide the currently visible popup displayed by
+<a href="#context_popup"><code>context.popup()</code></a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_post">context.post()</h3>
+<div class="paragraph">
+<p>Issues a POST REST API call to the URL associated with the action.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.post(input, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>input: JavaScript object to serialize as the request payload.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.post(
+  {message: "..."},
+  function (result) {
+    // ... use result here ...
+  });</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_popup">context.popup()</h3>
+<div class="paragraph">
+<p>Displays a small popup near the activation button to gather
+additional input from the user before executing the REST API RPC.</p>
+</div>
+<div class="paragraph">
+<p>The caller is always responsible for closing the popup with
+link#context_hide[<code>context.hide()</code>]. Gerrit will handle closing a
+popup if the user presses <code>Escape</code> while keyboard focus is within
+the popup.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.popup(element)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>element: an HTML DOM element to display as the body of the
+popup. This is typically a <code>div</code> element but can be any valid HTML
+element. CSS can be used to style the element beyond the defaults.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A common usage is to gather more input:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">self.onAction('revision', 'start-build', function (c) {
+  var l = c.checkbox();
+  var m = c.checkbox();
+  c.popup(c.div(
+    c.div(c.label(l, 'Linux')),
+    c.div(c.label(m, 'Mac OS X')),
+    c.button('Build', {onclick: function() {
+      c.call(
+        {
+          commit: c.revision.name,
+          linux: l.checked,
+          mac: m.checked,
+        },
+        function() { c.hide() });
+    });
+});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_put">context.put()</h3>
+<div class="paragraph">
+<p>Issues a PUT REST API call to the URL associated with the action.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.put(input, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>input: JavaScript object to serialize as the request payload.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">context.put(
+  {message: "..."},
+  function (result) {
+    // ... use result here ...
+  });</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_refresh">context.refresh()</h3>
+<div class="paragraph">
+<p>Refresh the current display. Shorthand for
+<a href="#Gerrit_refresh"><code>Gerrit.refresh()</code></a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_revision">context.revision</h3>
+<div class="paragraph">
+<p>When the action is invoked on a specific revision of a change,
+a <a href="rest-api-changes.html#revision-info">RevisionInfo</a>
+object instance describing the revision. Available fields of the
+RevisionInfo may vary based on the options used by the UI when it
+loaded the change.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="context_project">context.project</h3>
+<div class="paragraph">
+<p>When the action is invoked on a specific project,
+the name of the project.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_html_helpers">HTML Helpers</h3>
+<div class="paragraph">
+<p>The <a href="#ActionContext">action context</a> includes some HTML helper
+functions to make working with DOM based widgets less painful.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>br()</code>: new <code>&lt;br&gt;</code> element.</p>
+</li>
+<li>
+<p><code>button(label, options)</code>: new <code>&lt;button&gt;</code> with the string <code>label</code>
+wrapped inside of a <code>div</code>. The optional <code>options</code> object may
+define <code>onclick</code> as a function to be invoked upon clicking. This
+calling pattern avoids circular references between the element
+and the onclick handler.</p>
+</li>
+<li>
+<p><code>checkbox()</code>: new <code>&lt;input type='checkbox'&gt;</code> element.</p>
+</li>
+<li>
+<p><code>div(&#8230;&#8203;)</code>: a new <code>&lt;div&gt;</code> wrapping the (optional) arguments.</p>
+</li>
+<li>
+<p><code>hr()</code>: new <code>&lt;hr&gt;</code> element.</p>
+</li>
+<li>
+<p><code>label(c, label)</code>: a new <code>&lt;label&gt;</code> element wrapping element <code>c</code>
+and the string <code>label</code>. Used to wrap a checkbox with its label,
+<code>label(checkbox(), 'Click Me')</code>.</p>
+</li>
+<li>
+<p><code>prependLabel(label, c)</code>: a new <code>&lt;label&gt;</code> element wrapping element <code>c</code>
+and the string <code>label</code>. Used to wrap an input field with its label,
+<code>prependLabel('Greeting message', textfield())</code>.</p>
+</li>
+<li>
+<p><code>textarea(options)</code>: new <code>&lt;textarea&gt;</code> element. The options
+object may optionally include <code>rows</code> and <code>cols</code>. The textarea
+comes with an onkeypress handler installed to play nicely with
+Gerrit&#8217;s keyboard binding system.</p>
+</li>
+<li>
+<p><code>textfield()</code>: new <code>&lt;input type='text'&gt;</code> element.  The text field
+comes with an onkeypress handler installed to play nicely with
+Gerrit&#8217;s keyboard binding system.</p>
+</li>
+<li>
+<p><code>select(a,i)</code>: a new <code>&lt;select&gt;</code> element containing one <code>&lt;option&gt;</code>
+element for each entry in the provided array <code>a</code>.  The option with
+the index <code>i</code> will be pre-selected in the drop-down-list.</p>
+</li>
+<li>
+<p><code>selected(s)</code>: returns the text of the <code>&lt;option&gt;</code> element that is
+currently selected in the provided <code>&lt;select&gt;</code> element <code>s</code>.</p>
+</li>
+<li>
+<p><code>span(&#8230;&#8203;)</code>: a new <code>&lt;span&gt;</code> wrapping the (optional) arguments.</p>
+</li>
+<li>
+<p><code>msg(label)</code>: a new label.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ScreenContext">Screen Context</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A new screen context is passed to the <code>screen</code> callback function
+each time the user navigates to a matching URL.</p>
+</div>
+<div class="sect2">
+<h3 id="screen_body">screen.body</h3>
+<div class="paragraph">
+<p>Empty HTML <code>&lt;div&gt;</code> node the plugin should add its content to.  The
+node is already attached to the document, but is invisible.  Plugins
+must call <code>screen.show()</code> to display the DOM node.  Deferred display
+allows an implementor to partially populate the DOM, make remote HTTP
+requests, finish populating when the callbacks arrive, and only then
+make the view visible to the user.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="screen_token">screen.token</h3>
+<div class="paragraph">
+<p>URL token fragment that activated this screen.  The value is identical
+to <code>screen.token_match[0]</code>.  If the URL is <code>/#/x/hello/list</code> the token
+will be <code>"list"</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="screen_token_match">screen.token_match</h3>
+<div class="paragraph">
+<p>Array of matching subgroups from the pattern specified to <code>screen()</code>.
+This is identical to the result of RegExp.exec. Index 0 contains the
+entire matching expression; index 1 the first matching group, etc.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="screen_onUnload">screen.onUnload()</h3>
+<div class="paragraph">
+<p>Configures an optional callback to be invoked just before the screen
+is deleted from the browser DOM.  Plugins can use this callback to
+remove event listeners from DOM nodes, preventing memory leaks.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">screen.onUnload(callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>callback: JavaScript function to be invoked just before the
+<code>screen.body</code> DOM element is removed from the browser DOM.
+This event happens when the user navigates to another screen.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="screen.setTitle">screen.setTitle()</h3>
+<div class="paragraph">
+<p>Sets the heading text to be displayed when the screen is visible.
+This is presented in a large bold font below the menus, but above the
+content in <code>screen.body</code>.  Setting the title also sets the window
+title to the same string, if it has not already been set.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">screen.setPageTitle(titleText)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="screen.setWindowTitle">screen.setWindowTitle()</h3>
+<div class="paragraph">
+<p>Sets the text to be displayed in the browser&#8217;s title bar when the
+screen is visible.  Plugins should always prefer this method over
+trying to set <code>window.title</code> directly.  The window title defaults to
+the title given to <code>setTitle</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">screen.setWindowTitle(titleText)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="screen_show">screen.show()</h3>
+<div class="paragraph">
+<p>Destroy the currently visible screen and display the plugin&#8217;s screen.
+This method must be called after adding content to <code>screen.body</code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="SettingsScreenContext">Settings Screen Context</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A new settings screen context is passed to the <code>settingsScreen</code> callback
+function each time the user navigates to a matching URL.</p>
+</div>
+<div class="sect2">
+<h3 id="settingsScreen_body">settingsScreen.body</h3>
+<div class="paragraph">
+<p>Empty HTML <code>&lt;div&gt;</code> node the plugin should add its content to.  The
+node is already attached to the document, but is invisible.  Plugins
+must call <code>settingsScreen.show()</code> to display the DOM node.  Deferred
+display allows an implementor to partially populate the DOM, make
+remote HTTP requests, finish populating when the callbacks arrive, and
+only then make the view visible to the user.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="settingsScreen_onUnload">settingsScreen.onUnload()</h3>
+<div class="paragraph">
+<p>Configures an optional callback to be invoked just before the screen
+is deleted from the browser DOM.  Plugins can use this callback to
+remove event listeners from DOM nodes, preventing memory leaks.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">settingsScreen.onUnload(callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>callback: JavaScript function to be invoked just before the
+<code>settingsScreen.body</code> DOM element is removed from the browser DOM.
+This event happens when the user navigates to another screen.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="settingsScreen.setTitle">settingsScreen.setTitle()</h3>
+<div class="paragraph">
+<p>Sets the heading text to be displayed when the screen is visible.
+This is presented in a large bold font below the menus, but above the
+content in <code>settingsScreen.body</code>. Setting the title also sets the
+window title to the same string, if it has not already been set.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">settingsScreen.setPageTitle(titleText)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="settingsScreen.setWindowTitle">settingsScreen.setWindowTitle()</h3>
+<div class="paragraph">
+<p>Sets the text to be displayed in the browser&#8217;s title bar when the
+screen is visible.  Plugins should always prefer this method over
+trying to set <code>window.title</code> directly.  The window title defaults to
+the title given to <code>setTitle</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">settingsScreen.setWindowTitle(titleText)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="settingsScreen_show">settingsScreen.show()</h3>
+<div class="paragraph">
+<p>Destroy the currently visible screen and display the plugin&#8217;s screen.
+This method must be called after adding content to
+<code>settingsScreen.body</code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="PanelContext">Panel Context</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A new panel context is passed to the <code>panel</code> callback function each
+time a screen with the given extension point is loaded.</p>
+</div>
+<div class="sect2">
+<h3 id="panel_body">panel.body</h3>
+<div class="paragraph">
+<p>Empty HTML <code>&lt;div&gt;</code> node the plugin should add the panel content to.
+The node is already attached to the document.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="PanelProperties">Properties</h3>
+<div class="paragraph">
+<p>The extension panel parameters that are described in the
+<a href="dev-plugins.html#panels">plugin development documentation</a> are
+contained in the context as properties. Which properties are available
+depends on the extension point.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Gerrit">Gerrit</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Gerrit</code> object is the only symbol provided into the global
+namespace by Gerrit Code Review. All top-level functions can be
+accessed through this name.</p>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_css">Gerrit.css()</h3>
+<div class="paragraph">
+<p>Creates a new unique CSS class and injects it into the document.
+The name of the class is returned and can be used by the plugin.
+See <a href="#Gerrit_html"><code>Gerrit.html()</code></a> for an easy way to use
+generated class names.</p>
+</div>
+<div class="paragraph">
+<p>Classes created with this function should be created once at install
+time and reused throughout the plugin.  Repeatedly creating the same
+class will explode the global stylesheet.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.install(function(self)) {
+  var style = {
+    name: Gerrit.css('background: #fff; color: #000;'),
+  };
+});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_delete">Gerrit.delete()</h3>
+<div class="paragraph">
+<p>Issues a DELETE REST API request to the Gerrit server. For plugin
+private REST API URLs see <a href="#self_delete">self.delete()</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.delete(url, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the Gerrit server. For example to access the
+<a href="rest-api-changes.html">changes REST API</a> use <code>'/changes/'</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed
+JSON result of the API call. DELETE methods often return
+<code>204 No Content</code>, which is passed as null.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.delete(
+  '/changes/myProject~master~I8473b95934b5732ac55d26311a706c9c2bde9940/topic',
+  function () {});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_get">Gerrit.get()</h3>
+<div class="paragraph">
+<p>Issues a GET REST API request to the Gerrit server. For plugin
+private REST API URLs see <a href="#self_get">self.get()</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.get(url, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the Gerrit server. For example to access the
+<a href="rest-api-changes.html">changes REST API</a> use <code>'/changes/'</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.get('/changes/?q=status:open', function (open) {
+  for (var i = 0; i &lt; open.length; i++) {
+    console.log(open.get(i).change_id);
+  }
+});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_getCurrentUser">Gerrit.getCurrentUser()</h3>
+<div class="paragraph">
+<p>Returns the currently signed in user&#8217;s AccountInfo data; empty account
+data if no user is currently signed in.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_getPluginName">Gerrit.getPluginName()</h3>
+<div class="paragraph">
+<p>Returns the name this plugin was installed as by the server
+administrator. The plugin name is required to access REST API
+views installed by the plugin, or to access resources.</p>
+</div>
+<div class="paragraph">
+<p>Unlike <a href="#self_getPluginName"><code>self.getPluginName()</code></a> this method
+must guess the name from the JavaScript call stack. Plugins are
+encouraged to use <code>self.getPluginName()</code> whenever possible.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_go">Gerrit.go()</h3>
+<div class="paragraph">
+<p>Updates the web UI to display the screen identified by the supplied
+URL token. The URL token is the text after <code>#</code> in the browser URL.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.go('/admin/projects/');</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the URL passed matches <code><a href="http://&#8230;&#8203" class="bare">http://&#8230;&#8203</a>;</code>, <code><a href="https://&#8230;&#8203" class="bare">https://&#8230;&#8203</a>;</code>, or <code>//&#8230;&#8203;</code>
+the current browser window will navigate to the non-Gerrit URL.
+The user can return to Gerrit with the back button.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_html">Gerrit.html()</h3>
+<div class="paragraph">
+<p>Parses an HTML fragment after performing template replacements.  If
+the HTML has a single root element or node that node is returned,
+otherwise it is wrapped inside a <code>&lt;div&gt;</code> and the div is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.html(htmlText, options, wantElements);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>htmlText: string of HTML to be parsed.  A new unattached <code>&lt;div&gt;</code> is
+created in the browser&#8217;s document and the innerHTML property is
+assigned to the passed string, after performing replacements.  If
+the div has exactly one child, that child will be returned instead
+of the div.</p>
+</li>
+<li>
+<p>options: optional object reference supplying replacements for any
+<code>{name}</code> references in htmlText.  Navigation through objects is
+supported permitting <code>{style.bar}</code> to be replaced with <code>"foo"</code> if
+options was <code>{style: {bar: "foo"}}</code>.  Value replacements are HTML
+escaped before being inserted into the document fragment.</p>
+</li>
+<li>
+<p>wantElements: if options is given and wantElements is also true
+an object consisting of <code>{root: parsedElement, elements: {&#8230;&#8203;}}</code> is
+returned instead of the parsed element. The elements object contains
+a property for each element using <code>id={name}</code> in htmlText.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">var style = {bar: Gerrit.css('background: yellow')};
+Gerrit.html(
+  '&lt;span class="{style.bar}"&gt;Hello {name}!&lt;/span&gt;',
+  {style: style, name: "World"});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Event handlers can be automatically attached to elements referenced
+through an attribute id.  Object navigation is not supported for ids,
+and the parser strips the id attribute before returning the result.
+Handler functions must begin with <code>on</code> and be a function to be
+installed on the element.  This approach is useful for onclick and
+other handlers that do not want to create circular references that
+will eventually leak browser memory.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">var options = {
+  link: {
+    onclick: function(e) { window.close() },
+  },
+};
+Gerrit.html('&lt;a href="javascript:;" id="{link}"&gt;Close&lt;/a&gt;', options);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When using options to install handlers care must be taken to not
+accidentally include the returned element into the event handler&#8217;s
+closure.  This is why options is built before calling <code>Gerrit.html()</code>
+and not inline as a shown above with "Hello World".</p>
+</div>
+<div class="paragraph">
+<p>DOM nodes can optionally be returned, allowing handlers to access the
+elements identified by <code>id={name}</code> at a later point in time.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">var w = Gerrit.html(
+    '&lt;div&gt;Name: &lt;input type="text" id="{name}"&gt;&lt;/div&gt;'
+  + '&lt;div&gt;Age: &lt;input type="text" id="{age}"&gt;&lt;/div&gt;'
+  + '&lt;button id="{submit}"&gt;&lt;div&gt;Save&lt;/div&gt;&lt;/button&gt;',
+  {
+    submit: {
+      onclick: function(s) {
+        var e = w.elements;
+        window.alert(e.name.value + " is " + e.age.value);
+      },
+    },
+  }, true);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To prevent memory leaks <code>w.root</code> and <code>w.elements</code> should be set to
+null when the elements are no longer necessary.  Screens can use
+<a href="#screen_onUnload">screen.onUnload()</a> to define a callback function
+to perform this cleanup:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">var w = Gerrit.html(...);
+screen.body.appendElement(w.root);
+screen.onUnload(function() { w.clear() });</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_injectCss">Gerrit.injectCss()</h3>
+<div class="paragraph">
+<p>Injects CSS rules into the document by appending onto the end of the
+existing rule list.  CSS rules are global to the entire application
+and must be manually scoped by each plugin.  For an automatic scoping
+alternative see <a href="#Gerrit_css"><code>css()</code></a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.injectCss('.myplugin_bg {background: #000}');</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_install">Gerrit.install()</h3>
+<div class="paragraph">
+<p>Registers a new plugin by invoking the supplied initialization
+function. The function is passed the <a href="#self">plugin instance</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.install(function (self) {
+  // ... plugin JavaScript code here ...
+});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_post">Gerrit.post()</h3>
+<div class="paragraph">
+<p>Issues a POST REST API request to the Gerrit server. For plugin
+private REST API URLs see <a href="#self_post">self.post()</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.post(url, input, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the Gerrit server. For example to access the
+<a href="rest-api-changes.html">changes REST API</a> use <code>'/changes/'</code>.</p>
+</li>
+<li>
+<p>input: JavaScript object to serialize as the request payload.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.post(
+  '/changes/myProject~master~I8473b95934b5732ac55d26311a706c9c2bde9940/topic',
+  {topic: 'tests', message: 'Classify work as for testing.'},
+  function (r) {});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_put">Gerrit.put()</h3>
+<div class="paragraph">
+<p>Issues a PUT REST API request to the Gerrit server. For plugin
+private REST API URLs see <a href="#self_put">self.put()</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.put(url, input, callback)</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>url: URL relative to the Gerrit server. For example to access the
+<a href="rest-api-changes.html">changes REST API</a> use <code>'/changes/'</code>.</p>
+</li>
+<li>
+<p>input: JavaScript object to serialize as the request payload.</p>
+</li>
+<li>
+<p>callback: JavaScript function to be invoked with the parsed JSON
+result of the API call. If the API returns a string the result is
+a string, otherwise the result is a JavaScript object or array,
+as described in the relevant REST API documentation.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.put(
+  '/changes/myProject~master~I8473b95934b5732ac55d26311a706c9c2bde9940/topic',
+  {topic: 'tests', message: 'Classify work as for testing.'},
+  function (r) {});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_onAction">Gerrit.onAction()</h3>
+<div class="paragraph">
+<p>Register a JavaScript callback to be invoked when the user clicks
+on a button associated with a server side <code>UiAction</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.onAction(type, view_name, callback);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>type: <code>'change'</code>, <code>'edit'</code>, <code>'revision'</code>, <code>'project'</code> or <code>'branch'</code>
+indicating what sort of resource the <code>UiAction</code> was bound to in the server.</p>
+</li>
+<li>
+<p>view_name: string appearing in URLs to name the view. This is the
+second argument of the <code>get()</code>, <code>post()</code>, <code>put()</code>, and <code>delete()</code>
+binding methods in a <code>RestApiModule</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to invoke when the user clicks. The
+function will be passed a <a href="#ActionContext">ActionContext</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_screen">Gerrit.screen()</h3>
+<div class="paragraph">
+<p>Register a JavaScript callback to be invoked when the user navigates
+to an extension screen provided by the plugin. Extension screens are
+usually linked from the <a href="dev-plugins.html#top-menu-extensions">top menu</a>.
+The callback can populate the DOM with the screen&#8217;s contents.</p>
+</div>
+<div class="listingblock">
+<div class="title">Signature</div>
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.screen(pattern, callback);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>pattern: URL token pattern to identify the screen. Argument can be
+either a string (<code>'index'</code>) or a RegExp object (<code>/list\/(.*)/</code>).
+If a RegExp is used the matching groups will be available inside of
+the context as <code>token_match</code>.</p>
+</li>
+<li>
+<p>callback: JavaScript function to invoke when the user navigates to
+the screen. The function will be passed <a href="#ScreenContext">screen context</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_refresh">Gerrit.refresh()</h3>
+<div class="paragraph">
+<p>Redisplays the current web UI view, refreshing all information.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_refreshMenuBar">Gerrit.refreshMenuBar()</h3>
+<div class="paragraph">
+<p>Refreshes Gerrit&#8217;s menu bar.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_isSignedIn">Gerrit.isSignedIn()</h3>
+<div class="paragraph">
+<p>Checks if user is signed in.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_url">Gerrit.url()</h3>
+<div class="paragraph">
+<p>Returns the URL of the Gerrit Code Review server. If invoked with
+no parameter the URL of the site is returned. If passed a string
+the argument is appended to the site URL.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.url();        // "https://gerrit-review.googlesource.com/"
+Gerrit.url('/123');  // "https://gerrit-review.googlesource.com/123"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a plugin specific version see <a href="#self_url()"><code>self.url()</code></a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="Gerrit_showError">Gerrit.showError(message)</h3>
+<div class="paragraph">
+<p>Displays the given message in the Gerrit ErrorDialog.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

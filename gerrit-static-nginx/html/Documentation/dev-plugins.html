@@ -1,0 +1,3305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Plugin Development</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Plugin Development</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#API">API</a></li>
+<li><a href="#_manifest">Manifest</a>
+<ul class="sectlevel2">
+<li><a href="#_apitype">ApiType</a></li>
+<li><a href="#_explicit_registration">Explicit Registration</a></li>
+<li><a href="#plugin_name">Plugin Name</a></li>
+<li><a href="#reload_method">Reload Method</a></li>
+<li><a href="#init_step">Init step</a></li>
+</ul>
+</li>
+<li><a href="#classpath">Classpath</a></li>
+<li><a href="#events">Listening to Events</a></li>
+<li><a href="#stream-events">Sending Events to the Events Stream</a></li>
+<li><a href="#_modifying_the_stream_event_flow">Modifying the Stream Event Flow</a></li>
+<li><a href="#validation">Validation Listeners</a></li>
+<li><a href="#change-message-modifier">Change Message Modifier</a></li>
+<li><a href="#receive-pack">Receive Pack Initializers</a></li>
+<li><a href="#post-receive-hook">Post Receive-Pack Hooks</a></li>
+<li><a href="#pre-upload-hook">Pre Upload-Pack Hooks</a></li>
+<li><a href="#post-upload-hook">Post Upload-Pack Hooks</a></li>
+<li><a href="#ssh">SSH Commands</a>
+<ul class="sectlevel2">
+<li><a href="#multiple-commands">Multiple Commands bound to one implementation</a></li>
+<li><a href="#root-level-commands">Root Level Commands</a></li>
+</ul>
+</li>
+<li><a href="#search_operators">Search Operators</a>
+<ul class="sectlevel2">
+<li><a href="#search_operands">Search Operands</a></li>
+</ul>
+</li>
+<li><a href="#simple-configuration">Simple Configuration in <code>gerrit.config</code></a></li>
+<li><a href="#configuration">Configuration in own config file</a></li>
+<li><a href="#simple-project-specific-configuration">Simple Project Specific Configuration in <code>project.config</code></a>
+<ul class="sectlevel2">
+<li><a href="#configuring-groups">Referencing groups in <code>project.config</code></a></li>
+</ul>
+</li>
+<li><a href="#project-specific-configuration">Project Specific Configuration in own config file</a></li>
+<li><a href="#_react_on_changes_in_project_configuration">React on changes in project configuration</a></li>
+<li><a href="#capabilities">Plugin Owned Capabilities</a></li>
+<li><a href="#ui_extension">UI Extension</a>
+<ul class="sectlevel2">
+<li><a href="#panels">Panels</a></li>
+<li><a href="#actions">Actions</a></li>
+<li><a href="#action-visitor">Action Visitors</a></li>
+</ul>
+</li>
+<li><a href="#top-menu-extensions">Top Menu Extensions</a></li>
+<li><a href="#gwt_ui_extension">GWT UI Extension</a></li>
+<li><a href="#screen">Add Screen</a></li>
+<li><a href="#user-settings-screen">Add User Settings Screen</a></li>
+<li><a href="#settings-screen">Plugin Settings Screen</a></li>
+<li><a href="#http">HTTP Servlets</a></li>
+<li><a href="#data-directory">Data Directory</a></li>
+<li><a href="#secure-store">SecureStore</a></li>
+<li><a href="#accountcreation">Account Creation</a></li>
+<li><a href="#download-commands">Download Commands</a></li>
+<li><a href="#included-in">Included In</a></li>
+<li><a href="#links-to-external-tools">Links To External Tools</a></li>
+<li><a href="#lfs-extension">LFS Storage Plugins</a></li>
+<li><a href="#metrics">Metrics</a>
+<ul class="sectlevel2">
+<li><a href="#_metrics_reporting">Metrics Reporting</a></li>
+<li><a href="#_providing_own_metrics">Providing own metrics</a></li>
+</ul>
+</li>
+<li><a href="#account-patch-review-store">AccountPatchReviewStore</a></li>
+<li><a href="#documentation">Documentation</a>
+<ul class="sectlevel2">
+<li><a href="#auto-index">Automatic Index</a></li>
+</ul>
+</li>
+<li><a href="#deployment">Deployment</a></li>
+<li><a href="#_known_issues_and_bugs">Known issues and bugs</a>
+<ul class="sectlevel2">
+<li><a href="#_error_handling_in_ui_when_using_the_rest_api">Error handling in UI when using the REST API</a></li>
+</ul>
+</li>
+<li><a href="#reviewer-suggestion">Reviewer Suggestion Plugins</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Gerrit server functionality can be extended by installing plugins.
+This page describes how plugins for Gerrit can be developed.</p>
+</div>
+<div class="paragraph">
+<p>Depending on how tightly the extension code is coupled with the Gerrit
+server code, there is a distinction between <code>plugins</code> and <code>extensions</code>.</p>
+</div>
+<div id="plugin" class="paragraph">
+<p>A <code>plugin</code> in Gerrit is tightly coupled code that runs in the same
+JVM as Gerrit. It has full access to all server internals. Plugins
+are tightly coupled to a specific major.minor server version and
+may require source code changes to compile against a different
+server version.</p>
+</div>
+<div id="extension" class="paragraph">
+<p>An <code>extension</code> in Gerrit runs inside of the same JVM as Gerrit
+in the same way as a plugin, but has limited visibility to the
+server&#8217;s internals. The limited visibility reduces the extension&#8217;s
+dependencies, enabling it to be compatible across a wider range
+of server versions.</p>
+</div>
+<div class="paragraph">
+<p>Most of this documentation refers to either type as a plugin.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="getting-started">Getting started</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To get started with the development of a plugin clone the sample
+plugin:</p>
+</div>
+<div class="paragraph">
+<p>+
+This is a project that demonstrates the various features of the
+plugin API. It can be taken as an example to develop an own plugin.</p>
+</div>
+<div class="paragraph">
+<p>+</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git clone https://gerrit.googlesource.com/plugins/cookbook-plugin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>+
+When starting from this example one should take care to adapt the
+<code>Gerrit-ApiVersion</code> in the <code>BUILD</code> to the version of Gerrit for which
+the plugin is developed.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="API">API</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are two different API formats offered against which plugins can
+be developed:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">gerrit-extension-api.jar</dt>
+<dd>
+<p>A stable but thin interface. Suitable for extensions that need
+to be notified of events, but do not require tight coupling to
+the internals of Gerrit. Extensions built against this API can
+expect to be binary compatible across a wide range of server
+versions.</p>
+</dd>
+<dt class="hdlist1">gerrit-plugin-api.jar</dt>
+<dd>
+<p>The complete internals of the Gerrit server, permitting a
+plugin to tightly couple itself and provide additional
+functionality that is not possible as an extension. Plugins
+built against this API are expected to break at the source
+code level between every major.minor Gerrit release. A plugin
+that compiles against 2.5 will probably need source code level
+changes to work with 2.6, 2.7, and so on.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_manifest">Manifest</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may provide optional description information with standard
+manifest fields:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Implementation-Title: Example plugin showing examples
+  Implementation-Version: 1.0
+  Implementation-Vendor: Example, Inc.</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_apitype">ApiType</h3>
+<div class="paragraph">
+<p>Plugins using the tightly coupled <code>gerrit-plugin-api.jar</code> must
+declare this API dependency in the manifest to gain access to server
+internals. If no <code>Gerrit-ApiType</code> is specified the stable <code>extension</code>
+API will be assumed. This may cause ClassNotFoundExceptions when
+loading a plugin that needs the plugin API.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Gerrit-ApiType: plugin</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_explicit_registration">Explicit Registration</h3>
+<div class="paragraph">
+<p>Plugins that use explicit Guice registration must name the Guice
+modules in the manifest. Up to three modules can be named in the
+manifest. <code>Gerrit-Module</code> supplies bindings to the core server;
+<code>Gerrit-SshModule</code> supplies SSH commands to the SSH server (if
+enabled); <code>Gerrit-HttpModule</code> supplies servlets and filters to the HTTP
+server (if enabled). If no modules are named automatic registration
+will be performed by scanning all classes in the plugin JAR for
+<code>@Listen</code> and <code>@Export("")</code> annotations.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Gerrit-Module:     tld.example.project.CoreModuleClassName
+  Gerrit-SshModule:  tld.example.project.SshModuleClassName
+  Gerrit-HttpModule: tld.example.project.HttpModuleClassName</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="plugin_name">Plugin Name</h3>
+<div class="paragraph">
+<p>A plugin can optionally provide its own plugin name.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Gerrit-PluginName: replication</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is useful for plugins that contribute plugin-owned capabilities that
+are stored in the <code>project.config</code> file. Another use case is to be able to put
+project specific plugin configuration section in <code>project.config</code>. In this
+case it is advantageous to reserve the plugin name to access the configuration
+section in the <code>project.config</code> file.</p>
+</div>
+<div class="paragraph">
+<p>If <code>Gerrit-PluginName</code> is omitted, then the plugin&#8217;s name is determined from
+the plugin file name.</p>
+</div>
+<div class="paragraph">
+<p>If a plugin provides its own name, then that plugin cannot be deployed
+multiple times under different file names on one Gerrit site.</p>
+</div>
+<div class="paragraph">
+<p>For Maven driven plugins, the following line must be included in the pom.xml
+file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;manifestEntries&gt;
+  &lt;Gerrit-PluginName&gt;name&lt;/Gerrit-PluginName&gt;
+&lt;/manifestEntries&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For Bazel driven plugins, the following line must be included in the BUILD
+configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-python" data-lang="python">manifest_entries = [
+   'Gerrit-PluginName: name',
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A plugin can get its own name injected at runtime:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyClass {
+
+  private final String pluginName;
+
+  @Inject
+  public MyClass(@PluginName String pluginName) {
+    this.pluginName = pluginName;
+  }
+
+  [...]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A plugin can get its canonical web URL injected at runtime:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyClass {
+
+  private final String url;
+
+  @Inject
+  public MyClass(@PluginCanonicalWebUrl String url) {
+    this.url = url;
+  }
+
+  [...]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The URL is composed of the server&#8217;s canonical web URL and the plugin&#8217;s
+name, i.e. <code><a href="http://review.example.com:8080/plugin-name" class="bare">http://review.example.com:8080/plugin-name</a></code>.</p>
+</div>
+<div class="paragraph">
+<p>The canonical web URL may be injected into any .jar plugin regardless of
+whether or not the plugin provides an HTTP servlet.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reload_method">Reload Method</h3>
+<div class="paragraph">
+<p>If a plugin holds an exclusive resource that must be released before
+loading the plugin again (for example listening on a network port or
+acquiring a file lock) the manifest must declare <code>Gerrit-ReloadMode</code>
+to be <code>restart</code>. Otherwise the preferred method of <code>reload</code> will
+be used, as it enables the server to hot-patch an updated plugin
+with no down time.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Gerrit-ReloadMode: restart</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In either mode ('restart' or 'reload') any plugin or extension can
+be updated without restarting the Gerrit server. The difference is
+how Gerrit handles the upgrade:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">restart</dt>
+<dd>
+<p>The old plugin is completely stopped. All registrations of SSH
+commands and HTTP servlets are removed. All registrations of any
+extension points are removed. All registered LifecycleListeners
+have their <code>stop()</code> method invoked in reverse order. The new
+plugin is started, and registrations are made from the new
+plugin. There is a brief window where neither the old nor the
+new plugin is connected to the server. This means SSH commands
+and HTTP servlets will return not found errors, and the plugin
+will not be notified of events that occurred during the restart.</p>
+</dd>
+<dt class="hdlist1">reload</dt>
+<dd>
+<p>The new plugin is started. Its LifecycleListeners are permitted
+to perform their <code>start()</code> methods. All SSH and HTTP registrations
+are atomically swapped out from the old plugin to the new plugin,
+ensuring the server never returns a not found error. All extension
+point listeners are atomically swapped out from the old plugin to
+the new plugin, ensuring no events are missed (however some events
+may still route to the old plugin if the swap wasn&#8217;t complete yet).
+The old plugin is stopped.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>To reload/restart a plugin the <a href="cmd-plugin-reload.html">plugin reload</a>
+command can be used.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="init_step">Init step</h3>
+<div class="paragraph">
+<p>Plugins can contribute their own "init step" during the Gerrit init
+wizard. This is useful for guiding the Gerrit administrator through
+the settings needed by the plugin to work properly.</p>
+</div>
+<div class="paragraph">
+<p>For instance plugins to integrate Jira issues to Gerrit changes may
+contribute their own "init step" to allow configuring the Jira URL,
+credentials and possibly verify connectivity to validate them.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Gerrit-InitStep: tld.example.project.MyInitStep</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>MyInitStep needs to follow the standard Gerrit InitStep syntax
+and behavior: writing to the console using the injected ConsoleUI
+and accessing / changing configuration settings using Section.Factory.</p>
+</div>
+<div class="paragraph">
+<p>In addition to the standard Gerrit init injections, plugins receive
+the @PluginName String injection containing their own plugin name.</p>
+</div>
+<div class="paragraph">
+<p>During their initialization plugins may get access to the
+<code>project.config</code> file of the <code>All-Projects</code> project and they are able
+to store configuration parameters in it. For this a plugin <code>InitStep</code>
+can get <code>com.google.gerrit.pgm.init.api.AllProjectsConfig</code> injected:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">  public class MyInitStep implements InitStep {
+    private final String pluginName;
+    private final ConsoleUI ui;
+    private final AllProjectsConfig allProjectsConfig;
+
+    @Inject
+    public MyInitStep(@PluginName String pluginName, ConsoleUI ui,
+        AllProjectsConfig allProjectsConfig) {
+      this.pluginName = pluginName;
+      this.ui = ui;
+      this.allProjectsConfig = allProjectsConfig;
+    }
+
+    @Override
+    public void run() throws Exception {
+    }
+
+    @Override
+    public void postRun() throws Exception {
+      ui.message("\n");
+      ui.header(pluginName + " Integration");
+      boolean enabled = ui.yesno(true, "By default enabled for all projects");
+      Config cfg = allProjectsConfig.load().getConfig();
+      if (enabled) {
+        cfg.setBoolean("plugin", pluginName, "enabled", enabled);
+      } else {
+        cfg.unset("plugin", pluginName, "enabled");
+      }
+      allProjectsConfig.save(pluginName, "Initialize " + pluginName + " Integration");
+    }
+  }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Bear in mind that the Plugin&#8217;s InitStep class will be loaded but
+the standard Gerrit runtime environment is not available and the plugin&#8217;s
+own Guice modules were not initialized.
+This means the InitStep for a plugin is not executed in the same way that
+the plugin executes within the server, and may mean a plugin author cannot
+trivially reuse runtime code during init.</p>
+</div>
+<div class="paragraph">
+<p>For instance a plugin that wants to verify connectivity may need to statically
+call the constructor of their connection class, passing in values obtained
+from the Section.Factory rather than from an injected Config object.</p>
+</div>
+<div class="paragraph">
+<p>Plugins' InitSteps are executed during the "Gerrit Plugin init" phase, after
+the extraction of the plugins embedded in the distribution .war file into
+<code>$GERRIT_SITE/plugins</code> and before the DB Schema initialization or upgrade.</p>
+</div>
+<div class="paragraph">
+<p>A plugin&#8217;s InitStep cannot refer to Gerrit&#8217;s DB Schema or any other Gerrit
+runtime objects injected at startup.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyInitStep implements InitStep {
+  private final ConsoleUI ui;
+  private final Section.Factory sections;
+  private final String pluginName;
+
+  @Inject
+  public GitBlitInitStep(final ConsoleUI ui, Section.Factory sections, @PluginName String pluginName) {
+    this.ui = ui;
+    this.sections = sections;
+    this.pluginName = pluginName;
+  }
+
+  @Override
+  public void run() throws Exception {
+    ui.header("\nMy plugin");
+
+    Section mySection = getSection("myplugin", null);
+    mySection.string("Link name", "linkname", "MyLink");
+  }
+
+  @Override
+  public void postRun() throws Exception {
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="classpath">Classpath</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each plugin is loaded into its own ClassLoader, isolating plugins
+from each other. A plugin or extension inherits the Java runtime
+and the Gerrit API chosen by <code>Gerrit-ApiType</code> (extension or plugin)
+from the hosting server.</p>
+</div>
+<div class="paragraph">
+<p>Plugins are loaded from a single JAR file. If a plugin needs
+additional libraries, it must include those dependencies within
+its own JAR. Plugins built using Maven may be able to use the
+<a href="http://maven.apache.org/plugins/maven-shade-plugin/">shade plugin</a>
+to package additional dependencies. Relocating (or renaming) classes
+should not be necessary due to the ClassLoader isolation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="events">Listening to Events</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Certain operations in Gerrit trigger events. Plugins may receive
+notifications of these events by implementing the corresponding
+listeners.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>com.google.gerrit.common.EventListener</code>:</p>
+<div class="paragraph">
+<p>Allows to listen to events without user visibility restrictions. These
+are the same <a href="cmd-stream-events.html#events">events</a> that are also streamed by
+the <a href="cmd-stream-events.html">gerrit stream-events</a> command.</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.common.UserScopedEventListener</code>:</p>
+<div class="paragraph">
+<p>Allows to listen to events visible to the specified user. These are the
+same <a href="cmd-stream-events.html#events">events</a> that are also streamed
+by the <a href="cmd-stream-events.html">gerrit stream-events</a> command.</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.extensions.events.LifecycleListener</code>:</p>
+<div class="paragraph">
+<p>Plugin start and stop</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.extensions.events.NewProjectCreatedListener</code>:</p>
+<div class="paragraph">
+<p>Project creation</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.extensions.events.ProjectDeletedListener</code>:</p>
+<div class="paragraph">
+<p>Project deletion</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.extensions.events.HeadUpdatedListener</code>:</p>
+<div class="paragraph">
+<p>Update of HEAD on a project</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.extensions.events.UsageDataPublishedListener</code>:</p>
+<div class="paragraph">
+<p>Publication of usage data</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.extensions.events.GarbageCollectorListener</code>:</p>
+<div class="paragraph">
+<p>Garbage collection ran on a project</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.server.extensions.events.ChangeIndexedListener</code>:</p>
+<div class="paragraph">
+<p>Update of the secondary index</p>
+</div>
+</li>
+<li>
+<p><code>com.google.gerrit.httpd.WebLoginListener</code>:</p>
+<div class="paragraph">
+<p>User login or logout interactively on the Web user interface.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The event listener is under the Gerrit http package to automatically
+inherit the javax.servlet.http dependencies and allowing to influence
+the login or logout flow with additional redirections.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="stream-events">Sending Events to the Events Stream</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may send events to the events stream where consumers of
+Gerrit&#8217;s <code>stream-events</code> ssh command will receive them.</p>
+</div>
+<div class="paragraph">
+<p>To send an event, the plugin must invoke one of the <code>postEvent</code>
+methods in the <code>EventDispatcher</code> interface, passing an instance of
+its own custom event class derived from
+<code>com.google.gerrit.server.events.Event</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.gerrit.common.EventDispatcher;
+import com.google.gerrit.extensions.registration.DynamicItem;
+import com.google.gwtorm.server.OrmException;
+import com.google.inject.Inject;
+
+class MyPlugin {
+  private final DynamicItem&lt;EventDispatcher&gt; eventDispatcher;
+
+  @Inject
+  myPlugin(DynamicItem&lt;EventDispatcher&gt; eventDispatcher) {
+    this.eventDispatcher = eventDispatcher;
+  }
+
+  private void postEvent(MyPluginEvent event) {
+    try {
+      eventDispatcher.get().postEvent(event);
+    } catch (OrmException e) {
+      // error handling
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Plugins which define new Events should register them via the
+<code>com.google.gerrit.server.events.EventTypes.registerClass()</code>
+method. This will make the EventType known to the system.
+Deserializing events with the
+<code>com.google.gerrit.server.events.EventDeserializer</code> class requires
+that the event be registered in EventTypes.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_modifying_the_stream_event_flow">Modifying the Stream Event Flow</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is possible to modify the stream event flow from plugins by registering
+an <code>com.google.gerrit.server.events.EventDispatcher</code>. A plugin may register
+a Dispatcher class to replace the internal Dispatcher. EventDispatcher is
+a DynamicItem, so Gerrit may only have one copy.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="validation">Validation Listeners</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Certain operations in Gerrit can be validated by plugins by
+implementing the corresponding <a href="config-validation.html">listeners</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="change-message-modifier">Change Message Modifier</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>com.google.gerrit.server.git.ChangeMessageModifier</code>:
+plugins implementing this can modify commit message of the change being
+submitted by Rebase Always and Cherry Pick submit strategies as well as
+change being queried with COMMIT_FOOTERS option.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="receive-pack">Receive Pack Initializers</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may provide ReceivePack initializers which will be invoked
+by Gerrit just before a ReceivePack instance will be used. Usually,
+plugins will make use of the setXXX methods on the ReceivePack to
+set additional properties on it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="post-receive-hook">Post Receive-Pack Hooks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may register PostReceiveHook instances in order to get
+notified when JGit successfully receives a pack. This may be useful
+for those plugins which would like to monitor changes in Git
+repositories.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="pre-upload-hook">Pre Upload-Pack Hooks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may register PreUploadHook instances in order to get
+notified when JGit is about to upload a pack. This may be useful
+for those plugins which would like to monitor usage in Git
+repositories.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="post-upload-hook">Post Upload-Pack Hooks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may register PostUploadHook instances in order to get notified after
+JGit is done uploading a pack.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ssh">SSH Commands</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may provide commands that can be accessed through the SSH
+interface (extensions do not have this option).</p>
+</div>
+<div class="paragraph">
+<p>Command implementations must extend the base class SshCommand:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.gerrit.sshd.SshCommand;
+import com.google.gerrit.sshd.CommandMetaData;
+
+@CommandMetaData(name="print", description="Print hello command")
+class PrintHello extends SshCommand {
+  @Override
+  protected void run() {
+    stdout.print("Hello\n");
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If no Guice modules are declared in the manifest, SSH commands may
+use auto-registration by providing an <code>@Export</code> annotation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.gerrit.extensions.annotations.Export;
+import com.google.gerrit.sshd.SshCommand;
+
+@Export("print")
+class PrintHello extends SshCommand {
+  @Override
+  protected void run() {
+    stdout.print("Hello\n");
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If explicit registration is being used, a Guice module must be
+supplied to register the SSH command and declared in the manifest
+with the <code>Gerrit-SshModule</code> attribute:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.gerrit.sshd.PluginCommandModule;
+
+class MyCommands extends PluginCommandModule {
+  @Override
+  protected void configureCommands() {
+    command(PrintHello.class);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a plugin installed as name <code>helloworld</code>, the command implemented
+by PrintHello class will be available to users as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ ssh -p 29418 review.example.com helloworld print</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="multiple-commands">Multiple Commands bound to one implementation</h3>
+<div class="paragraph">
+<p>Multiple SSH commands can be bound to the same implementation class. For
+example a Gerrit Shell plugin can bind different shell commands to the same
+implementation class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class SshShellModule extends PluginCommandModule {
+  @Override
+  protected void configureCommands() {
+    command("ls").to(ShellCommand.class);
+    command("ps").to(ShellCommand.class);
+    [...]
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With the possible implementation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class ShellCommand extends SshCommand {
+  @Override
+  protected void run() throws UnloggedFailure {
+    String cmd = getName().substring(getPluginName().length() + 1);
+    ProcessBuilder proc = new ProcessBuilder(cmd);
+    Process cmd = proc.start();
+    [...]
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And the call:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ ssh -p 29418 review.example.com shell ls
+$ ssh -p 29418 review.example.com shell ps</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="root-level-commands">Root Level Commands</h3>
+<div class="paragraph">
+<p>Single command plugins are also supported. In this scenario plugin binds
+SSH command to its own name. <code>SshModule</code> must inherit from
+<code>SingleCommandPluginModule</code> class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class SshModule extends SingleCommandPluginModule {
+ @Override
+ protected void configure(LinkedBindingBuilder&lt;Command&gt; b) {
+    b.to(ShellCommand.class);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the plugin above is deployed under sh.jar file in <code>$site/plugins</code>
+directory, generic commands can be called without specifying the
+actual SSH command. Note in the example below, that the called commands
+<code>ls</code> and <code>ps</code> was not explicitly bound:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ ssh -p 29418 review.example.com sh ls
+$ ssh -p 29418 review.example.com sh ps</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="search_operators">Search Operators</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins can define new search operators to extend change searching by
+implementing the <code>ChangeQueryBuilder.ChangeOperatorFactory</code> interface
+and registering it to an operator name in the plugin module&#8217;s
+<code>configure()</code> method.  The search operator name is defined during
+registration via the DynamicMap annotation mechanism.  The plugin
+name will get appended to the annotated name, with an underscore
+in between, leading to the final operator name.  An example
+registration looks like this:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>bind(ChangeOperatorFactory.class)
+   .annotatedWith(Exports.named("sample"))
+   .to(SampleOperator.class);</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If this is registered in the <code>myplugin</code> plugin, then the resulting
+operator will be named <code>sample_myplugin</code>.</p>
+</div>
+<div class="paragraph">
+<p>The search operator itself is implemented by ensuring that the
+<code>create()</code> method of the class implementing the
+<code>ChangeQueryBuilder.ChangeOperatorFactory</code> interface returns a
+<code>Predicate&lt;ChangeData&gt;</code>.  Here is a sample operator factory
+definition which creates a <code>MyPredicate</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Singleton
+public class SampleOperator
+    implements ChangeQueryBuilder.ChangeOperatorFactory {
+  public static class MyPredicate extends OperatorChangePredicate&lt;ChangeData&gt; {
+    ...
+  }
+
+  @Override
+  public Predicate&lt;ChangeData&gt; create(ChangeQueryBuilder builder, String value)
+      throws QueryParseException {
+    return new MyPredicate(value);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="search_operands">Search Operands</h3>
+<div class="paragraph">
+<p>Plugins can define new search operands to extend change searching.
+Plugin methods implementing search operands (returning a
+<code>Predicate&lt;ChangeData&gt;</code>), must be defined on a class implementing
+one of the <code>ChangeQueryBuilder.ChangeOperandsFactory</code> interfaces
+(.e.g., ChangeQueryBuilder.ChangeHasOperandFactory).  The specific
+<code>ChangeOperandFactory</code> class must also be bound to the <code>DynamicSet</code> from
+a module&#8217;s <code>configure()</code> method in the plugin.</p>
+</div>
+<div class="paragraph">
+<p>The new operand, when used in a search would appear as:
+  operatorName:operandName_pluginName</p>
+</div>
+<div class="paragraph">
+<p>A sample <code>ChangeHasOperandFactory</code> class implementing, and registering, a
+new <code>has:sample_pluginName</code> operand is shown below:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>@Singleton
+public class SampleHasOperand implements ChangeHasOperandFactory {
+  public static class Module extends AbstractModule {
+    @Override
+    protected void configure() {
+      bind(ChangeHasOperandFactory.class)
+          .annotatedWith(Exports.named("sample")
+          .to(SampleHasOperand.class);
+    }
+  }</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>@Override
+public Predicate&lt;ChangeData&gt; create(ChangeQueryBuilder builder)
+    throws QueryParseException {
+  return new HasSamplePredicate();
+}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="simple-configuration">Simple Configuration in <code>gerrit.config</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In Gerrit, global configuration is stored in the <code>gerrit.config</code> file.
+If a plugin needs global configuration, this configuration should be
+stored in a <code>plugin</code> subsection in the <code>gerrit.config</code> file.</p>
+</div>
+<div class="paragraph">
+<p>This approach of storing the plugin configuration is only suitable for
+plugins that have a simple configuration that only consists of
+key-value pairs. With this approach it is not possible to have
+subsections in the plugin configuration. Plugins that require a complex
+configuration need to store their configuration in their
+<a href="#configuration">own configuration file</a> where they can make use of
+subsections. On the other hand storing the plugin configuration in a
+'plugin' subsection in the <code>gerrit.config</code> file has the advantage that
+administrators have all configuration parameters in one file, instead
+of having one configuration file per plugin.</p>
+</div>
+<div class="paragraph">
+<p>To avoid conflicts with other plugins, it is recommended that plugins
+only use the <code>plugin</code> subsection with their own name. For example the
+<code>helloworld</code> plugin should store its configuration in the
+<code>plugin.helloworld</code> subsection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[plugin "helloworld"]
+  language = Latin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Via the <code>com.google.gerrit.server.config.PluginConfigFactory</code> class a
+plugin can easily access its configuration and there is no need for a
+plugin to parse the <code>gerrit.config</code> file on its own:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+private com.google.gerrit.server.config.PluginConfigFactory cfg;
+
+[...]
+
+String language = cfg.getFromGerritConfig("helloworld")
+                     .getString("language", "English");</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="configuration">Configuration in own config file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins can store their configuration in an own configuration file.
+This makes sense if the plugin configuration is rather complex and
+requires the usage of subsections. Plugins that have a simple
+key-value pair configuration can store their configuration in a
+<a href="#simple-configuration"><code>plugin</code> subsection of the <code>gerrit.config</code>
+file</a>.</p>
+</div>
+<div class="paragraph">
+<p>The plugin configuration file must be named after the plugin and must
+be located in the <code>etc</code> folder of the review site. For example a
+configuration file for a <code>default-reviewer</code> plugin could look like
+this:</p>
+</div>
+<div class="listingblock">
+<div class="title">$site_path/etc/default-reviewer.config</div>
+<div class="content">
+<pre>[branch "refs/heads/master"]
+  reviewer = Project Owners
+  reviewer = john.doe@example.com
+[match "file:^.*\.txt"]
+  reviewer = My Info Developers</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Plugins that have sensitive configuration settings can store those settings in
+an own secure configuration file. The plugin&#8217;s secure configuration file must be
+named after the plugin and must be located in the <code>etc</code> folder of the review
+site. For example a secure configuration file for a <code>default-reviewer</code> plugin
+could look like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">$site_path/etc/default-reviewer.secure.config</div>
+<div class="content">
+<pre>[auth]
+  password = secret</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Via the <code>com.google.gerrit.server.config.PluginConfigFactory</code> class a
+plugin can easily access its configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+private com.google.gerrit.server.config.PluginConfigFactory cfg;
+
+[...]
+
+String[] reviewers = cfg.getGlobalPluginConfig("default-reviewer")
+                        .getStringList("branch", "refs/heads/master", "reviewer");
+String password = cfg.getGlobalPluginConfig("default-reviewer")
+                     .getString("auth", null, "password");</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="simple-project-specific-configuration">Simple Project Specific Configuration in <code>project.config</code></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In Gerrit, project specific configuration is stored in the project&#8217;s
+<code>project.config</code> file on the <code>refs/meta/config</code> branch.  If a plugin
+needs configuration on project level (e.g. to enable its functionality
+only for certain projects), this configuration should be stored in a
+<code>plugin</code> subsection in the project&#8217;s <code>project.config</code> file.</p>
+</div>
+<div class="paragraph">
+<p>This approach of storing the plugin configuration is only suitable for
+plugins that have a simple configuration that only consists of
+key-value pairs. With this approach it is not possible to have
+subsections in the plugin configuration. Plugins that require a complex
+configuration need to store their configuration in their
+<a href="#project-specific-configuration">own configuration file</a> where they
+can make use of subsections. On the other hand storing the plugin
+configuration in a 'plugin' subsection in the <code>project.config</code> file has
+the advantage that project owners have all configuration parameters in
+one file, instead of having one configuration file per plugin.</p>
+</div>
+<div class="paragraph">
+<p>To avoid conflicts with other plugins, it is recommended that plugins
+only use the <code>plugin</code> subsection with their own name. For example the
+<code>helloworld</code> plugin should store its configuration in the
+<code>plugin.helloworld</code> subsection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [plugin "helloworld"]
+    enabled = true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Via the <code>com.google.gerrit.server.config.PluginConfigFactory</code> class a
+plugin can easily access its project specific configuration and there
+is no need for a plugin to parse the <code>project.config</code> file on its own:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+private com.google.gerrit.server.config.PluginConfigFactory cfg;
+
+[...]
+
+boolean enabled = cfg.getFromProjectConfig(project, "helloworld")
+                     .getBoolean("enabled", false);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible to get missing configuration parameters inherited
+from the parent projects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+private com.google.gerrit.server.config.PluginConfigFactory cfg;
+
+[...]
+
+boolean enabled = cfg.getFromProjectConfigWithInheritance(project, "helloworld")
+                     .getBoolean("enabled", false);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Project owners can edit the project configuration by fetching the
+<code>refs/meta/config</code> branch, editing the <code>project.config</code> file and
+pushing the commit back.</p>
+</div>
+<div class="paragraph">
+<p>Plugin configuration values that are stored in the <code>project.config</code>
+file can be exposed in the ProjectInfoScreen to allow project owners
+to see and edit them from the UI.</p>
+</div>
+<div class="paragraph">
+<p>For this an instance of <code>ProjectConfigEntry</code> needs to be bound for each
+parameter. The export name must be a valid Git variable name. The
+variable name is case-insensitive, allows only alphanumeric characters
+and '-', and must start with an alphabetic character.</p>
+</div>
+<div class="paragraph">
+<p>The example below shows how the parameters <code>plugin.helloworld.enabled</code>
+and <code>plugin.helloworld.language</code> are bound to be editable from the
+Web UI. For the parameter <code>plugin.helloworld.enabled</code> "Enable Greeting"
+is provided as display name and the default value is set to <code>true</code>.
+For the parameter <code>plugin.helloworld.language</code> "Preferred Language"
+is provided as display name and "en" is set as default value.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">class Module extends AbstractModule {
+  @Override
+  protected void configure() {
+    bind(ProjectConfigEntry.class)
+        .annotatedWith(Exports.named("enabled"))
+        .toInstance(new ProjectConfigEntry("Enable Greeting", true));
+    bind(ProjectConfigEntry.class)
+        .annotatedWith(Exports.named("language"))
+        .toInstance(new ProjectConfigEntry("Preferred Language", "en"));
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By overwriting the <code>onUpdate</code> method of <code>ProjectConfigEntry</code> plugins
+can be notified when this configuration parameter is updated on a
+project.</p>
+</div>
+<div class="sect2">
+<h3 id="configuring-groups">Referencing groups in <code>project.config</code></h3>
+<div class="paragraph">
+<p>Plugins can refer to groups so that when they are renamed, the project
+config will also be updated in this section. The proper format to use is
+the string representation of a GroupReference, as shown below.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Group[group_name / group_uuid]</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project-specific-configuration">Project Specific Configuration in own config file</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins can store their project specific configuration in an own
+configuration file in the projects <code>refs/meta/config</code> branch.
+This makes sense if the plugins project specific configuration is
+rather complex and requires the usage of subsections. Plugins that
+have a simple key-value pair configuration can store their project
+specific configuration in a <a href="#simple-project-specific-configuration">
+<code>plugin</code> subsection of the <code>project.config</code> file</a>.</p>
+</div>
+<div class="paragraph">
+<p>The plugin configuration file in the <code>refs/meta/config</code> branch must be
+named after the plugin. For example a configuration file for a
+<code>default-reviewer</code> plugin could look like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">default-reviewer.config</div>
+<div class="content">
+<pre>[branch "refs/heads/master"]
+  reviewer = Project Owners
+  reviewer = john.doe@example.com
+[match "file:^.*\.txt"]
+  reviewer = My Info Developers</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Via the <code>com.google.gerrit.server.config.PluginConfigFactory</code> class a
+plugin can easily access its project specific configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+private com.google.gerrit.server.config.PluginConfigFactory cfg;
+
+[...]
+
+String[] reviewers = cfg.getProjectPluginConfig(project, "default-reviewer")
+                        .getStringList("branch", "refs/heads/master", "reviewer");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible to get missing configuration parameters inherited
+from the parent projects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+private com.google.gerrit.server.config.PluginConfigFactory cfg;
+
+[...]
+
+String[] reviewers = cfg.getProjectPluginConfigWithInheritance(project, "default-reviewer")
+                        .getStringList("branch", "refs/heads/master", "reviewer");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Project owners can edit the project configuration by fetching the
+<code>refs/meta/config</code> branch, editing the <code>&lt;plugin-name&gt;.config</code> file and
+pushing the commit back.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_react_on_changes_in_project_configuration">React on changes in project configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If a plugin wants to react on changes in the project configuration, it
+can implement a <code>GitReferenceUpdatedListener</code> and filter on events for
+the <code>refs/meta/config</code> branch:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyListener implements GitReferenceUpdatedListener {
+
+  private final MetaDataUpdate.Server metaDataUpdateFactory;
+
+  @Inject
+  MyListener(MetaDataUpdate.Server metaDataUpdateFactory) {
+    this.metaDataUpdateFactory = metaDataUpdateFactory;
+  }
+
+  @Override
+  public void onGitReferenceUpdated(Event event) {
+    if (event.getRefName().equals(RefNames.REFS_CONFIG)) {
+      Project.NameKey p = new Project.NameKey(event.getProjectName());
+      try {
+        ProjectConfig oldCfg = parseConfig(p, event.getOldObjectId());
+        ProjectConfig newCfg = parseConfig(p, event.getNewObjectId());
+
+        if (oldCfg != null &amp;&amp; newCfg != null
+            &amp;&amp; !oldCfg.getProject().getSubmitType().equals(newCfg.getProject().getSubmitType())) {
+          // submit type has changed
+          ...
+        }
+      } catch (IOException | ConfigInvalidException e) {
+        ...
+      }
+    }
+  }
+
+  private ProjectConfig parseConfig(Project.NameKey p, String idStr)
+      throws IOException, ConfigInvalidException, RepositoryNotFoundException {
+    ObjectId id = ObjectId.fromString(idStr);
+    if (ObjectId.zeroId().equals(id)) {
+      return null;
+    }
+    return ProjectConfig.read(metaDataUpdateFactory.create(p), id);
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="capabilities">Plugin Owned Capabilities</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins may provide their own capabilities and restrict usage of SSH
+commands or <code>UiAction</code> to the users who are granted those capabilities.</p>
+</div>
+<div class="paragraph">
+<p>Plugins define the capabilities by overriding the <code>CapabilityDefinition</code>
+abstract class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class PrintHelloCapability extends CapabilityDefinition {
+  @Override
+  public String getDescription() {
+    return "Print Hello";
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If no Guice modules are declared in the manifest, capability may
+use auto-registration by providing an <code>@Export</code> annotation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Export("printHello")
+public class PrintHelloCapability extends CapabilityDefinition {
+  [...]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Otherwise the capability must be bound in a plugin module:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class HelloWorldModule extends AbstractModule {
+  @Override
+  protected void configure() {
+    bind(CapabilityDefinition.class)
+      .annotatedWith(Exports.named("printHello"))
+      .to(PrintHelloCapability.class);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With a plugin-owned capability defined in this way, it is possible to restrict
+usage of an SSH command or <code>UiAction</code> to members of the group that were granted
+this capability in the usual way, using the <code>RequiresCapability</code> annotation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@RequiresCapability("printHello")
+@CommandMetaData(name="print", description="Print greeting in different languages")
+public final class PrintHelloWorldCommand extends SshCommand {
+  [...]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or with <code>UiAction</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@RequiresCapability("printHello")
+public class SayHelloAction extends UiAction&lt;RevisionResource&gt;
+  implements RestModifyView&lt;RevisionResource, SayHelloAction.Input&gt; {
+  [...]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Capability scope was introduced to differentiate between plugin-owned
+capabilities and core capabilities. Per default the scope of the
+<code>@RequiresCapability</code> annotation is <code>CapabilityScope.CONTEXT</code>, that means:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>when <code>@RequiresCapability</code> is used within a plugin the scope of the
+capability is assumed to be that plugin.</p>
+</li>
+<li>
+<p>If <code>@RequiresCapability</code> is used within the core Gerrit Code Review server
+(and thus is outside of a plugin) the scope is the core server and will use
+the <code>GlobalCapability</code> known to Gerrit Code Review server.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If a plugin needs to use a core capability name (e.g. "administrateServer")
+this can be specified by setting <code>scope = CapabilityScope.CORE</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@RequiresCapability(value = "administrateServer", scope =
+    CapabilityScope.CORE)
+  [...]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ui_extension">UI Extension</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="panels">Panels</h3>
+<div class="paragraph">
+<p>GWT plugins can contribute panels to Gerrit screens.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit screens define extension points where plugins can add GWT
+panels with custom controls:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Change Screen:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.CHANGE_SCREEN_HEADER</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown in the header bar to the right of the change
+status.</p>
+</div>
+</li>
+<li>
+<p><code>GerritUiExtensionPoint.CHANGE_SCREEN_HEADER_RIGHT_OF_BUTTONS</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown in the header bar on the right side of the buttons.</p>
+</div>
+</li>
+<li>
+<p><code>GerritUiExtensionPoint.CHANGE_SCREEN_HEADER_RIGHT_OF_POP_DOWNS</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown in the header bar on the right side of the pop down
+buttons.</p>
+</div>
+</li>
+<li>
+<p><code>GerritUiExtensionPoint.CHANGE_SCREEN_BELOW_COMMIT_INFO_BLOCK</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown below the commit info block.</p>
+</div>
+</li>
+<li>
+<p><code>GerritUiExtensionPoint.CHANGE_SCREEN_BELOW_CHANGE_INFO_BLOCK</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown below the change info block.</p>
+</div>
+</li>
+<li>
+<p><code>GerritUiExtensionPoint.CHANGE_SCREEN_BELOW_RELATED_INFO_BLOCK</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown below the related info block.</p>
+</div>
+</li>
+<li>
+<p><code>GerritUiExtensionPoint.CHANGE_SCREEN_HISTORY_RIGHT_OF_BUTTONS</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown in the history bar on the right side of the buttons.</p>
+</div>
+</li>
+<li>
+<p>The following parameters are provided:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.Key.CHANGE_INFO</code>:</p>
+<div class="paragraph">
+<p>The <a href="rest-api-changes.html#change-info">ChangeInfo</a> entity for the
+current change.</p>
+</div>
+<div class="paragraph">
+<p>The <a href="rest-api-changes.html#revision-info">RevisionInfo</a> entity for
+the current patch set.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Project Info Screen:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.PROJECT_INFO_SCREEN_TOP</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown at the top of the screen.</p>
+</div>
+</li>
+<li>
+<p><code>GerritUiExtensionPoint.PROJECT_INFO_SCREEN_BOTTOM</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown at the bottom of the screen.</p>
+</div>
+</li>
+<li>
+<p>The following parameters are provided:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.Key.PROJECT_NAME</code>:</p>
+<div class="paragraph">
+<p>The name of the project.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>User Password Screen:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.PASSWORD_SCREEN_BOTTOM</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown at the bottom of the screen.</p>
+</div>
+</li>
+<li>
+<p>The following parameters are provided:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.Key.ACCOUNT_INFO</code>:</p>
+<div class="paragraph">
+<p>The <a href="rest-api-accounts.html#account-info">AccountInfo</a> entity for
+the current user.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>User Preferences Screen:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.PREFERENCES_SCREEN_BOTTOM</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown at the bottom of the screen.</p>
+</div>
+</li>
+<li>
+<p>The following parameters are provided:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.Key.ACCOUNT_INFO</code>:</p>
+<div class="paragraph">
+<p>The <a href="rest-api-accounts.html#account-info">AccountInfo</a> entity for
+the current user.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>User Profile Screen:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.PROFILE_SCREEN_BOTTOM</code>:</p>
+<div class="paragraph">
+<p>Panel will be shown at the bottom of the screen below the grid with the
+profile data.</p>
+</div>
+</li>
+<li>
+<p>The following parameters are provided:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>GerritUiExtensionPoint.Key.ACCOUNT_INFO</code>:</p>
+<div class="paragraph">
+<p>The <a href="rest-api-accounts.html#account-info">AccountInfo</a> entity for
+the current user.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Example panel:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyPlugin extends PluginEntryPoint {
+  @Override
+  public void onPluginLoad() {
+    Plugin.get().panel(GerritUiExtensionPoint.CHANGE_SCREEN_BELOW_CHANGE_INFO_BLOCK,
+        new Panel.EntryPoint() {
+          @Override
+          public void onLoad(Panel panel) {
+            panel.setWidget(new InlineLabel("My Panel for change "
+                + panel.getInt(GerritUiExtensionPoint.Key.CHANGE_ID, -1));
+          }
+        });
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="actions">Actions</h3>
+<div class="paragraph">
+<p>Plugins can contribute UI actions on core Gerrit pages. This is useful
+for workflow customization or exposing plugin functionality through the
+UI in addition to SSH commands and the REST API.</p>
+</div>
+<div class="paragraph">
+<p>For instance a plugin to integrate Jira with Gerrit changes may
+contribute a "File bug" button to allow filing a bug from the change
+page or plugins to integrate continuous integration systems may
+contribute a "Schedule" button to allow a CI build to be scheduled
+manually from the patch set panel.</p>
+</div>
+<div class="paragraph">
+<p>Two different places on core Gerrit pages are supported:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Change screen</p>
+</li>
+<li>
+<p>Project info screen</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Plugins contribute UI actions by implementing the <code>UiAction</code> interface:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@RequiresCapability("printHello")
+class HelloWorldAction implements UiAction&lt;RevisionResource&gt;,
+    RestModifyView&lt;RevisionResource, HelloWorldAction.Input&gt; {
+  static class Input {
+    boolean french;
+    String message;
+  }
+
+  private Provider&lt;CurrentUser&gt; user;
+
+  @Inject
+  HelloWorldAction(Provider&lt;CurrentUser&gt; user) {
+    this.user = user;
+  }
+
+  @Override
+  public String apply(RevisionResource rev, Input input) {
+    final String greeting = input.french
+        ? "Bonjour"
+        : "Hello";
+    return String.format("%s %s from change %s, patch set %d!",
+        greeting,
+        Strings.isNullOrEmpty(input.message)
+            ? Objects.firstNonNull(user.get().getUserName(), "world")
+            : input.message,
+        rev.getChange().getId().toString(),
+        rev.getPatchSet().getPatchSetId());
+  }
+
+  @Override
+  public Description getDescription(
+      RevisionResource resource) {
+    return new Description()
+        .setLabel("Say hello")
+        .setTitle("Say hello in different languages");
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sometimes plugins may want to be able to change the state of a patch set or
+change in the <code>UiAction.apply()</code> method and reflect these changes on the core
+UI. For example a buildbot plugin which exposes a 'Schedule' button on the
+patch set panel may want to disable that button after the build was scheduled
+and update the tooltip of that button. But because of Gerrit&#8217;s caching
+strategy the following must be taken into consideration.</p>
+</div>
+<div class="paragraph">
+<p>The browser is allowed to cache the <code>UiAction</code> information until something on
+the change is modified. More accurately the change row needs to be modified in
+the database to have a more recent <code>lastUpdatedOn</code> or a new <code>rowVersion</code>, or
+the refs/meta/config of the project or any parents needs to change to a new
+SHA-1. The ETag SHA-1 computation code can be found in the
+<code>ChangeResource.getETag()</code> method.</p>
+</div>
+<div class="paragraph">
+<p>The easiest way to accomplish this is to update <code>lastUpdatedOn</code> of the change:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Override
+public Object apply(RevisionResource rcrs, Input in) {
+  // schedule a build
+  [...]
+  // update change
+  ReviewDb db = dbProvider.get();
+  try (BatchUpdate bu = batchUpdateFactory.create(
+      db, project.getNameKey(), user, TimeUtil.nowTs())) {
+    bu.addOp(change.getId(), new BatchUpdate.Op() {
+      @Override
+      public boolean updateChange(BatchUpdate.ChangeContext ctx) {
+        return true;
+      }
+    });
+    bu.execute();
+  }
+  [...]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>UiAction</code> must be bound in a plugin module:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class Module extends AbstractModule {
+  @Override
+  protected void configure() {
+    install(new RestApiModule() {
+      @Override
+      protected void configure() {
+        post(REVISION_KIND, "say-hello")
+            .to(HelloWorldAction.class);
+      }
+    });
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The module above must be declared in the <code>pom.xml</code> for Maven driven
+plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;manifestEntries&gt;
+  &lt;Gerrit-Module&gt;com.googlesource.gerrit.plugins.cookbook.Module&lt;/Gerrit-Module&gt;
+&lt;/manifestEntries&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or in the <code>BUILD</code> configuration file for Bazel driven plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-python" data-lang="python">manifest_entries = [
+  'Gerrit-Module: com.googlesource.gerrit.plugins.cookbook.Module',
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In some use cases more user input must be gathered, for that <code>UiAction</code> can be
+combined with the JavaScript API. This would display a small popup near the
+activation button to gather additional input from the user. The JS file is
+typically put in the <code>static</code> folder within the plugin&#8217;s directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.install(function(self) {
+  function onSayHello(c) {
+    var f = c.textfield();
+    var t = c.checkbox();
+    var b = c.button('Say hello', {onclick: function(){
+      c.call(
+        {message: f.value, french: t.checked},
+        function(r) {
+          c.hide();
+          window.alert(r);
+          c.refresh();
+        });
+    }});
+    c.popup(c.div(
+      c.prependLabel('Greeting message', f),
+      c.br(),
+      c.label(t, 'french'),
+      c.br(),
+      b));
+    f.focus();
+  }
+  self.onAction('revision', 'say-hello', onSayHello);
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The JS module must be exposed as a <code>WebUiPlugin</code> and bound as
+an HTTP Module:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class HttpModule extends HttpPluginModule {
+  @Override
+  protected void configureServlets() {
+    DynamicSet.bind(binder(), WebUiPlugin.class)
+        .toInstance(new JavaScriptPlugin("hello.js"));
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The HTTP module above must be declared in the <code>pom.xml</code> for Maven
+driven plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;manifestEntries&gt;
+  &lt;Gerrit-HttpModule&gt;com.googlesource.gerrit.plugins.cookbook.HttpModule&lt;/Gerrit-HttpModule&gt;
+&lt;/manifestEntries&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or in the <code>BUILD</code> configuration file for Bazel driven plugins</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-python" data-lang="python">manifest_entries = [
+  'Gerrit-HttpModule: com.googlesource.gerrit.plugins.cookbook.HttpModule',
+]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If <code>UiAction</code> is annotated with the <code>@RequiresCapability</code> annotation, then the
+capability check is done during the <code>UiAction</code> gathering, so the plugin author
+doesn&#8217;t have to set <code>UiAction.Description.setVisible()</code> explicitly in this
+case.</p>
+</div>
+<div class="paragraph">
+<p>The following prerequisites must be met, to satisfy the capability check:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>user is authenticated</p>
+</li>
+<li>
+<p>user is a member of a group which has the <code>Administrate Server</code> capability, or</p>
+</li>
+<li>
+<p>user is a member of a group which has the required capability</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>apply</code> method is called when the button is clicked. If <code>UiAction</code> is
+combined with JavaScript API (its own JavaScript function is provided),
+then a popup dialog is normally opened to gather additional user input.
+A new button is placed on the popup dialog to actually send the request.</p>
+</div>
+<div class="paragraph">
+<p>Every <code>UiAction</code> exposes a REST API endpoint. The endpoint from the example above
+can be accessed from any REST client, i. e.:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  curl -X POST -H "Content-Type: application/json" \
+    -d '{message: "François", french: true}' \
+    --digest --user joe:secret \
+    http://host:port/a/changes/1/revisions/1/cookbook~say-hello
+  "Bonjour François from change 1, patch set 1!"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A special case is to bind an endpoint without a view name.  This is
+particularly useful for <code>DELETE</code> requests:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class Module extends AbstractModule {
+  @Override
+  protected void configure() {
+    install(new RestApiModule() {
+      @Override
+      protected void configure() {
+        delete(PROJECT_KIND)
+            .to(DeleteProject.class);
+      }
+    });
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a <code>UiAction</code> bound this way, a JS API function can be provided.</p>
+</div>
+<div class="paragraph">
+<p>Currently only one restriction exists: per plugin only one <code>UiAction</code>
+can be bound per resource without view name. To define a JS function
+for the <code>UiAction</code>, "/" must be used as the name:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-javascript" data-lang="javascript">Gerrit.install(function(self) {
+  function onDeleteProject(c) {
+    [...]
+  }
+  self.onAction('project', '/', onDeleteProject);
+});</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="action-visitor">Action Visitors</h3>
+<div class="paragraph">
+<p>In addition to providing new actions, plugins can have fine-grained control
+over the <a href="rest-api-changes.html#action-info">ActionInfo</a> map, modifying or
+removing existing actions, including those contributed by core.</p>
+</div>
+<div class="paragraph">
+<p>Visitors are provided the <a href="rest-api-changes.html#action-info">ActionInfo</a>,
+which is mutable, along with copies of the
+<a href="rest-api-changes.html#change-info">ChangeInfo</a> and
+<a href="rest-api-changes.html#revision-info">RevisionInfo</a>. They can modify the
+action, or return <code>false</code> to exclude it from the resulting map.</p>
+</div>
+<div class="paragraph">
+<p>These operations only affect the action buttons that are displayed in the UI;
+the underlying REST API endpoints are not affected. Multiple plugins may
+implement the visitor interface, but the order in which they are run is
+undefined.</p>
+</div>
+<div class="paragraph">
+<p>For example, to exclude "Cherry-Pick" only from certain projects, and rename
+"Abandon":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyActionVisitor implements ActionVisitor {
+  @Override
+  public boolean visit(String name, ActionInfo actionInfo,
+      ChangeInfo changeInfo) {
+    if (name.equals("abandon")) {
+      actionInfo.label = "Drop";
+    }
+    return true;
+  }
+
+  @Override
+  public boolean visit(String name, ActionInfo actionInfo,
+      ChangeInfo changeInfo, RevisionInfo revisionInfo) {
+    if (project.startsWith("some-team/") &amp;&amp; name.equals("cherrypick")) {
+      return false;
+    }
+    return true;
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="top-menu-extensions">Top Menu Extensions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins can contribute items to Gerrit&#8217;s top menu.</p>
+</div>
+<div class="paragraph">
+<p>A single top menu extension can have multiple elements and will be put as
+the last element in Gerrit&#8217;s top menu.</p>
+</div>
+<div class="paragraph">
+<p>Plugins define the top menu entries by implementing <code>TopMenu</code> interface:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyTopMenuExtension implements TopMenu {
+
+  @Override
+  public List&lt;MenuEntry&gt; getEntries() {
+    return Lists.newArrayList(
+               new MenuEntry("Top Menu Entry", Lists.newArrayList(
+                      new MenuItem("Gerrit", "http://gerrit.googlecode.com/"))));
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Plugins can also add additional menu items to Gerrit&#8217;s top menu entries
+by defining a <code>MenuEntry</code> that has the same name as a Gerrit top menu
+entry:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyTopMenuExtension implements TopMenu {
+
+  @Override
+  public List&lt;MenuEntry&gt; getEntries() {
+    return Lists.newArrayList(
+               new MenuEntry(GerritTopMenu.PROJECTS, Lists.newArrayList(
+                      new MenuItem("Browse Repositories", "https://gerrit.googlesource.com/"))));
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>MenuItems</code> that are bound for the <code>MenuEntry</code> with the name
+<code>GerritTopMenu.PROJECTS</code> can contain a <code>${projectName}</code> placeholder
+which is automatically replaced by the actual project name.</p>
+</div>
+<div class="paragraph">
+<p>E.g. plugins may register an <a href="#http">HTTP Servlet</a> to handle project
+specific requests and add an menu item for this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">---
+  new MenuItem("My Screen", "/plugins/myplugin/project/${projectName}");
+---</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This also enables plugins to provide menu items for project aware
+screens:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">---
+  new MenuItem("My Screen", "/x/my-screen/for/${projectName}");
+---</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If no Guice modules are declared in the manifest, the top menu extension may use
+auto-registration by providing an <code>@Listen</code> annotation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Listen
+public class MyTopMenuExtension implements TopMenu {
+  [...]
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Otherwise the top menu extension must be bound in the plugin module used
+for the Gerrit system injector (Gerrit-Module entry in MANIFEST.MF):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">package com.googlesource.gerrit.plugins.helloworld;
+
+public class HelloWorldModule extends AbstractModule {
+  @Override
+  protected void configure() {
+    DynamicSet.bind(binder(), TopMenu.class).to(MyTopMenuExtension.class);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-manifest" data-lang="manifest">Gerrit-ApiType: plugin
+Gerrit-Module: com.googlesource.gerrit.plugins.helloworld.HelloWorldModule</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible to show some menu entries only if the user has a
+certain capability:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyTopMenuExtension implements TopMenu {
+  private final String pluginName;
+  private final Provider&lt;CurrentUser&gt; userProvider;
+  private final List&lt;MenuEntry&gt; menuEntries;
+
+  @Inject
+  public MyTopMenuExtension(@PluginName String pluginName,
+      Provider&lt;CurrentUser&gt; userProvider) {
+    this.pluginName = pluginName;
+    this.userProvider = userProvider;
+    menuEntries = new ArrayList&lt;TopMenu.MenuEntry&gt;();
+
+    // add menu entry that is only visible to users with a certain capability
+    if (canSeeMenuEntry()) {
+      menuEntries.add(new MenuEntry("Top Menu Entry", Collections
+          .singletonList(new MenuItem("Gerrit", "http://gerrit.googlecode.com/"))));
+    }
+
+    // add menu entry that is visible to all users (even anonymous users)
+    menuEntries.add(new MenuEntry("Top Menu Entry", Collections
+          .singletonList(new MenuItem("Documentation", "/plugins/myplugin/"))));
+  }
+
+  private boolean canSeeMenuEntry() {
+    if (userProvider.get().isIdentifiedUser()) {
+      CapabilityControl ctl = userProvider.get().getCapabilities();
+      return ctl.canPerform(pluginName + "-" + MyCapability.ID)
+          || ctl.canAdministrateServer();
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public List&lt;MenuEntry&gt; getEntries() {
+    return menuEntries;
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="gwt_ui_extension">GWT UI Extension</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins can extend the Gerrit UI with own GWT code.</p>
+</div>
+<div class="paragraph">
+<p>A GWT plugin must contain a GWT module file, e.g. <code>HelloPlugin.gwt.xml</code>,
+that bundles together all the configuration settings of the GWT plugin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;module rename-to="hello_gwt_plugin"&gt;
+  &lt;!-- Inherit the core Web Toolkit stuff. --&gt;
+  &lt;inherits name="com.google.gwt.user.User"/&gt;
+  &lt;!-- Other module inherits --&gt;
+  &lt;inherits name="com.google.gerrit.Plugin"/&gt;
+  &lt;inherits name="com.google.gwt.http.HTTP"/&gt;
+  &lt;!-- Using GWT built-in themes adds a number of static --&gt;
+  &lt;!-- resources to the plugin. No theme inherits lines were --&gt;
+  &lt;!-- added in order to make this plugin as simple as possible --&gt;
+  &lt;!-- Specify the app entry point class. --&gt;
+  &lt;entry-point class="${package}.client.HelloPlugin"/&gt;
+  &lt;stylesheet src="hello.css"/&gt;
+&lt;/module&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The GWT module must inherit <code>com.google.gerrit.Plugin</code> and
+<code>com.google.gwt.http.HTTP</code>.</p>
+</div>
+<div class="paragraph">
+<p>To register the GWT module a <code>GwtPlugin</code> needs to be bound.</p>
+</div>
+<div class="paragraph">
+<p>If no Guice modules are declared in the manifest, the GWT plugin may
+use auto-registration by using the <code>@Listen</code> annotation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Listen
+public class MyExtension extends GwtPlugin {
+  public MyExtension() {
+    super("hello_gwt_plugin");
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Otherwise the binding must be done in an <code>HttpModule</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class HttpModule extends HttpPluginModule {
+
+  @Override
+  protected void configureServlets() {
+    DynamicSet.bind(binder(), WebUiPlugin.class)
+        .toInstance(new GwtPlugin("hello_gwt_plugin"));
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The HTTP module above must be declared in the <code>pom.xml</code> for Maven
+driven plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;manifestEntries&gt;
+  &lt;Gerrit-HttpModule&gt;com.googlesource.gerrit.plugins.myplugin.HttpModule&lt;/Gerrit-HttpModule&gt;
+&lt;/manifestEntries&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The name that is provided to the <code>GwtPlugin</code> must match the GWT
+module name compiled into the plugin. The name of the GWT module
+can be explicitly set in the GWT module XML file by specifying
+the <code>rename-to</code> attribute on the module. It is important that the
+module name be unique across all plugins installed on the server,
+as the module name determines the JavaScript namespace used by the
+compiled plugin code.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;module rename-to="hello_gwt_plugin"&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The actual GWT code must be implemented in a class that extends
+<code>com.google.gerrit.plugin.client.PluginEntryPoint</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class HelloPlugin extends PluginEntryPoint {
+
+  @Override
+  public void onPluginLoad() {
+    // Create the dialog box
+    final DialogBox dialogBox = new DialogBox();
+
+    // The content of the dialog comes from a User specified Preference
+    dialogBox.setText("Hello from GWT Gerrit UI plugin");
+    dialogBox.setAnimationEnabled(true);
+    Button closeButton = new Button("Close");
+    VerticalPanel dialogVPanel = new VerticalPanel();
+    dialogVPanel.setWidth("100%");
+    dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+    dialogVPanel.add(closeButton);
+
+    closeButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+      }
+    });
+
+    // Set the contents of the Widget
+    dialogBox.setWidget(dialogVPanel);
+
+    RootPanel rootPanel = RootPanel.get(HelloMenu.MENU_ID);
+    rootPanel.getElement().removeAttribute("href");
+    rootPanel.addDomHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          dialogBox.center();
+          dialogBox.show();
+        }
+    }, ClickEvent.getType());
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This class must be set as entry point in the GWT module:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;entry-point class="${package}.client.HelloPlugin"/&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In addition this class must be defined as module in the <code>pom.xml</code> for the
+<code>gwt-maven-plugin</code> and the <code>webappDirectory</code> option of <code>gwt-maven-plugin</code>
+must be set to <code>${project.build.directory}/classes/static</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;plugin&gt;
+  &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
+  &lt;artifactId&gt;gwt-maven-plugin&lt;/artifactId&gt;
+  &lt;version&gt;2.7.0&lt;/version&gt;
+  &lt;configuration&gt;
+    &lt;module&gt;com.googlesource.gerrit.plugins.myplugin.HelloPlugin&lt;/module&gt;
+    &lt;disableClassMetadata&gt;true&lt;/disableClassMetadata&gt;
+    &lt;disableCastChecking&gt;true&lt;/disableCastChecking&gt;
+    &lt;webappDirectory&gt;${project.build.directory}/classes/static&lt;/webappDirectory&gt;
+  &lt;/configuration&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;goals&gt;
+        &lt;goal&gt;compile&lt;/goal&gt;
+      &lt;/goals&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To attach a GWT widget defined by the plugin to the Gerrit core UI
+<code>com.google.gwt.user.client.ui.RootPanel</code> can be used to manipulate the
+Gerrit core widgets:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">RootPanel rootPanel = RootPanel.get(HelloMenu.MENU_ID);
+rootPanel.getElement().removeAttribute("href");
+rootPanel.addDomHandler(new ClickHandler() {
+  @Override
+  public void onClick(ClickEvent event) {
+    dialogBox.center();
+    dialogBox.show();
+  }
+}, ClickEvent.getType());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>GWT plugins can come with their own css file. This css file must have a
+unique name and must be registered in the GWT module:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;stylesheet src="hello.css"/&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If a GWT plugin wants to invoke the Gerrit REST API it can use
+<code>com.google.gerrit.plugin.client.rpc.RestApi</code> to construct the URL
+path and to trigger the REST calls.</p>
+</div>
+<div class="paragraph">
+<p>Example for invoking a Gerrit core REST endpoint:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">new RestApi("projects").id(projectName).view("description")
+    .put("new description", new AsyncCallback&lt;JavaScriptObject&gt;() {
+
+  @Override
+  public void onSuccess(JavaScriptObject result) {
+    // TODO
+  }
+
+  @Override
+  public void onFailure(Throwable caught) {
+    // never invoked
+  }
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example for invoking a REST endpoint defined by a plugin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">new RestApi("projects").id(projectName).view("myplugin", "myview")
+    .get(new AsyncCallback&lt;JavaScriptObject&gt;() {
+
+  @Override
+  public void onSuccess(JavaScriptObject result) {
+    // TODO
+  }
+
+  @Override
+  public void onFailure(Throwable caught) {
+    // never invoked
+  }
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>onFailure(Throwable)</code> of the provided callback is never invoked.
+If an error occurs, it is shown in an error dialog.</p>
+</div>
+<div class="paragraph">
+<p>In order to be able to do REST calls the GWT module must inherit
+<code>com.google.gwt.json.JSON</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;inherits name="com.google.gwt.json.JSON"/&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="screen">Add Screen</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A <a href="#gwt_ui_extension">GWT plugin</a> can <a href="#top-menu-extensions">add
+a menu item</a> that opens a screen that is implemented by the plugin.
+This way plugin screens can be fully integrated into the Gerrit UI.</p>
+</div>
+<div class="paragraph">
+<p>Example menu item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyMenu implements TopMenu {
+  private final List&lt;MenuEntry&gt; menuEntries;
+
+  @Inject
+  public MyMenu(@PluginName String name) {
+    menuEntries = new ArrayList&lt;&gt;();
+    menuEntries.add(new MenuEntry("My Menu", Collections.singletonList(
+      new MenuItem("My Screen", "#/x/" + name + "/my-screen", ""))));
+  }
+
+  @Override
+  public List&lt;MenuEntry&gt; getEntries() {
+    return menuEntries;
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example screen:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyPlugin extends PluginEntryPoint {
+  @Override
+  public void onPluginLoad() {
+    Plugin.get().screen("my-screen", new Screen.EntryPoint() {
+      @Override
+      public void onLoad(Screen screen) {
+        screen.add(new InlineLabel("My Screen");
+        screen.show();
+      }
+    });
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="user-settings-screen">Add User Settings Screen</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A <a href="#gwt_ui_extension">GWT plugin</a> can implement a user settings
+screen that is integrated into the Gerrit user settings menu.</p>
+</div>
+<div class="paragraph">
+<p>Example settings screen:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class MyPlugin extends PluginEntryPoint {
+  @Override
+  public void onPluginLoad() {
+    Plugin.get().settingsScreen("my-preferences", "My Preferences",
+        new Screen.EntryPoint() {
+          @Override
+          public void onLoad(Screen screen) {
+            screen.setPageTitle("Settings");
+            screen.add(new InlineLabel("My Preferences"));
+            screen.show();
+          }
+    });
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By defining an <a href="config-gerrit.html#urlAlias">urlAlias</a> Gerrit
+administrators can map plugin screens into the Gerrit URL namespace or
+even replace Gerrit screens by plugin screens.</p>
+</div>
+<div class="paragraph">
+<p>Plugins may also programatically add URL aliases in the preferences of
+of a user. This way certain screens can be replaced for certain users.
+E.g. the plugin may offer a user preferences setting for choosing a
+screen that then sets/unsets a URL alias for the user.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="settings-screen">Plugin Settings Screen</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If a plugin implements a screen for administrating its settings that is
+available under "#/x/&lt;plugin-name&gt;/settings" it is automatically linked
+from the plugin list screen.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="http">HTTP Servlets</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins or extensions may register additional HTTP servlets, and
+wrap them with HTTP filters.</p>
+</div>
+<div class="paragraph">
+<p>Servlets may use auto-registration to declare the URL they handle:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.gerrit.extensions.annotations.Export;
+import com.google.inject.Singleton;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@Export("/print")
+@Singleton
+class HelloServlet extends HttpServlet {
+  protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    res.setContentType("text/plain");
+    res.setCharacterEncoding("UTF-8");
+    res.getWriter().write("Hello");
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The auto registration only works for standard servlet mappings like
+<code>/foo</code> or <code>/foo/*</code>. Regex style bindings must use a Guice ServletModule
+to register the HTTP servlets and declare it explicitly in the manifest
+with the <code>Gerrit-HttpModule</code> attribute:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.inject.servlet.ServletModule;
+
+class MyWebUrls extends ServletModule {
+  protected void configureServlets() {
+    serve("/print").with(HelloServlet.class);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a plugin installed as name <code>helloworld</code>, the servlet implemented
+by HelloServlet class will be available to users as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ curl http://review.example.com/plugins/helloworld/print</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="data-directory">Data Directory</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins can request a data directory with a <code>@PluginData</code> Path (or File,
+deprecated) dependency. A data directory will be created automatically
+by the server in <code>$site_path/data/$plugin_name</code> and passed to the
+plugin.</p>
+</div>
+<div class="paragraph">
+<p>Plugins can use this to store any data they want.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+MyType(@PluginData java.nio.file.Path myDir) {
+  this.in = Files.newInputStream(myDir.resolve("my.config"));
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="secure-store">SecureStore</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>SecureStore allows to change the way Gerrit stores sensitive data like
+passwords.</p>
+</div>
+<div class="paragraph">
+<p>In order to replace the default SecureStore (no-op) implementation,
+a class that extends <code>com.google.gerrit.server.securestore.SecureStore</code>
+needs to be provided (with dependencies) in a separate jar file. Then
+<a href="pgm-SwitchSecureStore.html">SwitchSecureStore</a> must be run to
+switch implementations.</p>
+</div>
+<div class="paragraph">
+<p>The SecureStore implementation is instantiated using a Guice injector
+which binds the <code>File</code> annotated with the <code>@SitePath</code> annotation.
+This means that a SecureStore implementation class can get access to
+the <code>site_path</code> like in the following example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@Inject
+MySecureStore(@SitePath java.io.File sitePath) {
+  // your code
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>No Guice bindings or modules are required. Gerrit will automatically
+discover and bind the implementation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="accountcreation">Account Creation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugins can hook into the
+<a href="rest-api-accounts.html#create-account">account creation</a> REST API and
+inject additional external identifiers for an account that represents a user
+in some external user store. For that, an implementation of the extension
+point <code>com.google.gerrit.server.api.accounts.AccountExternalIdCreator</code>
+must be registered.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">class MyExternalIdCreator implements AccountExternalIdCreator {
+  @Override
+  public List&lt;AccountExternalId&gt; create(Account.Id id, String username,
+      String email) {
+    // your code
+  }
+}
+
+bind(AccountExternalIdCreator.class)
+  .annotatedWith(UniqueAnnotations.create())
+  .to(MyExternalIdCreator.class);
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="download-commands">Download Commands</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit offers commands for downloading changes and cloning projects
+using different download schemes (e.g. for downloading via different
+network protocols). Plugins can contribute download schemes, download
+commands and clone commands by implementing
+<code>com.google.gerrit.extensions.config.DownloadScheme</code>,
+<code>com.google.gerrit.extensions.config.DownloadCommand</code> and
+<code>com.google.gerrit.extensions.config.CloneCommand</code>.</p>
+</div>
+<div class="paragraph">
+<p>The download schemes, download commands and clone commands which are
+used most often are provided by the Gerrit core plugin
+<code>download-commands</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="included-in">Included In</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>For merged changes the <a href="user-review-ui.html#included-in">Included In</a>
+drop-down panel shows the branches and tags in which the change is
+included.</p>
+</div>
+<div class="paragraph">
+<p>Plugins can add additional systems in which the change can be included
+by implementing <code>com.google.gerrit.extensions.config.ExternalIncludedIn</code>,
+e.g. a plugin can provide a list of servers on which the change was
+deployed.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="links-to-external-tools">Links To External Tools</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit has extension points that enables development of a
+light-weight plugin that links commits to external
+tools (GitBlit, CGit, company specific resources etc).</p>
+</div>
+<div class="paragraph">
+<p>PatchSetWebLinks will appear to the right of the commit-SHA1 in the UI.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.gerrit.extensions.annotations.Listen;
+import com.google.gerrit.extensions.webui.PatchSetWebLink;;
+import com.google.gerrit.extensions.webui.WebLinkTarget;
+
+@Listen
+public class MyWeblinkPlugin implements PatchSetWebLink {
+
+  private String name = "MyLink";
+  private String placeHolderUrlProjectCommit = "http://my.tool.com/project=%s/commit=%s";
+  private String imageUrl = "http://placehold.it/16x16.gif";
+
+  @Override
+  public WebLinkInfo getPatchSetWebLink(String projectName, String commit) {
+    return new WebLinkInfo(name,
+        imageUrl,
+        String.format(placeHolderUrlProjectCommit, project, commit),
+        WebLinkTarget.BLANK);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>ParentWebLinks will appear to the right of the SHA1 of the parent
+revisions in the UI. The implementation should in most use cases direct
+to the same external service as PatchSetWebLink; it is provided as a
+separate interface because not all users want to have links for the
+parent revisions.</p>
+</div>
+<div class="paragraph">
+<p>FileWebLinks will appear in the side-by-side diff screen on the right
+side of the patch selection on each side.</p>
+</div>
+<div class="paragraph">
+<p>DiffWebLinks will appear in the side-by-side and unified diff screen in
+the header next to the navigation icons.</p>
+</div>
+<div class="paragraph">
+<p>ProjectWebLinks will appear in the project list in the
+<code>Repository Browser</code> column.</p>
+</div>
+<div class="paragraph">
+<p>BranchWebLinks will appear in the branch list in the last column.</p>
+</div>
+<div class="paragraph">
+<p>FileHistoryWebLinks will appear on the access rights screen.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="lfs-extension">LFS Storage Plugins</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit provides an extension point that enables development of
+<a href="https://github.com/github/git-lfs/blob/master/docs/api/v1/http-v1-batch.md">
+LFS (Large File Storage)</a> storage plugins. Gerrit core exposes the default LFS
+protocol endpoint <code>&lt;project-name&gt;/info/lfs/objects/batch</code> and forwards the requests
+to the configured <a href="config-gerrit.html#lfs">lfs.plugin</a> plugin which implements
+the LFS protocol. By exposing the default LFS endpoint, the git-lfs client can be
+used without any configuration.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">/** Provide an LFS protocol implementation */
+import org.eclipse.jgit.lfs.server.LargeFileRepository;
+import org.eclipse.jgit.lfs.server.LfsProtocolServlet;
+
+@Singleton
+public class LfsApiServlet extends LfsProtocolServlet {
+  private static final long serialVersionUID = 1L;
+
+  private final S3LargeFileRepository repository;
+
+  @Inject
+  LfsApiServlet(S3LargeFileRepository repository) {
+    this.repository = repository;
+  }
+
+  @Override
+  protected LargeFileRepository getLargeFileRepository() {
+    return repository;
+  }
+}
+
+/** Register the LfsApiServlet to listen on the default LFS protocol endpoint */
+import static com.google.gerrit.httpd.plugins.LfsPluginServlet.URL_REGEX;
+
+import com.google.gerrit.httpd.plugins.HttpPluginModule;
+
+public class HttpModule extends HttpPluginModule {
+
+  @Override
+  protected void configureServlets() {
+    serveRegex(URL_REGEX).with(LfsApiServlet.class);
+  }
+}
+
+/** Provide an implementation of the LargeFileRepository */
+import org.eclipse.jgit.lfs.server.s3.S3Repository;
+
+public class S3LargeFileRepository extends S3Repository {
+...
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="metrics">Metrics</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_metrics_reporting">Metrics Reporting</h3>
+<div class="paragraph">
+<p>To send Gerrit&#8217;s metrics data to an external reporting backend, a plugin can
+get a <code>MetricRegistry</code> injected and register an instance of a class that
+implements the <code>Reporter</code> interface from <a href="http://metrics.dropwizard.io/">
+DropWizard Metrics</a>.</p>
+</div>
+<div class="paragraph">
+<p>Metric reporting plugin implementations are provided for
+<a href="https://gerrit.googlesource.com/plugins/metrics-reporter-jmx/">JMX</a>,
+<a href="https://gerrit.googlesource.com/plugins/metrics-reporter-elasticsearch/">Elastic Search</a>,
+and <a href="https://gerrit.googlesource.com/plugins/metrics-reporter-graphite/">Graphite</a>.</p>
+</div>
+<div class="paragraph">
+<p>There is also a working example of reporting metrics to the console in the
+<a href="https://gerrit.googlesource.com/plugins/cookbook-plugin/+/master/src/main/java/com/googlesource/gerrit/plugins/cookbook/ConsoleMetricReporter.jave">
+cookbook plugin</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_providing_own_metrics">Providing own metrics</h3>
+<div class="paragraph">
+<p>Plugins may provide metrics to be dispatched to external reporting services by
+getting a <code>MetricMaker</code> injected and creating instances of specific types of
+metric:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Counter</p>
+<div class="paragraph">
+<p>Metric whose value increments during the life of the process.</p>
+</div>
+</li>
+<li>
+<p>Timer</p>
+<div class="paragraph">
+<p>Metric recording time spent on an operation.</p>
+</div>
+</li>
+<li>
+<p>Histogram</p>
+<div class="paragraph">
+<p>Metric recording statistical distribution (rate) of values.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Plugin metrics are recorded under <code>plugins/${plugin-name}/${metric-name}</code>.</p>
+</div>
+<div class="paragraph">
+<p>See the replication metrics in the
+<a href="https://gerrit.googlesource.com/plugins/replication/+/master/src/main/java/com/googlesource/gerrit/plugins/replication/ReplicationMetrics.java">
+replication plugin</a> for an example of usage.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="account-patch-review-store">AccountPatchReviewStore</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The AccountPatchReviewStore is used to store reviewed flags on changes.
+A reviewed flag is a tuple of (patch set ID, file, account ID) and
+records whether the user has reviewed a file in a patch set. Each user
+can easily have thousands of reviewed flags and the number of reviewed
+flags is growing without bound. The store must be able handle this data
+volume efficiently.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit implements this extension point, but plugins may bind another
+implementation, e.g. one that supports multi-master.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>DynamicItem.bind(binder(), AccountPatchReviewStore.class)
+    .to(MultiMasterAccountPatchReviewStore.class);
+
+...
+
+public class MultiMasterAccountPatchReviewStore
+    implements AccountPatchReviewStore {
+  ...
+}</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="documentation">Documentation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If a plugin does not register a filter or servlet to handle URLs
+<code>/Documentation/*</code> or <code>/static/*</code>, the core Gerrit server will
+automatically export these resources over HTTP from the plugin JAR.</p>
+</div>
+<div class="paragraph">
+<p>Static resources under the <code>static/</code> directory in the JAR will be
+available as <code>/plugins/helloworld/static/resource</code>. This prefix is
+configurable by setting the <code>Gerrit-HttpStaticPrefix</code> attribute.</p>
+</div>
+<div class="paragraph">
+<p>Documentation files under the <code>Documentation/</code> directory in the JAR
+will be available as <code>/plugins/helloworld/Documentation/resource</code>. This
+prefix is configurable by setting the <code>Gerrit-HttpDocumentationPrefix</code>
+attribute.</p>
+</div>
+<div class="paragraph">
+<p>Documentation may be written in the Markdown flavor
+<a href="https://github.com/sirthias/pegdown">pegdown</a>
+if the file name ends with <code>.md</code>. Gerrit will automatically convert
+Markdown to HTML if accessed with extension <code>.html</code>.</p>
+</div>
+<div id="macros" class="paragraph">
+<p>Within the Markdown documentation files macros can be used that allow
+to write documentation with reasonably accurate examples that adjust
+automatically based on the installation.</p>
+</div>
+<div class="paragraph">
+<p>The following macros are supported:</p>
+</div>
+<table class="tableblock frame-all grid-all" style="width: 40%;">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Macro</th>
+<th class="tableblock halign-left valign-top">Replacement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">@PLUGIN@</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name of the plugin</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">@URL@</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gerrit Web URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">@SSH_HOST@</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SSH Host</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">@SSH_PORT@</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SSH Port</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The macros will be replaced when the documentation files are rendered
+from Markdown to HTML.</p>
+</div>
+<div class="paragraph">
+<p>Macros that start with <code>\</code> such as <code>\@KEEP@</code> will render as <code>@KEEP@</code>
+even if there is an expansion for <code>KEEP</code> in the future.</p>
+</div>
+<div class="sect2">
+<h3 id="auto-index">Automatic Index</h3>
+<div class="paragraph">
+<p>If a plugin does not handle its <code>/</code> URL itself, Gerrit will
+redirect clients to the plugin&#8217;s <code>/Documentation/index.html</code>.
+Requests for <code>/Documentation/</code> (bare directory) will also redirect
+to <code>/Documentation/index.html</code>.</p>
+</div>
+<div class="paragraph">
+<p>If neither resource <code>Documentation/index.html</code> or
+<code>Documentation/index.md</code> exists in the plugin JAR, Gerrit will
+automatically generate an index page for the plugin&#8217;s documentation
+tree by scanning every <code><strong>.md</code> and <code></strong>.html</code> file in the Documentation/
+directory.</p>
+</div>
+<div class="paragraph">
+<p>For any discovered Markdown (<code>*.md</code>) file, Gerrit will parse the
+header of the file and extract the first level one title. This
+title text will be used as display text for a link to the HTML
+version of the page.</p>
+</div>
+<div class="paragraph">
+<p>For any discovered HTML (<code><strong>.html</code>) file, Gerrit will use the name
+of the file, minus the <code></strong>.html</code> extension, as the link text. Any
+hyphens in the file name will be replaced with spaces.</p>
+</div>
+<div class="paragraph">
+<p>If a discovered file is named <code>about.md</code> or <code>about.html</code>, its
+content will be inserted in an 'About' section at the top of the
+auto-generated index page.  If both <code>about.md</code> and <code>about.html</code>
+exist, only the first discovered file will be used.</p>
+</div>
+<div class="paragraph">
+<p>If a discovered file name beings with <code>cmd-</code> it will be clustered
+into a 'Commands' section of the generated index page.</p>
+</div>
+<div class="paragraph">
+<p>If a discovered file name beings with <code>servlet-</code> it will be clustered
+into a 'Servlets' section of the generated index page.</p>
+</div>
+<div class="paragraph">
+<p>If a discovered file name beings with <code>rest-api-</code> it will be clustered
+into a 'REST APIs' section of the generated index page.</p>
+</div>
+<div class="paragraph">
+<p>All other files are clustered under a 'Documentation' section.</p>
+</div>
+<div class="paragraph">
+<p>Some optional information from the manifest is extracted and
+displayed as part of the index page, if present in the manifest:</p>
+</div>
+<table class="tableblock frame-all grid-all" style="width: 40%;">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field</th>
+<th class="tableblock halign-left valign-top">Source Attribute</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Implementation-Title</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Vendor</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Implementation-Vendor</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Version</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Implementation-Version</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">URL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Implementation-URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">API Version</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Gerrit-ApiVersion</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="deployment">Deployment</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Compiled plugins and extensions can be deployed to a running Gerrit
+server using the <a href="cmd-plugin-install.html">plugin install</a> command.</p>
+</div>
+<div class="paragraph">
+<p>Web UI plugins distributed as  single <code>.js</code> file can be deployed
+without the overhead of JAR packaging, for more information refer to
+<a href="cmd-plugin-install.html">plugin install</a> command.</p>
+</div>
+<div class="paragraph">
+<p>Plugins can also be copied directly into the server&#8217;s
+directory at <code>$site_path/plugins/$name.(jar|js)</code>.  The name of
+the JAR file, minus the <code>.jar</code> or <code>.js</code> extension, will be used as the
+plugin name. Unless disabled, servers periodically scan this
+directory for updated plugins. The time can be adjusted by
+<a href="config-gerrit.html#plugins.checkFrequency">plugins.checkFrequency</a>.</p>
+</div>
+<div class="paragraph">
+<p>For disabling plugins the <a href="cmd-plugin-remove.html">plugin remove</a>
+command can be used.</p>
+</div>
+<div class="paragraph">
+<p>Disabled plugins can be re-enabled using the
+<a href="cmd-plugin-enable.html">plugin enable</a> command.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_known_issues_and_bugs">Known issues and bugs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_error_handling_in_ui_when_using_the_rest_api">Error handling in UI when using the REST API</h3>
+<div class="paragraph">
+<p>When a plugin invokes a REST endpoint in the UI, it provides an
+<code>AsyncCallback</code> to handle the result. At the moment the
+<code>onFailure(Throwable)</code> of the callback is never invoked, even if there
+is an error. Errors are always handled by the Gerrit core UI which
+shows the error dialog. This means currently plugins cannot do any
+error handling and e.g. ignore expected errors.</p>
+</div>
+<div class="paragraph">
+<p>In the following example the REST endpoint would return '404 Not Found'
+if there is no HTTP password and the Gerrit core UI would display an
+error dialog for this. However having no HTTP password is not an error
+and the plugin may like to handle this case.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">new RestApi("accounts").id("self").view("password.http")
+    .get(new AsyncCallback&lt;NativeString&gt;() {
+
+  @Override
+  public void onSuccess(NativeString httpPassword) {
+    // TODO
+  }
+
+  @Override
+  public void onFailure(Throwable caught) {
+    // never invoked
+  }
+});</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="reviewer-suggestion">Reviewer Suggestion Plugins</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit provides an extension point that enables Plugins to rank
+the list of reviewer suggestion a user receives upon clicking "Add Reviewer" on
+the change screen.
+Gerrit supports both a default suggestion that appears when the user has not yet
+typed anything and a filtered suggestion that is shown as the user starts
+typing.
+Plugins receive a candidate list and can return a Set of suggested reviewers
+containing the Account.Id and a score for each reviewer.
+The candidate list is non-binding and plugins can choose to return reviewers not
+initially contained in the candidate list.
+Server administrators can configure the overall weight of each plugin using the
+weight config parameter on [addreviewer "&lt;pluginName-exportName&gt;"].</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">import com.google.gerrit.common.Nullable;
+import com.google.gerrit.extensions.annotations.ExtensionPoint;
+import com.google.gerrit.reviewdb.client.Account;
+import com.google.gerrit.reviewdb.client.Change;
+import com.google.gerrit.reviewdb.client.Project;
+
+import java.util.Set;
+
+public class MyPlugin implements ReviewerSuggestion {
+  public Set&lt;SuggestedReviewer&gt; suggestReviewers(Project.NameKey project,
+      @Nullable Change.Id changeId, @Nullable String query,
+      Set&lt;Account.Id&gt; candidates) {
+    Set&lt;SuggestedReviewer&gt; suggestions = new HashSet&lt;&gt;();
+    // Implement your ranking logic here
+    return suggestions;
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="js-api.html">JavaScript API</a></p>
+</li>
+<li>
+<p><a href="dev-rest-api.html">REST API Developers' Notes</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

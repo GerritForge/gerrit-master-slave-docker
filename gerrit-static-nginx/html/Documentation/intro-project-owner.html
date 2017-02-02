@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Project Owner Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Project Owner Guide</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#project-owner">What is a project owner?</a></li>
+<li><a href="#access-rights">Access Rights</a>
+<ul class="sectlevel2">
+<li><a href="#edit-access-rights">Editing Access Rights</a></li>
+<li><a href="#inheritance">Inheritance</a></li>
+<li><a href="#refs">References</a></li>
+<li><a href="#groups">Groups</a></li>
+<li><a href="#common-access-rights">Common Access Rights</a></li>
+<li><a href="#code-review">Code Review</a></li>
+</ul>
+</li>
+<li><a href="#project-options">Project Options</a>
+<ul class="sectlevel2">
+<li><a href="#submit-type">Submit Type</a></li>
+</ul>
+</li>
+<li><a href="#labels">Labels</a></li>
+<li><a href="#submit-rules">Submit Rules</a></li>
+<li><a href="#continuous-integration">Continuous Integration</a></li>
+<li><a href="#commit-validation">Commit Validation</a></li>
+<li><a href="#branch-administration">Branch Administration</a></li>
+<li><a href="#notifications">Email Notifications</a></li>
+<li><a href="#dashboards">Dashboards</a></li>
+<li><a href="#issue-tracker-integration">Issue Tracker Integration</a></li>
+<li><a href="#comment-links">Comment Links</a></li>
+<li><a href="#reviewers">Reviewers</a></li>
+<li><a href="#download-commands">Download Commands</a></li>
+<li><a href="#theme">Theme</a></li>
+<li><a href="#tool-integration">Integration with other tools</a></li>
+<li><a href="#project-lifecycle">Project Lifecycle</a>
+<ul class="sectlevel2">
+<li><a href="#project-creation">Project Creation</a></li>
+<li><a href="#import-history">Import Existing History</a></li>
+<li><a href="#project-deletion">Project Deletion</a></li>
+<li><a href="#project-rename">Project Rename</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This is a Gerrit guide that is dedicated to project owners. It
+explains the many possibilities that Gerrit provides to customize the
+workflows for a project.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project-owner">What is a project owner?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Being project owner means that you own a project in Gerrit.
+Technically this is expressed by having the
+<a href="access-control.html#category_owner">Owner</a> access right on
+<code>refs/*</code> on that project. As project owner you have the permission to
+edit the access control list and the project settings of the project.
+It also means that you should get familiar with these settings so that
+you can adapt them to the needs of your project.</p>
+</div>
+<div class="paragraph">
+<p>Being project owner means being responsible for the administration of
+a project. This requires having a deeper knowledge of Gerrit than the
+average user. Normally per team there should be 2 to 3 persons, who
+have a certain level of Git/Gerrit knowledge, assigned as project
+owners. It normally doesn&#8217;t make sense that everyone in a team is
+project owner. For normal team members it is sufficient to be committer
+or contributor.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="access-rights">Access Rights</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As a project owner you can edit the access control list of your
+project. This allows you to grant permissions on the project to
+different groups.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit comes with a rich set of permissions which allow a very
+fine-grained control over who can do what on a project. Access
+control is one of the most powerful Gerrit features but it is also a
+rather complex topic. This guide will only highlight the most
+important aspects of access control, but the <a href="access-control.html">
+Access Control</a> chapter explains all the details.</p>
+</div>
+<div class="sect2">
+<h3 id="edit-access-rights">Editing Access Rights</h3>
+<div class="paragraph">
+<p>To see the access rights of your project</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>go to the Gerrit Web UI</p>
+</li>
+<li>
+<p>click on the <code>Projects</code> &gt; <code>List</code> menu entry</p>
+</li>
+<li>
+<p>find your project in the project list and click on it</p>
+</li>
+<li>
+<p>click on the <code>Access</code> menu entry</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>By clicking on the <code>Edit</code> button the access rights become editable and
+you may save any changes by clicking on the <code>Save Changes</code> button.
+Optionally you can provide a <code>Commit Message</code> to explain the reasons
+for changing the access rights.</p>
+</div>
+<div class="paragraph">
+<p>The access rights are stored in the project&#8217;s Git repository in a
+special branch called <code>refs/meta/config</code>. On this branch there is a
+<code>project.config</code> file which contains the access rights. More
+information about this storage format can be found in the
+<a href="config-project-config.html">Project Configuration File Format</a>
+chapter. What is important to know is that by looking at the history
+of the <code>project.config</code> file on the <code>refs/meta/config</code> branch you can
+always see how the access rights were changed and by whom. If a good
+commit message is provided you can also see from the history why the
+access rights were modified.</p>
+</div>
+<div class="paragraph">
+<p>If a Git browser such as gitweb is configured for the Gerrit server you
+can find a link to the history of the <code>project.config</code> file in the
+Web UI. Otherwise you may inspect the history locally. If you have
+cloned the repository you can do this by executing the following
+commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git fetch ssh://localhost:29418/project refs/meta/config
+  $ git checkout FETCH_HEAD
+  $ git log project.config</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Non project owners may still edit the access rights and propose the
+modifications to the project owners by clicking on the <code>Save for
+Review</code> button. This creates a new change with the access rights
+modifications that can be approved by a project owner. The project
+owners are automatically added as reviewer on this change so that they
+get informed about it by email.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="inheritance">Inheritance</h3>
+<div class="paragraph">
+<p>Normally when a new project is created in Gerrit it already has some
+access rights which are inherited from the parent projects.
+Projects in Gerrit are organized hierarchically as a tree with the
+`All-Projects' project as root from which all projects inherit. Each
+project can have only a single parent project, multi-inheritance is
+not supported.</p>
+</div>
+<div class="paragraph">
+<p>Looking at the access rights of your project in the Gerrit Web UI, you
+only see the access rights which are defined on that project. To see
+the inherited access rights you must follow the link to the parent
+project under <code>Rights Inherit From</code>.</p>
+</div>
+<div class="paragraph">
+<p>Inherited access rights can be overwritten unless they are defined as
+<a href="access-control.html#block">BLOCK rule</a>. BLOCK rules are used to
+limit the possibilities of the project owners on the inheriting
+projects. With this, global policies can be enforced on all projects.
+Please note that Gerrit doesn&#8217;t prevent you from assigning access
+rights that contradict an inherited BLOCK rule, but these access rights
+will simply have no effect.</p>
+</div>
+<div class="paragraph">
+<p>If you are responsible for several projects which require the same
+permissions, it makes sense to have a common parent for them and to
+maintain the access rights on that common parent. Changing the parent
+of a project is only allowed for Gerrit administrators. This means you
+need to contact the administrator of your Gerrit server if you want to
+reparent your project. One way to do this is to change the parent
+project in the Web UI, save the modifications for review and get the
+change approved and merged by a Gerrit administrator.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="refs">References</h3>
+<div class="paragraph">
+<p>Access rights in Gerrit are assigned on references (aka refs). Refs in
+Git exist in different namespaces, e.g. all branches normally exist
+under <code>refs/heads/</code> and all tags under <code>refs/tags/</code>. In addition there
+are a number of <a href="access-control.html#references_special">special refs</a>
+and <a href="access-control.html#references_magic">magic refs</a>.</p>
+</div>
+<div class="paragraph">
+<p>Access rights can be assigned on a concrete ref, e.g.
+<code>refs/heads/master</code> but also on ref patterns and regular expressions
+for ref names.</p>
+</div>
+<div class="paragraph">
+<p>A ref pattern ends with <code>/*</code> and describes a complete ref name
+namespace, e.g. access rights assigned on <code>refs/heads/*</code> apply to all
+branches.</p>
+</div>
+<div class="paragraph">
+<p>Regular expressions must start with <code>^</code>, e.g. access rights assigned
+on <code>^refs/heads/rel-.*</code> would apply to all <code>rel-*</code> branches.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="groups">Groups</h3>
+<div class="paragraph">
+<p>Access rights are granted to groups. It is useful to know that Gerrit
+maintains its own groups internally but also supports different external
+group backends.</p>
+</div>
+<div class="paragraph">
+<p>The Gerrit internal groups can be seen in the Gerrit Web UI by clicking
+on the <code>Groups</code> &gt; <code>List</code> menu entry. By clicking on a group you can
+edit the group members (<code>Members</code> tab) and the group options
+(<code>General</code> tab).</p>
+</div>
+<div class="paragraph">
+<p>Gerrit internal groups contain users as members, but can also include
+other groups, even external groups.</p>
+</div>
+<div class="paragraph">
+<p>Every group is owned by an owner group. Only members of the owner
+group can administrate the owned group (assign members, edit the group
+options). A group can own itself; in this case members of the group
+can, for example, add further members to the group. When you create new
+groups for your project to assign access rights to committer or other
+roles, make sure that they are owned by the project owner group.</p>
+</div>
+<div class="paragraph">
+<p>An important setting on a group is the option
+<code>Make group visible to all registered users.</code>, which defines whether
+non-members can see who is member of the group.</p>
+</div>
+<div class="paragraph">
+<p>New internal Gerrit groups can be created under <code>Groups</code> &gt;
+<code>Create New Group</code>. This menu is only available if you have the global
+capability <a href="access-control.html#capability_createGroup">Create Group</a>
+assigned.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit also has a set of special
+<a href="access-control.html#system_groups">system groups</a> that you might
+find useful.</p>
+</div>
+<div class="paragraph">
+<p>External groups need to be prefixed when assigning access rights to
+them, e.g. <a href="access-control.html#ldap_groups">LDAP group names</a> need
+to be prefixed with <code>ldap/</code>.</p>
+</div>
+<div class="paragraph">
+<p>If the <a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/singleusergroup">
+singleusergroup</a> plugin is installed you can also directly assign
+access rights to users, by prefixing the username with <code>user/</code> or the
+user&#8217;s account ID by <code>userid/</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="common-access-rights">Common Access Rights</h3>
+<div class="paragraph">
+<p>Different roles in a project, such as developer (committer) or
+contributor, need different access rights. Examples for which access
+rights are typically assigned for which role are described in the
+<a href="access-control.html#example_roles">Access Control</a> chapter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="code-review">Code Review</h3>
+<div class="paragraph">
+<p>Gerrit&#8217;s main functionality is code review, however using code review
+is optional and you may decide to only use Gerrit as a Git server with
+access control. Whether you allow only pushes for review or also
+direct pushes depends on the project&#8217;s access rights.</p>
+</div>
+<div class="paragraph">
+<p>To push a commit for review it must be pushed to
+<a href="access-control.html#refs_for">refs/for/&lt;branch-name&gt;</a>. This means
+the <a href="access-control.html#category_push_review">Push</a> access right
+must be assigned on <code>refs/for/&lt;branch-name&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>To allow direct pushes and bypass code review, the
+<a href="access-control.html#category_push_direct">Push</a> access right is
+required on <code>refs/heads/&lt;branch-name&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>By pushing for review you are not only enabling the review workflow,
+but you can also get <a href="#continuous-integration">automatic
+verifications from a build server</a> before changes are merged. In
+addition you can benefit from Gerrit&#8217;s merge strategies that can
+automatically merge/rebase commits on server side if necessary. You can
+control the merge strategy by configuring the
+<a href="project-configuration.html#submit_type">submit type</a> on the project. If you
+bypass code review you always need to merge/rebase manually if the tip
+of the destination branch has moved. Please keep this in mind if you
+choose to not work with code review because you think it&#8217;s easier to
+avoid the additional complexity of the review workflow; it might
+actually not be easier.</p>
+</div>
+<div class="paragraph">
+<p>You may also enable <a href="user-upload.html#auto_merge">auto-merge on
+push</a> to benefit from the automatic merge/rebase on server side while
+pushing directly into the repository.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project-options">Project Options</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As project owner you can control several options on your project.
+The different options are described in the
+<a href="project-configuration.html#project_options">Project Options</a> section.</p>
+</div>
+<div class="paragraph">
+<p>To see the options of your project</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>go to the Gerrit Web UI</p>
+</li>
+<li>
+<p>click on the <code>Projects</code> &gt; <code>List</code> menu entry</p>
+</li>
+<li>
+<p>find your project in the project list and click on it</p>
+</li>
+<li>
+<p>click on the <code>General</code> menu entry</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="submit-type">Submit Type</h3>
+<div class="paragraph">
+<p>An important decision for a project is the choice of the submit type
+and the content merge setting (see the <code>Allow content merges</code> option).
+The <a href="project-configuration.html#submit_type">submit type</a> is the method
+Gerrit uses to submit a change to the project. The submit type defines
+what Gerrit should do on submit of a change if the destination branch
+has moved while the change was in review. The
+<a href="project-configuration.html#content_merge">content merge</a> setting applies
+if the same files have been modified concurrently and tells Gerrit
+whether it should attempt a content merge for these files.</p>
+</div>
+<div class="paragraph">
+<p>When choosing the submit type and the content merge setting one must
+weigh development comfort against the safety of not breaking the
+destination branch.</p>
+</div>
+<div class="paragraph">
+<p>The most restrictive submit type is
+<a href="project-configuration.html#fast_forward_only">Fast Forward Only</a>. Using
+this submit type means that after submitting one change all other open
+changes for the same destination branch must be rebased manually. This
+is quite burdensome and in practice only feasible for branches with
+very few changes. On the other hand, if changes are verified before
+submit, e.g. automatically by a CI integration, with this submit type,
+you can be sure that the destination branch never gets broken.</p>
+</div>
+<div class="paragraph">
+<p>Choosing <a href="project-configuration.html#merge_if_necessary">Merge If Necessary</a>
+as submit type makes the life for developers more comfortable,
+especially if content merge is enabled. If this submit strategy is used
+developers only need to rebase manually if the same files have been
+modified concurrently or if the content merge on such a file fails. The
+drawback with this submit type is that there is a risk of breaking
+the destination branch, e.g. if one change moves a class into another
+package and another change imports this class from the old location.
+Experience shows that in practice <code>Merge If Necessary</code> with content
+merge enabled works pretty well and breaking the destination branch
+happens rarely. This is why this setting is recommended at least for
+development branches. You likely want to start with
+<code>Merge If Necessary</code> with content merge enabled and only switch to a
+more restrictive policy if you are facing issues with the build and
+test stability of the destination branches.</p>
+</div>
+<div class="paragraph">
+<p>It is also possible to define the submit type dynamically via
+<a href="#prolog-submit-type">Prolog</a>. This way you can use different submit
+types for different branches.</p>
+</div>
+<div class="paragraph">
+<p>Please note that there are other submit types available; they are
+described in the <a href="project-configuration.html#submit_type">Submit Type</a>
+section.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="labels">Labels</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The code review process includes that reviewers formally express their
+opinion about a change by voting on different <a href="config-labels.html">
+labels</a>. By default Gerrit comes with the
+<a href="config-labels.html#label_Code-Review">Code-Review</a> label and many
+Gerrit servers have the <a href="config-labels.html#label_Verified">Verified</a>
+label configured globally. However projects can also define their own
+<a href="config-labels.html#label_custom">custom labels</a> to formalize
+project-specific workflows. For example if a project requires an IP
+approval from a special IP-team, it can define an <code>IP-Review</code> label
+and grant permissions to the IP-team to vote on this label.</p>
+</div>
+<div class="paragraph">
+<p>The behavior of a label can be controlled by its
+<a href="config-labels.html#label_function">function</a>, e.g. it can be
+configured whether a max positive voting on the label is required for
+submit or if the voting on the label is optional.</p>
+</div>
+<div class="paragraph">
+<p>By using a custom <a href="#submit-rules">submit rule</a> it can be controlled
+per change whether a label is required for submit or not.</p>
+</div>
+<div class="paragraph">
+<p>A useful feature on labels is the possibility to automatically copy
+scores forward to new patch sets if it was a
+<a href="config-labels.html#label_copyAllScoresOnTrivialRebase">trivial
+rebase</a> or if <a href="config-labels.html#label_copyAllScoresIfNoCodeChange">
+there was no code change</a> (e.g. only the commit message was edited).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="submit-rules">Submit Rules</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A <a href="prolog-cookbook.html#SubmitRule">submit rule</a> in Gerrit is logic
+that defines when a change is submittable. By default, a change is
+submittable when it gets at least one highest vote on each label and
+has no lowest vote (aka veto vote) on any label.</p>
+</div>
+<div class="paragraph">
+<p>The submit rules in Gerrit are implemented in <a href="prolog-cookbook.html">
+Prolog</a> and projects that need more flexibility can define their own
+submit rules to decide when a change should be submittable. A good
+<a href="prolog-cookbook.html#NonAuthorCodeReview">example</a> from the Prolog
+cookbook shows how to allow submit only if a change has a
+<code>Code-Review+2</code> vote from a person that is not the change author. This
+way a four-eyes principle for the reviews can be enforced.</p>
+</div>
+<div class="paragraph">
+<p>A Prolog submit rule has access to <a href="prolog-change-facts.html">
+information</a> about the change for which it is testing the
+submittability. Among others the list of the modified files can be
+accessed, which allows special logic if certain files are touched. For
+example, a common practice is to require a vote on an additional label,
+like <code>Library-Compliance</code>, if the dependencies of the project are
+changed.</p>
+</div>
+<div id="prolog-submit-type" class="paragraph">
+<p>It is also possible to control the <a href="prolog-cookbook.html#SubmitType">
+submit type</a> from Prolog. For example this can be used to define a more
+restrictive submit type such as <code>Fast Forward Only</code> for stable branches
+while using a more liberal submit type, e.g. <code>Merge If Necessary</code> with
+content merge, for development branches. How this can be done can be
+seen from an <a href="prolog-cookbook.html#SubmitTypePerBranch">example</a> in
+the Prolog cookbook.</p>
+</div>
+<div class="paragraph">
+<p>Submit rules are maintained in the <a href="prolog-cookbook.html#RulesFile">
+rules.pl</a> file in the <code>refs/meta/config</code> branch of the project. How to
+write submit rules is explained in the
+<a href="prolog-cookbook.html#HowToWriteSubmitRules">Prolog cookbook</a>. There
+is also good support for <a href="prolog-cookbook.html#TestingSubmitRules">
+testing submit rules</a> while developing them.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="continuous-integration">Continuous Integration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With Gerrit you can have continuous integration builds not only for
+updates of central branches but also whenever a new change/patch set is
+uploaded for review. This way you get automatic verification of all
+changes <strong>before</strong> they are merged and any build and test issues are
+detected early. To indicate the build and test status the continuous
+integration system normally votes with the
+<a href="config-labels.html#label_Verified">Verified</a> label on the change.</p>
+</div>
+<div class="paragraph">
+<p>There are several solutions for integrating continuous integration
+systems. The most commonly used are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://wiki.jenkins-ci.org/display/JENKINS/Gerrit+Trigger">
+Gerrit Trigger</a> plugin for <a href="http://jenkins-ci.org/">Jenkins</a></p>
+</li>
+<li>
+<p><a href="http://www.mediawiki.org/wiki/Continuous_integration/Zuul">
+Zuul</a> for <a href="http://jenkins-ci.org/">Jenkins</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For the integration with the continuous integration system you must
+have a service user that is able to access Gerrit. To create a service
+user in Gerrit you can use the <a href="cmd-create-account.html">create-account</a>
+SSH command if the <a href="access-control.html#capability_createAccount">
+Create Account</a> global capability is granted. If not, you need to ask
+a Gerrit administrator to create the service user.</p>
+</div>
+<div class="paragraph">
+<p>If the <a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/serviceuser">
+serviceuser</a> plugin is installed you can also create new service users
+in the Gerrit Web UI under <code>People</code> &gt; <code>Create Service User</code>. For this
+the <code>Create Service User</code> global capability must be assigned.</p>
+</div>
+<div class="paragraph">
+<p>The service user must have <a href="access-control.html#category_read">read</a>
+access to your project. In addition, if automatic change verification
+is enabled, the service user must be allowed to vote on the
+<a href="config-labels.html#label_Verified">Verified</a> label.</p>
+</div>
+<div class="paragraph">
+<p>Continuous integration systems usually integrate with Gerrit by
+listening to the Gerrit <a href="cmd-stream-events.html#events">stream
+events</a>. For this the service user must have the
+<a href="access-control.html#capability_streamEvents">Stream Events</a> global
+capability assigned.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="commit-validation">Commit Validation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit provides an
+<a href="https://gerrit-review.googlesource.com/Documentation/config-validation.html#new-commit-validation">
+extension point to do validation of new commits</a>. A Gerrit plugin
+implementing this extension point can perform validation checks when
+new commits are pushed to Gerrit. The plugin can either provide a
+message to the client or reject the commit and cause the push to fail.</p>
+</div>
+<div class="paragraph">
+<p>There are some plugins available that provide commit validation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/uploadvalidator">
+uploadvalidator</a>:</p>
+<div class="paragraph">
+<p>The <code>uploadvalidator</code> plugin allows project owners to configure blocked
+file extensions, required footers and a maximum allowed path length.</p>
+</div>
+</li>
+<li>
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/commit-message-length-validator">
+commit-message-length-validator</a></p>
+<div class="paragraph">
+<p>The <code>commit-message-length-validator</code> core plugin validates that commit
+messages conform to line length limits.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="branch-administration">Branch Administration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As project owner you can administrate the branches of your project in
+the Gerrit Web UI under <code>Projects</code> &gt; <code>List</code> &gt; &lt;your project&gt; &gt;
+<code>Branches</code>. In the Web UI both <a href="project-configuration.html#branch-creation">
+branch creation</a> and <a href="project-configuration.html#branch-deletion">branch
+deletion</a> are allowed for project owners without requiring any
+additional access rights.</p>
+</div>
+<div class="paragraph">
+<p>By setting <code>HEAD</code> on the project you can define its
+<a href="project-configuration.html#default-branch">default branch</a>. For convenience
+reasons, when the repository is cloned Git creates a local branch for
+this default branch and checks it out.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="notifications">Email Notifications</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With Gerrit individual users control their own email subscriptions. By
+editing the <a href="user-notify.html#user">watched projects</a> in the Web UI
+under <code>Settings</code> &gt; <code>Watched Projects</code> users can decide which events to
+be informed about by email. The change notifications can be filtered by
+<a href="user-search.html">change search expressions</a>.</p>
+</div>
+<div class="paragraph">
+<p>This means as a project owner you normally don&#8217;t need to do anything
+about email notifications, except maybe telling your project team where
+to configure the watches.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit also supports <a href="user-notify.html#project">notifications on
+project level</a> that allow project owners to set up email notifications
+for team mailing lists or groups of users. This configuration is done
+in the <code>project.config</code> file in the <code>refs/meta/config</code> branch as
+explained in the section about <a href="user-notify.html#project">project
+level notifications</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="dashboards">Dashboards</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit comes with a pre-defined user dashboard that provides a view
+of the changes that are relevant for a user. Users can also define
+their own <a href="user-dashboards.html">custom dashboards</a> where the
+dashboard sections can be freely configured. As a project owner you can
+configure such custom dashboards on
+<a href="user-dashboards.html#project-dashboards">project level</a>. This way
+you can define a view of the changes that are relevant for your
+project and share this dashboard with all users. The project dashboards
+can be seen in the Web UI under <code>Projects</code> &gt; <code>List</code> &gt; &lt;your project&gt; &gt;
+<code>Dashboards</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="issue-tracker-integration">Issue Tracker Integration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are several possibilities to integrate issue trackers with
+Gerrit.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Comment Links</p>
+<div class="paragraph">
+<p>As described in the <a href="#comment-links">Comment Links</a> section, comment
+links can be used to link IDs from commit message footers to issues in
+an issue tracker system.</p>
+</div>
+</li>
+<li>
+<p>Tracking IDs</p>
+<div class="paragraph">
+<p>Gerrit can be configured to index IDs from commit message footers so
+that the <a href="user-search.html#tr">tr/bug</a> search operators can be used
+to query for changes with a certain ID. The
+<a href="config-gerrit.html#trackingid">configuration of tracking IDs</a> can
+only be done globally by a Gerrit administrator.</p>
+</div>
+</li>
+<li>
+<p>Issue Tracker System Plugins</p>
+<div class="paragraph">
+<p>There are Gerrit plugins for a tight integration with
+<a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-jira">Jira</a>,
+<a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-bugzilla">Bugzilla</a> and
+<a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-rtc">IBM Rational Team Concert</a>.
+If installed, these plugins can e.g. be used to automatically add links
+to Gerrit changes to the issues in the issue tracker system or to
+automatically close an issue if the corresponding change is merged.
+If installed, project owners may enable/disable the issue tracker
+integration from the Gerrit Web UI under <code>Projects</code> &gt; <code>Lists</code> &gt;
+&lt;your project&gt; &gt; <code>General</code>.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="comment-links">Comment Links</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit can linkify strings in commit messages, summary comments and
+inline comments. A string that matches a defined regular expression is
+then displayed as hyperlink to a configured backend system.</p>
+</div>
+<div class="paragraph">
+<p>So called comment links can be configured globally by a Gerrit
+administrator, but also per project by the project owner. Comment links
+on project level are defined in the <code>project.config</code> file in the
+<code>refs/meta/config</code> branch of the project as described in the
+documentation of the <a href="config-gerrit.html#commentlink">commentlink</a>
+configuration parameter.</p>
+</div>
+<div class="paragraph">
+<p>Often comment links are used to link an ID in a commit message footer
+to an issue in an issue tracker system. For example, to link the ID
+from the <code>Bug</code> footer to Jira the following configuration can be used:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [commentlink "myjira"]
+    match = ([Bb][Uu][Gg]:\\s+)(\\S+)
+    link =  https://myjira/browse/$2</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="reviewers">Reviewers</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Normally it is not needed to explicitly assign reviewers to every
+change since the project members either <a href="user-notify.html#user">
+watch the project</a> and get notified by email or regularly check the
+list of open changes in the Gerrit Web UI. The project members then
+pick the changes themselves that are interesting to them for review.</p>
+</div>
+<div class="paragraph">
+<p>If authors of changes want to have a review by a particular person
+(e.g. someone who is known to be expert in the touched code area, or a
+stakeholder for the implemented feature), they can request the review
+by adding this person in the Gerrit Web UI as a reviewer on the change.
+Gerrit will then notify this person by email about the review request.</p>
+</div>
+<div class="paragraph">
+<p>With the <a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/reviewers">
+reviewers</a> plugin it is possible to configure default reviewers who
+will be automatically added to each change. The default reviewers can
+be configured in the Gerrit Web UI under <code>Projects</code> &gt; <code>List</code> &gt;
+&lt;your project&gt; &gt; <code>General</code> in the <code>reviewers Plugin</code> section.</p>
+</div>
+<div class="paragraph">
+<p>The <a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/reviewers-by-blame">
+reviewers-by-blame</a> plugin can automatically add reviewers to changes
+based on the <a href="https://www.kernel.org/pub/software/scm/git/docs/git-blame.html">
+git blame</a> computation on the changed files. This means that the plugin
+will add those users as reviewer that authored most of the lines
+touched by the change, since these users should be familiar with the
+code and can most likely review the change. How many reviewers the
+plugin will add to a change at most can be configured in the Gerrit
+Web UI under <code>Projects</code> &gt; <code>List</code> &gt; &lt;your project&gt; &gt; <code>General</code> in the
+<code>reviewers-by-blame Plugin</code> section.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="download-commands">Download Commands</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On the change screen in the <code>Downloads</code> drop-down panel Gerrit offers
+commands for downloading the currently viewed patch set.</p>
+</div>
+<div class="paragraph">
+<p>The download commands are implemented by Gerrit plugins. This means
+that the available download commands depend on the installed Gerrit
+plugins:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/download-commands">
+download-commands</a> plugin:</p>
+<div class="paragraph">
+<p>The <code>download-commands</code> plugin provides the default download commands
+(<code>Checkout</code>, <code>Cherry Pick</code>, <code>Format Patch</code> and <code>Pull</code>).</p>
+</div>
+<div class="paragraph">
+<p>Gerrit administrators may configure which of the commands are shown on
+the change screen.</p>
+</div>
+</li>
+<li>
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/egit">
+egit</a> plugin:</p>
+<div class="paragraph">
+<p>The <code>egit</code> plugin provides the change ref as a download command, which is
+needed for downloading a change from within
+<a href="https://www.eclipse.org/egit/">EGit</a>.</p>
+</div>
+</li>
+<li>
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/project-download-commands">
+project-download-commands</a> plugin:</p>
+<div class="paragraph">
+<p>The <code>project-download-commands</code> plugin enables project owners to
+configure project-specific download commands. For example, a
+project-specific download command may update submodules, trigger a
+build, execute the tests or even do a deployment.</p>
+</div>
+<div class="paragraph">
+<p>The project-specific download commands must be configured in the
+<code>project.config</code> file in the <code>refs/meta/config</code> branch of the project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [plugin "project-download-commands"]
+    Build = git fetch ${url} ${ref} &amp;&amp; git checkout FETCH_HEAD &amp;&amp; bazel build ${project}
+    Update = git fetch ${url} ${ref} &amp;&amp; git checkout FETCH_HEAD &amp;&amp; git submodule update</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Project-specific download commands that are defined on a parent project
+are inherited by the child projects. A child project can overwrite an
+inherited download command, or remove it by assigning no value to it.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="theme">Theme</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit supports project-specific themes for customizing the appearance
+of the change screen and the diff screens. It is possible to define an
+HTML header and footer and to adapt Gerrit&#8217;s CSS. Details about themes
+are explained in the <a href="config-themes.html">Themes</a> section.</p>
+</div>
+<div class="paragraph">
+<p>Project-specific themes can only be installed by Gerrit administrators
+since the theme files must be copied into the Gerrit installation
+folder.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tool-integration">Integration with other tools</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit provides many possibilities for the integration with other
+tools:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Stream Events:</p>
+<div class="paragraph">
+<p>The <a href="cmd-stream-events.html">stream-events</a> SSH command allows to
+listen to Gerrit <a href="cmd-stream-events.html#events">events</a>. Other
+tools can use this to react on actions done in Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>The <a href="access-control.html#capability_streamEvents">Stream Events</a>
+global capability is required for using the <code>stream-events</code> command.</p>
+</div>
+</li>
+<li>
+<p>REST API:</p>
+<div class="paragraph">
+<p>Gerrit provides a rich <a href="rest-api.html">REST API</a> that other tools
+can use to query information from Gerrit and and to trigger actions in
+Gerrit.</p>
+</div>
+</li>
+<li>
+<p>Gerrit Plugins:</p>
+<div class="paragraph">
+<p>The Gerrit functionality can be extended by plugins and there are many
+extension points, e.g. plugins can</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="dev-plugins.html#top-menu-extensions">add new menu entries</a></p>
+</li>
+<li>
+<p><a href="dev-plugins.html#ui_extension">extend existing screens</a> and
+<a href="dev-plugins.html#screen">add new screens</a></p>
+</li>
+<li>
+<p><a href="config-validation.html">do validation</a>, e.g. of new commits</p>
+</li>
+<li>
+<p>add new REST endpoints and <a href="dev-plugins.html#ssh">SSH commands</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>How to develop a Gerrit plugin is described in the <a href="dev-plugins.html">
+Plugin Development</a> section.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project-lifecycle">Project Lifecycle</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="project-creation">Project Creation</h3>
+<div class="paragraph">
+<p>New projects can be created in the Gerrit Web UI under <code>Projects</code> &gt;
+<code>Create Project</code>. The <code>Create Project</code> menu entry is only available if
+you have the <a href="access-control.html#capability_createProject">
+Create Project</a> global capability assigned.</p>
+</div>
+<div class="paragraph">
+<p>Projects can also be created via REST or SSH as described in the
+<a href="project-configuration.html#project-creation">Project Setup</a> section.</p>
+</div>
+<div class="paragraph">
+<p>Creating the project with an initial empty commit is generally
+recommended because some tools have issues with cloning repositories
+that are completely empty. However, if you plan to <a href="#import-history">
+import an existing history</a> into the new project, it is better to
+create the project without an initial empty commit.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="import-history">Import Existing History</h3>
+<div class="paragraph">
+<p>If you have an existing history you can import it into a Gerrit
+project. To do this you need to have a local Git repository that
+contains this history. If your existing codebase is in another VCS you
+must migrate it to Git first. For Subversion you can use the
+<a href="http://git-scm.com/book/en/Git-and-Other-Systems-Git-and-Subversion">
+git svn</a> command as described in the
+<a href="http://git-scm.com/book/en/Git-and-Other-Systems-Migrating-to-Git#Subversion">
+Subversion migration guide</a>. An importer for Perforce is available in
+the <code>contrib</code> section of the Git source code; how to use
+<a href="http://git-scm.com/docs/git-p4">git p4</a> to do the import from
+Perforce is described in the
+<a href="http://git-scm.com/book/en/Git-and-Other-Systems-Migrating-to-Git#Perforce">
+Perforce migration guide</a>.</p>
+</div>
+<div class="paragraph">
+<p>To import an existing history into a Gerrit project you bypass code
+review and push it directly to <code>refs/heads/&lt;branch&gt;</code>. For this you must
+have the corresponding <a href="access-control.html#category_push_direct">
+Push</a> access right assigned. If the destination branch in the Gerrit
+repository already contains a history (e.g. an initial empty commit),
+you can overwrite it by doing a force push. In this case force push
+must be allowed in the access controls of the project.</p>
+</div>
+<div class="paragraph">
+<p>Some Gerrit servers may disallow forging committers by blocking the
+<a href="access-control.html#category_forge_committer">Forge Committer</a>
+access right globally. In this case you must use the
+<a href="https://www.kernel.org/pub/software/scm/git/docs/git-filter-branch.html">
+git filter-branch</a> command to rewrite the committer information for all
+commits (the author information that records who was writing the code
+stays intact; signed tags will lose their signature):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git filter-branch --tag-name-filter cat --env-filter 'GIT_COMMITTER_NAME="John Doe"; GIT_COMMITTER_EMAIL="john.doe@example.com";' -- --all</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If a <a href="config-gerrit.html#receive.maxObjectSizeLimit">max object size
+limit</a> is configured on the server you may need to remove large objects
+from the history before you are able to push. To find large objects in
+the history of your project you can use the <code>reposize.sh</code> script which
+you can download from Gerrit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ curl -Lo reposize.sh http://review.example.com:8080/tools/scripts/reposize.sh
+
+or
+
+  $ scp -p -P 29418 john.doe@review.example.com:scripts/reposize.sh .</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can then use the
+<a href="https://www.kernel.org/pub/software/scm/git/docs/git-filter-branch.html">
+git filter-branch</a> command to remove the large objects from the history
+of all branches:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git filter-branch -f --index-filter 'git rm --cached --ignore-unmatch path/to/large-file.jar' -- --all</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Since this command rewrites all commits in the repository it&#8217;s a good
+idea to create a fresh clone from this rewritten repository before
+pushing to Gerrit, this will ensure that the original objects which
+have been rewritten are removed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="project-deletion">Project Deletion</h3>
+<div class="paragraph">
+<p>Gerrit core does not support the deletion of projects.</p>
+</div>
+<div class="paragraph">
+<p>If the <a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/delete-project">
+delete-project</a> plugin is installed, projects can be deleted from the
+Gerrit Web UI under <code>Projects</code> &gt; <code>List</code> &gt; &lt;project&gt; &gt; <code>General</code> by
+clicking on the <code>Delete</code> command under <code>Project Commands</code>. The <code>Delete</code>
+command is only available if you have the <code>Delete Projects</code> global
+capability assigned, or if you own the project and you have the
+<code>Delete Own Projects</code> global capability assigned. If neither of these
+capabilities is granted, you need to contact a Gerrit administrator to
+request the deletion of your project.</p>
+</div>
+<div class="paragraph">
+<p>Instead of deleting a project you may set the
+<a href="project-configuration.html#project-state">project state</a> to <code>ReadOnly</code> or
+<code>Hidden</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="project-rename">Project Rename</h3>
+<div class="paragraph">
+<p>Gerrit core does not support the renaming of projects.</p>
+</div>
+<div class="paragraph">
+<p>As workaround you may</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#project-creation">create a new project</a> with the new name</p>
+</li>
+<li>
+<p><a href="#import-history">import the history of the old project</a></p>
+</li>
+<li>
+<p><a href="#project-deletion">delete the old project</a></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Please note that a drawback of this workaround is that the whole review
+history (changes, review comments) is lost.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively, you can use the
+<a href="https://gerrit.googlesource.com/plugins/importer/">importer</a> plugin
+to copy the project <em>including the review history</em>, and then
+<a href="#project-deletion">delete the old project</a>.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -44,7 +44,15 @@ services:
       - gerrit-master-nginx
       - gerrit-slave-nginx
       - gerrit-slave-httpd
-        
+      - gerrit-static-nginx
+
+  gerrit-static-nginx:
+    build: gerrit-static-nginx
+    ports:
+      - "18083:80"
+    networks:
+      - gerrit-net
+
 networks:
   gerrit-net:
     driver: bridge

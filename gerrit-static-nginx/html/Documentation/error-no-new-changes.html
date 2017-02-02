@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>no new changes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>no new changes</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_fast_forward_merges">Fast-forward merges</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>With this error message Gerrit rejects to push a commit if the pushed
+commit was already successfully pushed to Gerrit in project scope.
+In this case there is no new change and consequently there is nothing
+for Gerrit to do.</p>
+</div>
+<div class="paragraph">
+<p>If your push is failing with this error message, you normally
+don&#8217;t have to do anything since the commit was already successfully
+pushed. Still this error message may sometimes come as a surprise if
+you expected a new commit to be pushed. In this case you should
+verify that:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>your changes were successfully committed locally (otherwise there
+is no new commit which can be pushed)</p>
+</li>
+<li>
+<p>you are pushing the correct commit (e.g. if you are pushing HEAD
+make sure you have locally checked out the correct branch)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If you are sure you are pushing the correct commit and you are still
+getting the "no new changes" error unexpectedly you can take the
+commit ID and search for the corresponding change in Gerrit. To do
+this simply paste the commit ID in the Gerrit Web UI into the search
+field. Details about how to search in Gerrit are explained <a href="user-search.html">here</a>.</p>
+</div>
+<div class="paragraph">
+<p>Please note that each commit can really be pushed only once. This
+means:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>you cannot push a commit again even if the change for which the
+commit was pushed before was abandoned (but you may restore the
+abandoned change)</p>
+</li>
+<li>
+<p>you cannot reset a change to an old patch set by pushing the old
+commit for this change again</p>
+</li>
+<li>
+<p>if a commit was pushed to one branch you cannot push this commit
+to another branch in project scope.</p>
+</li>
+<li>
+<p>if a commit was pushed directly to a branch (without going through
+code review) you cannot push this commit once again for code
+review (please note that in this case searching by the commit ID
+in the Gerrit Web UI will not find any change)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If you need to re-push a commit you may rewrite this commit by
+<a href="http://www.kernel.org/pub/software/scm/git/docs/git-commit.html">amending</a> it or doing an interactive <a href="http://www.kernel.org/pub/software/scm/git/docs/git-rebase.html">git rebase</a>. By rewriting the
+commit you actually create a new commit (with a new commit ID in
+project scope) which can then be pushed to Gerrit. If the old commit
+contains a Change-Id in the commit message you also need to replace
+it with a new Change-Id (case 1. and 3. above), otherwise the push
+will fail with another error message.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_fast_forward_merges">Fast-forward merges</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You will also encounter this error if you did a Fast-forward merge
+and try to push the result.  A workaround is to use the
+<a href="user-upload.html#base">Selecting Merge Base</a>
+feature or enable the
+<a href="project-configuration.html#_use_target_branch_when_determining_new_changes_to_open">
+Use target branch when determining new changes to open</a>
+configuration.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="error-messages.html">Gerrit Error Messages</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>
