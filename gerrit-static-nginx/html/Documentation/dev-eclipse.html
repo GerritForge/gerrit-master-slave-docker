@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Eclipse Setup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Eclipse Setup</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#setup">Project Setup</a></li>
+<li><a href="#Formatting">Code Formatter Settings</a></li>
+<li><a href="#_site_initialization">Site Initialization</a></li>
+<li><a href="#_testing">Testing</a>
+<ul class="sectlevel2">
+<li><a href="#_running_the_daemon">Running the Daemon</a></li>
+<li><a href="#_running_gwt_debug_mode">Running GWT Debug Mode</a></li>
+<li><a href="#_running_gwt_debug_mode_for_gerrit_plugins">Running GWT Debug Mode for Gerrit plugins</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This document is about configuring Gerrit Code Review into an
+Eclipse workspace for development and debugging with GWT.</p>
+</div>
+<div class="paragraph">
+<p>Java 6 or later SDK is also required to run GWT&#8217;s compiler and
+runtime debugging environment.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="setup">Project Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In your Eclipse installation&#8217;s <code>eclipse.ini</code> file, add the following line in
+the <code>vmargs</code> section:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  -DmaxCompiledUnitsAtOnce=10000</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Without this setting, annotation processing does not work reliably and the
+build is likely to fail with errors like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Could not write generated class ... javax.annotation.processing.FilerException: Source file already created</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  AutoAnnotation_Commands_named cannot be resolved to a type</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In Eclipse, choose 'Import existing project' and select the <code>gerrit</code> project
+from the current working directory.</p>
+</div>
+<div class="paragraph">
+<p>Expand the <code>gerrit</code> project, right-click on the <code>eclipse-out</code> folder, select
+'Properties', and then under 'Attributes' check 'Derived'.</p>
+</div>
+<div class="paragraph">
+<p>Note that if you make any changes in the project configuration
+that get saved to the <code>.project</code> file, for example adding Resource
+Filters on a folder, they will be overwritten the next time you run
+<code>tools/eclipse/project.py</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="Formatting">Code Formatter Settings</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Import <code>tools/GoogleFormat.xml</code> using Window &#8594; Preferences &#8594;
+Java &#8594; Code Style &#8594; Formatter &#8594; Import&#8230;&#8203;</p>
+</div>
+<div class="paragraph">
+<p>This will define the 'Google Format' profile, which the project
+settings prefer when formatting source code.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_site_initialization">Site Initialization</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Build once on the command line with
+<a href="dev-bazel.html#build">Bazel</a> and then follow
+<a href="dev-readme.html#init">Site Initialization</a> in the
+Developer Setup guide to configure a local site for testing.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing">Testing</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_running_the_daemon">Running the Daemon</h3>
+<div class="paragraph">
+<p>Duplicate the existing launch configuration:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>In Eclipse select Run &#8594; Debug Configurations &#8230;&#8203;</p>
+</li>
+<li>
+<p>Java Application &#8594; <code>gerrit_daemon</code></p>
+</li>
+<li>
+<p>Right click, Duplicate</p>
+</li>
+<li>
+<p>Modify the name to be unique.</p>
+</li>
+<li>
+<p>Switch to Arguments tab.</p>
+</li>
+<li>
+<p>Edit the <code>-d</code> program argument flag to match the path used during
+'init'.  The template launch configuration resolves to <code>../gerrit_testsite</code>
+since that is what the documentation recommends.</p>
+</li>
+<li>
+<p>Switch to Common tab.</p>
+</li>
+<li>
+<p>Change Save as to be Local file.</p>
+</li>
+<li>
+<p>Close the Debug Configurations dialog and save the changes when prompted.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_running_gwt_debug_mode">Running GWT Debug Mode</h3>
+<div class="paragraph">
+<p>The <code>gerrit_gwt_debug</code> launch configuration uses GWT&#8217;s
+<a href="http://www.gwtproject.org/articles/superdevmode.html">Super Dev Mode</a>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Make a local copy of the <code>gerrit_gwt_debug</code> configuration, using the
+process described for <code>gerrit_daemon</code> above.</p>
+</li>
+<li>
+<p>Launch the local copy of <code>gerrit_gwt_debug</code> from the Eclipse debug menu.</p>
+</li>
+<li>
+<p>If debugging GWT for the first time:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Open the <a href="http://localhost:9876/">codeserver URL</a> and add the <code>Dev Mode On</code>
+and <code>Dev Mode Off</code> bookmarklet to your bookmark bar.</p>
+</li>
+<li>
+<p>Activate the source maps feature in your browser. Refer to the
+<a href="https://developer.chrome.com/devtools/docs/javascript-debugging#source-maps">
+Chrome</a> and
+<a href="https://developer.mozilla.org/en-US/docs/Tools/Debugger#Use_a_source_map">
+Firefox</a> developer documentation.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Load the <a href="http://localhost:8080">Gerrit page</a>.</p>
+</li>
+<li>
+<p>Open the source tab in developer tools.</p>
+</li>
+<li>
+<p>Click the <code>Dev Mode On</code> bookmark to incrementally recompile changed files.</p>
+</li>
+<li>
+<p>Select the <code>gerrit_ui</code> module to compile (the <code>Compile</code> button can also be used
+as a bookmarklet).</p>
+</li>
+<li>
+<p>In the developer tools source tab, open a file and set a breakpoint.</p>
+</li>
+<li>
+<p>Navigate to the UI and confirm that the breakpoint is hit.</p>
+</li>
+<li>
+<p>To end the debugging session, click the <code>Dev Mode Off</code> bookmark.</p>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">After changing the client side code:</div>
+<ul>
+<li>
+<p>Hitting <code>F5</code> in the browser only reloads the last compile output, without
+recompiling.</p>
+</li>
+<li>
+<p>To reflect your changes in the debug session, click <code>Dev Mode On</code> then <code>Compile</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_running_gwt_debug_mode_for_gerrit_plugins">Running GWT Debug Mode for Gerrit plugins</h3>
+<div class="paragraph">
+<p>A Gerrit plugin can expose GWT module and its implementation can be inspected
+in the SDM debug session.</p>
+</div>
+<div class="paragraph">
+<p><code>codeserver</code> needs two additional inputs to expose the plugin module in the SDM
+debug session: the module name and the source folder location. For example the
+module name and source folder of <code>cookbook-plugin</code> should be added in the local
+copy of the <code>gerrit_gwt_debug</code> configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  com.googlesource.gerrit.plugins.cookbook.HelloForm \
+  -src ${resource_loc:/gerrit}/plugins/cookbook-plugin/src/main/java \
+  -- --console-log [...]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After doing that, both the Gerrit core and plugin GWT modules can be activated
+during SDM (debug session)[<a href="http://imgur.com/HFXZ5No" class="bare">http://imgur.com/HFXZ5No</a>].</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

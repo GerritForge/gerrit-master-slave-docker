@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - /plugins/ REST API</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - /plugins/ REST API</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#plugin-endpoints">Plugin Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#list-plugins">List Plugins</a></li>
+<li><a href="#install-plugin">Install Plugin</a></li>
+<li><a href="#get-plugin-status">Get Plugin Status</a></li>
+<li><a href="#enable-plugin">Enable Plugin</a></li>
+<li><a href="#disable-plugin">Disable Plugin</a></li>
+<li><a href="#reload-plugin">Reload Plugin</a></li>
+</ul>
+</li>
+<li><a href="#ids">IDs</a>
+<ul class="sectlevel2">
+<li><a href="#plugin-id">{plugin-id}</a></li>
+</ul>
+</li>
+<li><a href="#json-entities">JSON Entities</a>
+<ul class="sectlevel2">
+<li><a href="#plugin-info">PluginInfo</a></li>
+<li><a href="#plugin-input">PluginInput</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page describes the plugin related REST endpoints.
+Please also take note of the general information on the
+<a href="rest-api.html">REST API</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="plugin-endpoints">Plugin Endpoints</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit REST endpoints for installed plugins are available under
+'/plugins/<a href="#plugin-id">{plugin-id}</a>/gerrit~&lt;endpoint-id&gt;'.
+The <code>gerrit~</code> prefix ensures that the Gerrit REST endpoints for plugins
+do not clash with any REST endpoint that a plugin may offer under its
+namespace.</p>
+</div>
+<div class="sect2">
+<h3 id="list-plugins">List Plugins</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /plugins/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lists the plugins installed on the Gerrit server. Only the enabled
+plugins are returned unless the <code>all</code> option is specified.</p>
+</div>
+<div class="paragraph">
+<p>To be allowed to see the installed plugins, a user must be a member of
+a group that is granted the 'View Plugins' capability or the
+'Administrate Server' capability.</p>
+</div>
+<div class="paragraph">
+<p>As result a map is returned that maps the plugin IDs to
+<a href="#plugin-info">PluginInfo</a> entries. The entries in the map are sorted
+by plugin ID.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /plugins/?all HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "delete-project": {
+      "id": "delete-project",
+      "index_url": "plugins/delete-project/",
+      "version": "2.9-SNAPSHOT"
+    },
+    "reviewers-by-blame": {
+      "id": "reviewers-by-blame",
+      "index_url": "plugins/reviewers-by-blame/",
+      "version": "2.9-SNAPSHOT",
+      "disabled": true
+    }
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install-plugin">Install Plugin</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /plugins/<a href="#plugin-id">{plugin-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Installs a new plugin on the Gerrit server. If a plugin with the
+specified name already exists it is overwritten. Note: if the plugin
+provides its own name in the MANIFEST file, then the plugin name from
+the MANIFEST file has precedence over the {plugin-id} above.</p>
+</div>
+<div class="paragraph">
+<p>The plugin jar can either be sent as binary data in the request body
+or a URL to the plugin jar must be provided in the request body inside
+a <a href="#plugin-input">PluginInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /plugins/delete-project HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "url": "file:///gerrit/plugins/delete-project/delete-project-2.8.jar"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To provide the plugin jar as binary data in the request body the
+following curl command can be used:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  curl --digest --user admin:TNNuLkWsIV8w -X PUT --data-binary @delete-project-2.8.jar 'http://gerrit:8080/a/plugins/delete-project'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#plugin-info">PluginInfo</a> entity is returned that
+describes the plugin.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 201 Created
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "delete-project",
+    "version": "2.8"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If an existing plugin was overwritten the response is &#8220;200 OK&#8221;.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-plugin-status">Get Plugin Status</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /plugins/<a href="#plugin-id">{plugin-id}</a>/gerrit~status'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves the status of a plugin on the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /plugins/delete-project/gerrit~status HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#plugin-info">PluginInfo</a> entity is returned that
+describes the plugin.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "delete-project",
+    "version": "2.8"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="enable-plugin">Enable Plugin</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /plugins/<a href="#plugin-id">{plugin-id}</a>/gerrit~enable'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Enables a plugin on the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /plugins/delete-project/gerrit~enable HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#plugin-info">PluginInfo</a> entity is returned that
+describes the plugin.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "delete-project",
+    "version": "2.8"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="disable-plugin">Disable Plugin</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /plugins/<a href="#plugin-id">{plugin-id}</a>/gerrit~disable'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>OR</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'DELETE /plugins/<a href="#plugin-id">{plugin-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Disables a plugin on the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /plugins/delete-project/gerrit~disable HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#plugin-info">PluginInfo</a> entity is returned that
+describes the plugin.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "delete-project",
+    "version": "2.8",
+    "disabled": true
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reload-plugin">Reload Plugin</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /plugins/<a href="#plugin-id">{plugin-id}</a>/gerrit~reload'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Reloads a plugin on the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /plugins/delete-project/gerrit~reload HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#plugin-info">PluginInfo</a> entity is returned that
+describes the plugin.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "delete-project",
+    "version": "2.8",
+    "disabled": true
+  }</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ids">IDs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="plugin-id">{plugin-id}</h3>
+<div class="paragraph">
+<p>The ID of the plugin.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="json-entities">JSON Entities</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="plugin-info">PluginInfo</h3>
+<div class="paragraph">
+<p>The <code>PluginInfo</code> entity describes a plugin.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ID of the plugin.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>version</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The version of the plugin.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>index_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">URL of the plugin&#8217;s default page.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disabled</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the plugin is disabled.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="plugin-input">PluginInput</h3>
+<div class="paragraph">
+<p>The <code>PluginInput</code> entity describes a plugin that should be installed.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">URL to the plugin jar.</p></td>
+</tr>
+</tbody>
+</table>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

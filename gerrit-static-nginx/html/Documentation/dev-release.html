@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Making a Gerrit Release</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Making a Gerrit Release</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_gerrit_release_type">Gerrit Release Type</a>
+<ul class="sectlevel2">
+<li><a href="#stable">Stable</a></li>
+<li><a href="#_stable_fix">Stable-Fix</a></li>
+<li><a href="#security">Security-Fix</a></li>
+</ul>
+</li>
+<li><a href="#_create_the_actual_release">Create the Actual Release</a>
+<ul class="sectlevel2">
+<li><a href="#subproject">Release Subprojects</a></li>
+<li><a href="#update-versions">Update Versions and Create Release Tag</a></li>
+<li><a href="#build-gerrit">Build Gerrit</a></li>
+<li><a href="#publish-gerrit">Publish the Gerrit Release</a></li>
+<li><a href="#finalize-release-notes">Finalize the Release Notes</a></li>
+<li><a href="#increase-version">Increase Gerrit Version for Current Development</a></li>
+<li><a href="#merge-stable">Merge <code>stable</code> into <code>master</code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This document is meant primarily for Gerrit maintainers
+who have been given approval and submit status to the Gerrit
+projects.  Additionally, maintainers should be given owner
+status to the Gerrit web site.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To make a Gerrit release involves a great deal of complex
+tasks and it is easy to miss a step so this document should
+hopefully serve as both a how to for those new to the process
+and as a checklist for those already familiar with these
+tasks.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gerrit_release_type">Gerrit Release Type</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Here are some guidelines on release approaches depending on the
+type of release you want to make (<code>stable-fix</code>, <code>stable</code>, <code>RC0</code>,
+<code>RC1</code>&#8230;&#8203;).</p>
+</div>
+<div class="sect2">
+<h3 id="stable">Stable</h3>
+<div class="paragraph">
+<p>A <code>stable</code> release is generally built from the <code>master</code> branch and may
+need to undergo some stabilization before releasing the final release.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Propose the release with any plans/objectives to the mailing list</p>
+</li>
+<li>
+<p>Create a Gerrit <code>RC0</code></p>
+</li>
+<li>
+<p>If needed create a Gerrit <code>RC1</code></p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You may let in a few features to this release
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If needed create a Gerrit <code>RC2</code></p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+There should be no new features in this release, only bug fixes
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Finally create the <code>stable</code> release (no <code>RC</code>)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_stable_fix">Stable-Fix</h3>
+<div class="paragraph">
+<p><code>stable-fix</code> releases should likely only contain bug fixes and doc
+updates.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Propose the release with any plans/objectives to the mailing list</p>
+</li>
+<li>
+<p>This type of release does not need any RCs, release when the
+objectives are met</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="security">Security-Fix</h3>
+<div class="paragraph">
+<p><code>security-fix</code> releases should only contain bug fixes for security
+issues.</p>
+</div>
+<div class="paragraph">
+<p>For security issues it is important that they are only announced
+<strong>after</strong> fixed versions for all relevant releases have been published.
+Because of this, <code>security-fix</code> releases can&#8217;t be prepared in the public
+<code>gerrit</code> project.</p>
+</div>
+<div class="paragraph">
+<p><code>security-fix</code> releases are prepared in the <code>gerrit-security-fixes</code>
+project which is only readable by the Gerrit Maintainers. Only after
+a <code>security-fix</code> release has been published will the commits/tags made in
+the <code>gerrit-security-fixes</code> project be taken over into the public
+<code>gerrit</code> project.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_create_the_actual_release">Create the Actual Release</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a Gerrit release the following steps have to be done:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#subproject">Release Subprojects</a></p>
+</li>
+<li>
+<p><a href="#build-gerrit">Build the Gerrit Release</a></p>
+</li>
+<li>
+<p><a href="#publish-gerrit">Publish the Gerrit Release</a></p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="#publish-to-maven-central">Publish the Gerrit artifacts to Maven Central</a></p>
+</li>
+<li>
+<p><a href="#publish-to-google-storage">Publish the Gerrit WAR to Google Storage</a></p>
+</li>
+<li>
+<p><a href="#push-stable">Push the Stable Branch</a></p>
+</li>
+<li>
+<p><a href="#push-tag">Push the Release Tag</a></p>
+</li>
+<li>
+<p><a href="#upload-documentation">Upload the Documentation</a></p>
+</li>
+<li>
+<p><a href="#finalize-release-notes">Finalize Release Notes</a></p>
+</li>
+<li>
+<p><a href="#update-issues">Update the Issues</a></p>
+</li>
+<li>
+<p><a href="#announce">Announce on Mailing List</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p><a href="#increase-version">Increase Gerrit Version for Current Development</a></p>
+</li>
+<li>
+<p><a href="#merge-stable">Merge <code>stable</code> into <code>master</code></a></p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="subproject">Release Subprojects</h3>
+<div class="paragraph">
+<p>The subprojects to be released are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>gwtjsonrpc</code></p>
+</li>
+<li>
+<p><code>gwtorm</code></p>
+</li>
+<li>
+<p><code>prolog-cafe</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For each subproject do:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Check the dependency to the Subproject in the Gerrit parent <code>pom.xml</code>:</p>
+<div class="paragraph">
+<p>If a <code>SNAPSHOT</code> version of the subproject is referenced the subproject
+needs to be released so that Gerrit can reference a released version of
+the subproject.</p>
+</div>
+</li>
+<li>
+<p><a href="dev-release-subproject.html#make-snapshot">Make a snapshot and test it</a></p>
+</li>
+<li>
+<p><a href="dev-release-subproject.html#prepare-release">Prepare the Release</a></p>
+</li>
+<li>
+<p><a href="dev-release-subproject.html#publish-release">Publish the Release</a></p>
+</li>
+<li>
+<p>Update the <code>artifact</code>, <code>sha1</code>, and <code>src_sha1</code> values in the <code>maven_jar</code>
+for the Subproject in <code>WORKSPACE</code> to the released version.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="update-versions">Update Versions and Create Release Tag</h3>
+<div class="paragraph">
+<p>Before doing the release build, the <code>GERRIT_VERSION</code> in the <code>VERSION</code>
+file must be updated, e.g. change it from <code>2.5-SNAPSHOT</code> to <code>2.5</code>.</p>
+</div>
+<div class="paragraph">
+<p>In addition the version must be updated in a number of pom.xml files.</p>
+</div>
+<div class="paragraph">
+<p>To do this run the <code>./tools/version.py</code> script and provide the new
+version as parameter, e.g.:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  ./tools/version.py 2.5</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit the changes and create the release tag on the new commit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git tag -a v2.5</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Tag the plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git submodule foreach git tag -a v2.5</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="build-gerrit">Build Gerrit</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Build the Gerrit WAR, API JARs and documentation</p>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build release Documentation:searchfree
+  ./tools/maven/api.sh install</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Sanity check WAR</p>
+</li>
+<li>
+<p>Test the new Gerrit version</p>
+</li>
+<li>
+<p>Verify plugin versions</p>
+<div class="paragraph">
+<p>Verify the versions:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  java -jar bazel-bin/release.war init --list-plugins</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="publish-gerrit">Publish the Gerrit Release</h3>
+<div class="sect3">
+<h4 id="publish-to-maven-central">Publish the Gerrit artifacts to Maven Central</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Make sure you have done the
+<a href="dev-release-deploy-config.html#deploy-configuration-setting-maven-central">
+configuration</a> for deploying to Maven Central</p>
+</li>
+<li>
+<p>Make sure that the version is updated in the <code>version.bzl</code> file and in
+the <code>pom.xml</code> files as described in the <a href="#update-versions">Update
+Versions and Create Release Tag</a> section.</p>
+</li>
+<li>
+<p>Push the WAR to Maven Central:</p>
+<div class="listingblock">
+<div class="content">
+<pre>  ./tools/maven/api.sh war_deploy</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Push the plugin artifacts to Maven Central:</p>
+<div class="listingblock">
+<div class="content">
+<pre>  ./tools/maven/api.sh deploy</pre>
+</div>
+</div>
+</li>
+<li>
+<p>To where the artifacts are uploaded depends on the <code>GERRIT_VERSION</code> in
+the <code>version.bzl</code> file:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>SNAPSHOT versions are directly uploaded into the Sonatype snapshots
+repository and no further action is needed:</p>
+<div class="paragraph">
+<p><a href="https://oss.sonatype.org/content/repositories/snapshots/com/google/gerrit/" class="bare">https://oss.sonatype.org/content/repositories/snapshots/com/google/gerrit/</a></p>
+</div>
+</li>
+<li>
+<p>Release versions are uploaded into a staging repository in the
+<a href="https://oss.sonatype.org/">Sonatype Nexus Server</a>.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Verify the staging repository</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Go to the <a href="https://oss.sonatype.org/">Sonatype Nexus Server</a> and
+sign in with your Sonatype credentials.</p>
+</li>
+<li>
+<p>Click on 'Build Promotion' in the left navigation bar under
+'Staging Repositories' and find the <code>comgooglegerrit-XXXX</code> staging
+repository.</p>
+</li>
+<li>
+<p>Verify its content</p>
+<div class="paragraph">
+<p>While the staging repository is open you can upload further content and
+also replace uploaded artifacts. If something is wrong with the staging
+repository you can drop it by selecting it and clicking on <code>Drop</code>.</p>
+</div>
+</li>
+<li>
+<p>Run Sonatype validations on the staging repository</p>
+<div class="paragraph">
+<p>Select the staging repository and click on <code>Close</code>. This runs the
+Sonatype validations on the staging repository. The repository will
+only be closed if everything is OK. A closed repository cannot be
+modified anymore, but you may still drop it if you find any issues.</p>
+</div>
+</li>
+<li>
+<p>Test closed staging repository</p>
+<div class="paragraph">
+<p>Once a repository is closed you can find the URL to it in the <code>Summary</code>
+section, e.g. <a href="https://oss.sonatype.org/content/repositories/comgooglegerrit-1029" class="bare">https://oss.sonatype.org/content/repositories/comgooglegerrit-1029</a></p>
+</div>
+<div class="paragraph">
+<p>Use this URL for further testing of the artifacts in this repository,
+e.g. to try building a plugin against the plugin API in this repository
+update the version in the <code>pom.xml</code> and configure the repository:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;repositories&gt;
+    &lt;repository&gt;
+      &lt;id&gt;gerrit-staging-repository&lt;/id&gt;
+      &lt;url&gt;https://oss.sonatype.org/content/repositories/comgooglegerrit-1029&lt;/url&gt;
+    &lt;/repository&gt;
+  &lt;/repositories&gt;</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Release the staging repository</p>
+<div class="paragraph">
+<p>How to release a staging repository is described in the
+<a href="https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-8.a.2.ReleasingaStagingRepository">
+Sonatype OSS Maven Repository Usage Guide</a>.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Releasing artifacts to Maven Central cannot be undone!
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Find the closed staging repository in the
+<a href="https://oss.sonatype.org/">Sonatype Nexus Server</a>, select it and
+click on <code>Release</code>.</p>
+</li>
+<li>
+<p>The released artifacts are available in
+<a href="https://oss.sonatype.org/content/repositories/releases/com/google/gerrit/" class="bare">https://oss.sonatype.org/content/repositories/releases/com/google/gerrit/</a></p>
+</li>
+<li>
+<p>It may take up to 2 hours until the artifacts appear on Maven
+Central:</p>
+<div class="paragraph">
+<p><a href="http://central.maven.org/maven2/com/google/gerrit/" class="bare">http://central.maven.org/maven2/com/google/gerrit/</a></p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>[optional]: View download statistics</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Sign in to the
+<a href="https://oss.sonatype.org/">Sonatype Nexus Server</a>.</p>
+</li>
+<li>
+<p>Click on 'Views/Repositories' in the left navigation bar under
+'Central Statistics'.</p>
+</li>
+<li>
+<p>Select <code>com.google.gerrit</code> as <code>Project</code>.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="publish-to-google-storage">Publish the Gerrit WAR to the Google Cloud Storage</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>go to the <a href="https://console.cloud.google.com/storage/browser/gerrit-releases/?project=api-project-164060093628">
+gerrit-releases bucket in the Google cloud storage console</a></p>
+</li>
+<li>
+<p>make sure you are signed in with your Gmail account</p>
+</li>
+<li>
+<p>manually upload the Gerrit WAR file by using the <code>Upload</code> button</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="push-stable">Push the Stable Branch</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Create the stable branch <code>stable-2.5</code> in the <code>gerrit</code> project via the
+<a href="https://gerrit-review.googlesource.com/#/admin/projects/gerrit,branches">
+Gerrit Web UI</a> or by push.</p>
+</li>
+<li>
+<p>Push the commits done on <code>stable-2.5</code> to <code>refs/for/stable-2.5</code> and
+get them merged</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="push-tag">Push the Release Tag</h4>
+<div class="paragraph">
+<p>Push the new Release Tag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push gerrit-review tag v2.5</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Push the new Release Tag on the plugins:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git submodule foreach git push gerrit-review tag v2.5</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="upload-documentation">Upload the Documentation</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Extract the documentation files from the zip file generated from
+<code>bazel build searchfree</code>: <code>bazel-bin/Documentation/searchfree.zip</code>.</p>
+</li>
+<li>
+<p>Upload the files manually via web browser to the appropriate folder
+in the
+<a href="https://console.cloud.google.com/storage/browser/gerrit-documentation/?project=api-project-164060093628">
+gerrit-documentation</a> storage bucket.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="finalize-release-notes">Finalize the Release Notes</h3>
+<div class="paragraph">
+<p>Upload a change on the homepage project to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Remove 'In Development' caveat from the relevant section.</p>
+</li>
+<li>
+<p>Add links to the released documentation and the .war file, and make the
+latest version bold.</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="update-links">Update homepage links</h4>
+<div class="paragraph">
+<p>Upload a change on the <a href="https://gerrit-review.googlesource.com/#/admin/projects/homepage">
+homepage project</a> to change the version numbers to the new version.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="update-issues">Update the Issues</h4>
+<div class="paragraph">
+<p>Update the issues by hand. There is no script for this.</p>
+</div>
+<div class="paragraph">
+<p>Our current process is an issue should be updated to say <code>Status =
+Submitted, FixedIn-2.5</code> once the change is submitted, but before the
+release.</p>
+</div>
+<div class="paragraph">
+<p>After the release is actually made, you can search in Google Code for
+<code>Status=Submitted FixedIn=2.5</code> and then batch update these changes
+to say <code>Status=Released</code>. Make sure the pulldown says <code>All Issues</code>
+because <code>Status=Submitted</code> is considered a closed issue.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="announce">Announce on Mailing List</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Send an email to the mailing list to announce the release, consider
+including some or all of the following in the email:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>A link to the release and the release notes</p>
+</li>
+<li>
+<p>A link to the docs</p>
+</li>
+<li>
+<p>Describe the type of release (stable, bug fix, RC)</p>
+</li>
+<li>
+<p>Hash values (SHA1, SHA256, MD5) for the release WAR file.</p>
+<div class="paragraph">
+<p>The SHA1 and MD5 can be taken from the artifact page on Sonatype. The
+SHA256 can be generated with
+<code>openssl sha -sha256 bazel-bin/release.war</code> or an equivalent
+command.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Update the new discussion group announcement to be sticky</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Go to: <a href="http://groups.google.com/group/repo-discuss/topics" class="bare">http://groups.google.com/group/repo-discuss/topics</a></p>
+</li>
+<li>
+<p>Click on the announcement thread</p>
+</li>
+<li>
+<p>Near the top right, click on actions</p>
+</li>
+<li>
+<p>Under actions, click the "Display this top first" checkbox</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Update the previous discussion group announcement to no longer be sticky</p>
+<div class="ulist">
+<ul>
+<li>
+<p>See above (unclick checkbox)</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="increase-version">Increase Gerrit Version for Current Development</h3>
+<div class="paragraph">
+<p>All new development that is done in the <code>master</code> branch will be included in the
+next Gerrit release. The Gerrit version should be set to the snapshot version
+for the next release.</p>
+</div>
+<div class="paragraph">
+<p>Use the <code>version</code> tool to set the version in the <code>version.bzl</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> ./tools/version.py 2.11-SNAPSHOT</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify that the changes made by the tool are sane, then commit them, push
+the change for review on the master branch, and get it merged.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="merge-stable">Merge <code>stable</code> into <code>master</code></h3>
+<div class="paragraph">
+<p>After every release, stable should be merged to master to ensure that
+none of the changes/fixes ever get lost.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git config merge.summary true
+  git checkout master
+  git reset --hard origin/master
+  git branch -f stable origin/stable
+  git merge stable</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

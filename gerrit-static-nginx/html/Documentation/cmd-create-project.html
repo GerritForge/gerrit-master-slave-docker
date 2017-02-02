@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>gerrit create-project</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>gerrit create-project</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_access">ACCESS</a></li>
+<li><a href="#_scripting">SCRIPTING</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_examples">EXAMPLES</a></li>
+<li><a href="#_replication">REPLICATION</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>gerrit create-project - Create a new hosted project</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>ssh</em> -p &lt;port&gt; &lt;host&gt; <em>gerrit create-project</em>
+  [--owner &lt;GROUP&gt; &#8230;&#8203; | -o &lt;GROUP&gt; &#8230;&#8203;]
+  [--parent &lt;NAME&gt; | -p &lt;NAME&gt; ]
+  [--suggest-parents | -S ]
+  [--permissions-only]
+  [--description &lt;DESC&gt; | -d &lt;DESC&gt;]
+  [--submit-type &lt;TYPE&gt; | -t &lt;TYPE&gt;]
+  [--use-contributor-agreements | --ca]
+  [--use-signed-off-by | --so]
+  [--use-content-merge]
+  [--create-new-change-for-all-not-in-target]
+  [--require-change-id | --id]
+  [[--branch &lt;REF&gt; | -b &lt;REF&gt;] &#8230;&#8203;]
+  [--empty-commit]
+  [--max-object-size-limit &lt;N&gt;]
+  [--plugin-config &lt;PARAM&gt; &#8230;&#8203;]
+  { &lt;NAME&gt; }</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Creates a new bare Git repository under <code>gerrit.basePath</code>, using
+the project name supplied.  The newly created repository is empty
+(has no commits), but is registered in the Gerrit database so that
+the initial commit may be uploaded for review, or initial content
+can be pushed directly into a branch.</p>
+</div>
+<div class="paragraph">
+<p>If replication is enabled, this command also connects to each of
+the configured remote systems over SSH and uses command line git
+on the remote system to create the empty repository.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_access">ACCESS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Caller must be a member of the privileged 'Administrators' group,
+or have been granted
+<a href="access-control.html#capability_createProject">the 'Create Project' global capability</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scripting">SCRIPTING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command is intended to be used in scripts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">&lt;NAME&gt;</dt>
+<dd>
+<p>Required; name of the new project to create.  If name ends
+with <code>.git</code> the suffix will be automatically removed.</p>
+</dd>
+<dt class="hdlist1">--branch</dt>
+<dt class="hdlist1">-b</dt>
+<dd>
+<p>Name of the initial branch(es) in the newly created project.
+Several branches can be specified on the command line.
+If several branches are specified then the first one becomes HEAD
+of the project. If none branches are specified then default value
+('master') is used.</p>
+</dd>
+<dt class="hdlist1">--owner</dt>
+<dt class="hdlist1">-o</dt>
+<dd>
+<p>Name of the group(s) which will initially own this repository.
+The specified group(s) must already be defined within Gerrit.
+Several groups can be specified on the command line.</p>
+<div class="paragraph">
+<p>Defaults to what is specified by <code>repository.*.ownerGroup</code>
+in gerrit.config.</p>
+</div>
+</dd>
+<dt class="hdlist1">--parent</dt>
+<dt class="hdlist1">-p</dt>
+<dd>
+<p>Name of the parent project to inherit access rights
+through. If not specified, the parent is set to the default
+project <code>All-Projects</code>.</p>
+</dd>
+<dt class="hdlist1">--suggest-parents</dt>
+<dt class="hdlist1">-S</dt>
+<dd>
+<p>Suggest parent candidates. This option cannot be used with
+other arguments. Print out a list of projects that are
+already parents to other projects, thus it can help the user
+find a suitable parent for the new project.</p>
+</dd>
+<dt class="hdlist1">--permissions-only</dt>
+<dd>
+<p>Create the project only to serve as a parent for other
+projects.  The new project&#8217;s Git repository will be
+initialized to have 'HEAD' point to 'refs/meta/config'.</p>
+</dd>
+<dt class="hdlist1">--description</dt>
+<dt class="hdlist1">-d</dt>
+<dd>
+<p>Initial description of the project.  If not specified,
+no description is stored.</p>
+<div class="paragraph">
+<p>Description values containing spaces should be quoted in single quotes
+(').  This most likely requires double quoting the value, for example
+<code>--description "'A description string'"</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">--submit-type</dt>
+<dt class="hdlist1">-t</dt>
+<dd>
+<p>Action used by Gerrit to submit an approved change to its
+destination branch.  Supported options are:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>FAST_FORWARD_ONLY: produces a strictly linear history.</p>
+</li>
+<li>
+<p>MERGE_IF_NECESSARY: create a merge commit when required.</p>
+</li>
+<li>
+<p>REBASE_IF_NECESSARY: rebase the commit when required.</p>
+</li>
+<li>
+<p>MERGE_ALWAYS: always create a merge commit.</p>
+</li>
+<li>
+<p>CHERRY_PICK: always cherry-pick the commit.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Defaults to MERGE_IF_NECESSARY unless
+<a href="config-gerrit.html#repository.name.defaultSubmitType">
+repository.&lt;name&gt;.defaultSubmitType</a> is set to a different value.
+For more details see <a href="project-configuration.html#submit_type">
+Submit Types</a>.</p>
+</div>
+</dd>
+<dt class="hdlist1">--use-content-merge</dt>
+<dd>
+<p>If enabled, Gerrit will try to perform a 3-way merge of text
+file content when a file has been modified by both the
+destination branch and the change being submitted.  This
+option only takes effect if submit type is not
+FAST_FORWARD_ONLY.  Disabled by default.</p>
+</dd>
+<dt class="hdlist1">--use-contributor-agreements</dt>
+<dt class="hdlist1">--ca</dt>
+<dd>
+<p>If enabled, authors must complete a contributor agreement
+on the site before pushing any commits or changes to this
+project.  Disabled by default.</p>
+</dd>
+<dt class="hdlist1">--use-signed-off-by</dt>
+<dd>
+<p>--so:
+	If enabled, each change must contain a Signed-off-by line
+	from either the author or the uploader in the commit message.
+	Disabled by default.</p>
+</dd>
+<dt class="hdlist1">--create-new-change-for-all-not-in-target</dt>
+<dd>
+<p>--ncfa:
+	If enabled, a new change is created for every commit that is not in
+	the target branch. If the pushed commit is a merge commit, this flag is
+	ignored for that push. To avoid accidental creation of a large number
+	of open changes, this option also does not accept merge commits in the
+	commit chain.
+	Disabled by default.</p>
+</dd>
+<dt class="hdlist1">--require-change-id</dt>
+<dt class="hdlist1">--id</dt>
+<dd>
+<p>Require a valid <a href="user-changeid.html">Change-Id</a> footer
+in any commit uploaded for review. This does not apply to
+commits pushed directly to a branch or tag.</p>
+</dd>
+<dt class="hdlist1">--empty-commit</dt>
+<dd>
+<p>Creates an initial empty commit for the Git repository of the
+project that is newly created.</p>
+</dd>
+<dt class="hdlist1">--max-object-size-limit</dt>
+<dd>
+<p>Define maximum Git object size for this project. Pushes containing an
+object larger than this limit will be rejected. This can be used to
+further limit the global
+ <a href="config-gerrit.html#receive.maxObjectSizeLimit">receive.maxObjectSizeLimit</a>
+and cannot be used to increase that globally set limit.</p>
+<div class="paragraph">
+<p>Common unit suffixes of 'k', 'm', or 'g' are supported.</p>
+</div>
+</dd>
+<dt class="hdlist1">--plugin-config</dt>
+<dd>
+<p>A plugin configuration parameter that should be set for this
+project. The plugin configuration parameter must be specified in
+the format '&lt;plugin-name&gt;.&lt;parameter-name&gt;=&lt;value&gt;'. Only
+parameters that are explicitly declared by a plugin can be set.
+Multiple <code>--plugin-config</code> options can be specified to set multiple
+plugin parameters.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">EXAMPLES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Create a new project called <code>tools/gerrit</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit create-project tools/gerrit.git</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a new project with a description:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit create-project tool.git --description "'Tools used by build system'"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that it is necessary to quote the description twice.  The local
+shell needs double quotes around the value to ensure the single quotes
+are passed through SSH as-is to the remote Gerrit server, which uses
+the single quotes to delimit the value.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_replication">REPLICATION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the replication plugin is installed, the plugin will attempt to
+perform remote repository creation by a Bourne shell script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  mkdir -p '/base/project.git' &amp;&amp; cd '/base/project.git' &amp;&amp; git init --bare &amp;&amp; git update-ref HEAD refs/heads/master</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For this to work successfully the remote system must be able to run
+arbitrary shell scripts, and must have <code>git</code> in the user&#8217;s PATH
+environment variable.  Administrators could also run this command line
+by hand to establish a new empty repository.</p>
+</div>
+<div class="paragraph">
+<p>A custom extension or plugin may also be developed to implement the
+NewProjectCreatedListener extension point and handle custom logic
+for remote repository creation.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="project-configuration.html">Project Configuration</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

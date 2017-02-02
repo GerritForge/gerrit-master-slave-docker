@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - /access/ REST API</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - /access/ REST API</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#access-endpoints">Access Rights Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#list-access">List Access Rights</a></li>
+</ul>
+</li>
+<li><a href="#json-entities">JSON Entities</a>
+<ul class="sectlevel2">
+<li><a href="#access-section-info">AccessSectionInfo</a></li>
+<li><a href="#permission-info">PermissionInfo</a></li>
+<li><a href="#permission-rule-info">PermissionRuleInfo</a></li>
+<li><a href="#project-access-info">ProjectAccessInfo</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page describes the access rights related REST endpoints.
+Please also take note of the general information on the
+<a href="rest-api.html">REST API</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="access-endpoints">Access Rights Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="list-access">List Access Rights</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /access/?project=<a href="rest-api-projects.html#project-name">{project-name}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lists the access rights for projects. The projects for which the access
+rights should be returned must be specified as <code>project</code> options. The
+<code>project</code> can be specified multiple times.</p>
+</div>
+<div class="paragraph">
+<p>As result a map is returned that maps the project name to
+<a href="#project-access-info">ProjectAccessInfo</a> entities.</p>
+</div>
+<div class="paragraph">
+<p>The entries in the map are sorted by project name.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /access/?project=MyProject&amp;project=All-Projects HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "All-Projects": {
+      "revision": "edd453d18e08640e67a8c9a150cec998ed0ac9aa",
+      "local": {
+        "GLOBAL_CAPABILITIES": {
+          "permissions": {
+            "priority": {
+              "rules": {
+                "15bfcd8a6de1a69c50b30cedcdcc951c15703152": {
+                  "action": "BATCH"
+                }
+              }
+            },
+            "streamEvents": {
+              "rules": {
+                "15bfcd8a6de1a69c50b30cedcdcc951c15703152": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "administrateServer": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                }
+              }
+            }
+          }
+        },
+        "refs/meta/config": {
+          "permissions": {
+            "submit": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "label-Code-Review": {
+              "label": "Code-Review",
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW",
+                  "min": -2,
+                  "max": 2
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW",
+                  "min": -2,
+                  "max": 2
+                }
+              }
+            },
+            "read": {
+              "exclusive": true,
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "push": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            }
+          }
+        },
+        "refs/for/refs/*": {
+          "permissions": {
+            "pushMerge": {
+              "rules": {
+                "global:Registered-Users": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "push": {
+              "rules": {
+                "global:Registered-Users": {
+                  "action": "ALLOW"
+                }
+              }
+            }
+          }
+        },
+        "refs/tags/*": {
+          "permissions": {
+            "createSignedTag": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "createTag": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            }
+          }
+        },
+        "refs/heads/*": {
+          "permissions": {
+            "forgeCommitter": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "forgeAuthor": {
+              "rules": {
+                "global:Registered-Users": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "submit": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "editTopicName": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW",
+                  "force": true
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW",
+                  "force": true
+                }
+              }
+            },
+            "label-Code-Review": {
+              "label": "Code-Review",
+              "rules": {
+                "global:Registered-Users": {
+                  "action": "ALLOW",
+                  "min": -1,
+                  "max": 1
+                },
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW",
+                  "min": -2,
+                  "max": 2
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW",
+                  "min": -2,
+                  "max": 2
+                }
+              }
+            },
+            "create": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            },
+            "push": {
+              "rules": {
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                },
+                "global:Project-Owners": {
+                  "action": "ALLOW"
+                }
+              }
+            }
+          }
+        },
+        "refs/*": {
+          "permissions": {
+            "read": {
+              "rules": {
+                "global:Anonymous-Users": {
+                  "action": "ALLOW"
+                },
+                "53a4f647a89ea57992571187d8025f830625192a": {
+                  "action": "ALLOW"
+                }
+              }
+            }
+          }
+        }
+      },
+      "is_owner": true,
+      "owner_of": [
+        "GLOBAL_CAPABILITIES",
+        "refs/meta/config",
+        "refs/for/refs/*",
+        "refs/tags/*",
+        "refs/heads/*",
+        "refs/*"
+      ],
+      "can_upload": true,
+      "can_add": true,
+      "config_visible": true
+    },
+    "MyProject": {
+      "revision": "61157ed63e14d261b6dca40650472a9b0bd88474",
+      "inherits_from": {
+        "id": "All-Projects",
+        "name": "All-Projects",
+        "description": "Access inherited by all other projects."
+      },
+      "local": {},
+      "is_owner": true,
+      "owner_of": [
+        "refs/*"
+      ],
+      "can_upload": true,
+      "can_add": true,
+      "config_visible": true
+    }
+  }</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="json-entities">JSON Entities</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="access-section-info">AccessSectionInfo</h3>
+<div class="paragraph">
+<p>The <code>AccessSectionInfo</code> describes the access rights that are assigned
+on a ref.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>permissions</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The permissions assigned on the ref of this access section as a map
+that maps the permission names to <a href="#permission-info">PermissionInfo</a>
+entities.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="permission-info">PermissionInfo</h3>
+<div class="paragraph">
+<p>The <code>PermissionInfo</code> entity contains information about an assigned
+permission.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the label. Not set if it&#8217;s not a label permission.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exclusive</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether this permission is assigned exclusively.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>rules</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The rules assigned for this permission as a map that maps the UUIDs of
+the groups for which the permission are assigned to
+<a href="#permission-info">PermissionRuleInfo</a> entities.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="permission-rule-info">PermissionRuleInfo</h3>
+<div class="paragraph">
+<p>The <code>PermissionRuleInfo</code> entity contains information about a permission
+rule that is assigned to group.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>action</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The action of this rule. For normal permissions this can be <code>ALLOW</code>,
+<code>DENY</code> or <code>BLOCK</code>. Special values for global capabilities are
+<code>INTERACTIVE</code> and <code>BATCH</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>force</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the force flag is set.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>min</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if range is empty (from <code>0</code> to <code>0</code>) or not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The min value of the permission range.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>max</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if range is empty (from <code>0</code> to <code>0</code>) or not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The max value of the permission range.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="project-access-info">ProjectAccessInfo</h3>
+<div class="paragraph">
+<p>The <code>ProjectAccessInfo</code> entity contains information about the access
+rights for a project.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>revision</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The revision of the <code>refs/meta/config</code> branch from which the access
+rights were loaded.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>inherits_from</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set for the <code>All-Project</code> project</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The parent project from which permissions are inherited as a
+<a href="rest-api-projects.html#project-info">ProjectInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>local</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The local access rights of the project as a map that maps the refs to
+<a href="#access-section-info">AccessSectionInfo</a> entities.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>is_owner</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the calling user owns this project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>owner_of</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The list of refs owned by the calling user.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>can_upload</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the calling user can upload to any ref.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>can_add</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the calling user can add any ref.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>config_visible</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the calling user can see the <code>refs/meta/config</code> branch of the
+project.</p></td>
+</tr>
+</tbody>
+</table>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Standalone Daemon Installation Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Standalone Daemon Installation Guide</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#cryptography">Configure Java for Strong Cryptography</a></li>
+<li><a href="#download">Download Gerrit</a></li>
+<li><a href="#createdb">Database Setup</a>
+<ul class="sectlevel2">
+<li><a href="#createdb_h2">H2</a></li>
+<li><a href="#createdb_derby">Apache Derby</a></li>
+<li><a href="#createdb_postgres">PostgreSQL</a></li>
+<li><a href="#createdb_mysql">MySQL</a></li>
+<li><a href="#createdb_oracle">Oracle</a></li>
+<li><a href="#createdb_maxdb">SAP MaxDB</a></li>
+<li><a href="#createdb_db2">DB2</a></li>
+<li><a href="#createdb_hana">SAP HANA</a></li>
+</ul>
+</li>
+<li><a href="#init">Initialize the Site</a></li>
+<li><a href="#_installation_complete">Installation Complete</a></li>
+<li><a href="#project_setup">Project Setup</a></li>
+<li><a href="#rc_d">Start/Stop Daemon</a></li>
+<li><a href="#installation_on_windows">Installation on Windows</a>
+<ul class="sectlevel2">
+<li><a href="#_install_the_daemon_as_windows_service">Install the daemon as Windows Service</a></li>
+</ul>
+</li>
+<li><a href="#customize">Site Customization</a></li>
+<li><a href="#anonymous_access">Anonymous Access</a></li>
+<li><a href="#plugins">Plugins</a></li>
+<li><a href="#_external_documentation_links">External Documentation Links</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="requirements">Requirements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run the Gerrit service, the following requirements must be met on
+the host:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>JRE, minimum version 1.8 <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Download</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll also need an SQL database to house the review metadata. You have the
+choice of either using the embedded H2 or to host your own MySQL or PostgreSQL.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="cryptography">Configure Java for Strong Cryptography</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Support for extra strength cryptographic ciphers: <em>AES128CTR</em>, <em>AES256CTR</em>,
+<em>ARCFOUR256</em>, and <em>ARCFOUR128</em> can be enabled by downloading the <em>Java
+Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files</em>
+from Oracle and installing them into your JRE.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Installing JCE extensions is optional and export restrictions may apply.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Download the unlimited strength JCE policy files.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">JDK7 JCE policy files</a></p>
+</li>
+<li>
+<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">JDK8 JCE policy files</a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Uncompress and extract the downloaded file.</p>
+<div class="paragraph">
+<p>The downloaded file  contains the following files:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">README.txt</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about JCE and installation guide</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">local_policy.jar</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unlimited strength local policy file</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">US_export_policy.jar</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unlimited strength US export policy file</p></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>Install the unlimited strength policy JAR files by following instructions
+found in <code>README.txt</code>.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="download">Download Gerrit</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Current and past binary releases of Gerrit can be obtained from
+the <a href="https://www.gerritcodereview.com/download/index.html">
+Gerrit Releases site</a>.</p>
+</div>
+<div class="paragraph">
+<p>Download any current <code>*.war</code> package. The war will be referred to as
+<code>gerrit.war</code> from this point forward, so you may find it easier to
+rename the downloaded file.</p>
+</div>
+<div class="paragraph">
+<p>If you would prefer to build Gerrit directly from source, review
+the notes under <a href="dev-readme.html">developer setup</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="createdb">Database Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>During the init phase of Gerrit you will need to specify which database to use.</p>
+</div>
+<div class="sect2">
+<h3 id="createdb_h2">H2</h3>
+<div class="paragraph">
+<p>If you choose H2, Gerrit will automatically set up the embedded H2 database as
+backend so no set up or configuration is necessary.</p>
+</div>
+<div class="paragraph">
+<p>Using the embedded H2 database is the easiest way to get a Gerrit
+site up and running, making it ideal for proof of concepts or small team
+servers.  On the flip side, H2 is not the recommended option for large
+corporate installations. This is because there is no easy way to interact
+with the database while Gerrit is offline, it&#8217;s not easy to backup the data,
+and it&#8217;s not possible to set up H2 in a load balanced/hotswap configuration.</p>
+</div>
+<div class="paragraph">
+<p>If this option interests you, you might want to consider <a href="install-quick.html">the quick guide</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_derby">Apache Derby</h3>
+<div class="paragraph">
+<p>If Derby is selected, Gerrit will automatically set up the embedded Derby
+database as backend so no set up or configuration is necessary.</p>
+</div>
+<div class="paragraph">
+<p>Currently only support for embedded mode is added. There are two other
+deployment options for Apache Derby that can be added later:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://db.apache.org/derby/papers/DerbyTut/ns_intro.html#Network+Server+Options">
+Derby Network Server (standalone mode)</a></p>
+</li>
+<li>
+<p><a href="http://db.apache.org/derby/papers/DerbyTut/ns_intro.html#Embedded+Server">
+Embedded Server (hybrid mode)</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_postgres">PostgreSQL</h3>
+<div class="paragraph">
+<p>This option is more complicated than the H2 option but is recommended
+for larger installations. It&#8217;s the database backend with the largest userbase
+in the Gerrit community.</p>
+</div>
+<div class="paragraph">
+<p>Create a user for the web application within PostgreSQL, assign it a
+password, create a database to store the metadata, and grant the user
+full rights on the newly created database:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ createuser --username=postgres -RDIElPS gerrit2
+  $ createdb --username=postgres -E UTF-8 -O gerrit2 reviewdb</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit PostgreSQL&#8217;s <a href="http://www.postgresql.org/docs/9.1/interactive/index.html">documentation</a> for further information regarding
+using PostgreSQL.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_mysql">MySQL</h3>
+<div class="paragraph">
+<p>This option is also more complicated than the H2 option. Just as with
+PostgreSQL it&#8217;s also recommended for larger installations.</p>
+</div>
+<div class="paragraph">
+<p>Create a user for the web application within the database, assign it a
+password, create a database, and give the newly created user full
+rights on it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  mysql
+
+  CREATE USER 'gerrit2'@'localhost' IDENTIFIED BY 'secret';
+  CREATE DATABASE reviewdb;
+  GRANT ALL ON reviewdb.* TO 'gerrit2'@'localhost';
+  FLUSH PRIVILEGES;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit MySQL&#8217;s <a href="http://dev.mysql.com/doc/">documentation</a> for further
+information regarding using MySQL.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_oracle">Oracle</h3>
+<div class="paragraph">
+<p>PostgreSQL or H2 is the recommended database for Gerrit Code Review.
+Oracle is supported for environments where running on an existing Oracle
+installation simplifies administrative overheads, such as database backups.</p>
+</div>
+<div class="paragraph">
+<p>Create a user for the web application within sqlplus, assign it a
+password, and grant the user full rights on the newly created database:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  SQL&gt; create user gerrit2 identified by secret_password default tablespace users;
+  SQL&gt; grant connect, resources to gerrit2;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>JDBC driver ojdbc6.jar must be obtained from your Oracle distribution. Gerrit
+initialization process tries to copy it from a known location:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/u01/app/oracle/product/11.2.0/xe/jdbc/lib/ojdbc6.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If this file can not be located at this place, then the alternative location
+can be provided.</p>
+</div>
+<div class="paragraph">
+<p>Instance name is the Oracle SID. Sample database section in
+$site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = oracle
+        instance = xe
+        hostname = localhost
+        username = gerrit2
+        port = 1521</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sample database section in $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = secret_pasword</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_maxdb">SAP MaxDB</h3>
+<div class="paragraph">
+<p>SAP MaxDB is a supported database for running Gerrit Code Review. However it is
+recommended only for environments where you intend to run Gerrit on an existing
+MaxDB installation to reduce administrative overhead.</p>
+</div>
+<div class="paragraph">
+<p>In the MaxDB studio or using the SQLCLI command line interface create a user
+'gerrit2' with the user class 'RESOURCE' and a password &lt;secret password&gt;. This
+will also create an associated schema on the database.</p>
+</div>
+<div class="paragraph">
+<p>To run Gerrit on MaxDB, you need to obtain the MaxDB JDBC driver. It can be
+found in your MaxDB installation at the following location:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>on Windows 64bit at "C:\Program Files\sdb\MaxDB\runtime\jar\sapdbc.jar"</p>
+</li>
+<li>
+<p>on Linux at "/opt/sdb/MaxDB/runtime/jar/sapdbc.jar"</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It needs to be stored in the 'lib' folder of the review site.</p>
+</div>
+<div class="paragraph">
+<p>In the following sample database section it is assumed that the database name is
+'reviewdb' and the database is installed on localhost:</p>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = maxdb
+        database = reviewdb
+        hostname = localhost
+        username = gerrit2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = &lt;secret password&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit SAP MaxDB&#8217;s <a href="http://maxdb.sap.com/documentation/">documentation</a> for further
+information regarding using SAP MaxDB.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_db2">DB2</h3>
+<div class="paragraph">
+<p>IBM DB2 is a supported database for running Gerrit Code Review. However it is
+recommended only for environments where you intend to run Gerrit on an existing
+DB2 installation to reduce administrative overhead.</p>
+</div>
+<div class="paragraph">
+<p>Create a system wide user for the Gerrit application, and grant the user
+full rights on the newly created database:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  db2 =&gt; create database gerrit
+  db2 =&gt; connect to gerrit
+  db2 =&gt; grant connect,accessctrl,dataaccess,dbadm,secadm on database to gerrit2;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>JDBC driver db2jcc4.jar and db2jcc_license_cu.jar must be obtained
+from your DB2 distribution. Gerrit initialization process tries to copy
+it from a known location:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>/opt/ibm/db2/V10.5/java/db2jcc4.jar
+/opt/ibm/db2/V10.5/java/db2jcc_license_cu.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If these files cannot be located at this place, then an alternative location
+can be provided during init step execution.</p>
+</div>
+<div class="paragraph">
+<p>Sample database section in $site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = db2
+        database = gerrit
+        hostname = localhost
+        username = gerrit2
+        port = 50001</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sample database section in $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = secret_pasword</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="createdb_hana">SAP HANA</h3>
+<div class="paragraph">
+<p>SAP HANA is a supported database for running Gerrit Code Review. However it is
+recommended only for environments where you intend to run Gerrit on an existing
+HANA installation to reduce administrative overhead.</p>
+</div>
+<div class="paragraph">
+<p>In the HANA studio or the SAP HANA Web-based Development Workbench create a user
+'GERRIT2' with the role 'RESTRICTED_USER_JDBC_ACCESS' and a password
+&lt;secret password&gt;. This will also create an associated schema on the database.
+As this user would be required to change the password upon first login you might
+want to to disable the password lifetime check by executing
+'ALTER USER GERRIT2 DISABLE PASSWORD LIFETIME'.</p>
+</div>
+<div class="paragraph">
+<p>To run Gerrit on HANA, you need to obtain the HANA JDBC driver. It can be found
+as described
+<a href="http://help.sap.com/saphelp_hanaplatform/helpdata/en/ff/15928cf5594d78b841fbbe649f04b4/frameset.htm">here</a>.
+It needs to be stored in the 'lib' folder of the review site.</p>
+</div>
+<div class="paragraph">
+<p>In the following sample database section it is assumed that HANA is running on
+the host 'hana.host' with the instance number 00 where a schema/user GERRIT2
+was created:</p>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/gerrit.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        type = hana
+        instance = 00
+        hostname = hana.host
+        username = GERRIT2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In $site_path/etc/secure.config:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[database]
+        password = &lt;secret password&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Visit SAP HANA&#8217;s <a href="http://help.sap.com/hana_appliance/">documentation</a> for
+further information regarding using SAP HANA.</p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="init">Initialize the Site</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit stores configuration files, the server&#8217;s SSH keys, and the
+managed Git repositories under a local directory, typically referred
+to as <code>'$site_path'</code>.  If the embedded H2 database is being used,
+its data files will also be stored under this directory.</p>
+</div>
+<div class="paragraph">
+<p>You also have to decide where to store your server side git repositories. This
+can either be a relative path under <code>'$site_path'</code> or an absolute path
+anywhere on your server system. You have to choose a place before commencing
+your init phase.</p>
+</div>
+<div class="paragraph">
+<p>Initialize a new site directory by running the init command, passing
+the path of the site directory to be created as an argument to the
+'-d' option.  Its recommended that Gerrit Code Review be given its
+own user account on the host system:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  sudo adduser gerrit2
+  sudo su gerrit2
+
+  java -jar gerrit.war init -d /path/to/your/gerrit_application_directory</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you choose a location where your new user doesn&#8217;t
+have any privileges, you may have to manually create the directory first and
+then give ownership of that location to the <code>'gerrit2'</code> user.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If run from an interactive terminal, the init command will prompt through a
+series of configuration questions, including gathering information
+about the database created above.  If the terminal is not interactive,
+running the init command will choose some reasonable default selections,
+and will use the embedded H2 database. Once the init phase is complete,
+you can review your settings in the file <code>'$site_path/etc/gerrit.config'</code>.</p>
+</div>
+<div class="paragraph">
+<p>When running the init command, additional JARs might be downloaded to
+support optional selected functionality.  If a download fails a URL will
+be displayed and init will wait for the user to manually download the JAR
+and store it in the target location.</p>
+</div>
+<div class="paragraph">
+<p>When the init phase is complete, the daemon will be automatically started
+in the background and your web browser will open to the site:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Initialized /home/gerrit2/review_site
+  Executing /home/gerrit2/review_site/bin/gerrit.sh start
+  Starting Gerrit Code Review: OK
+  Waiting for server to start ... OK
+  Opening browser ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the browser opens, sign in to Gerrit through the web interface.
+The first user to sign-in and register an account will be
+automatically placed into the fully privileged Administrators group,
+permitting server management over the web and over SSH.  Subsequent
+users will be automatically registered as unprivileged users.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation_complete">Installation Complete</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Your base Gerrit server is now installed and running.  You&#8217;re now ready to
+either set up more projects or start working with the projects you&#8217;ve already
+imported.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project_setup">Project Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>See <a href="project-configuration.html">Project Configuration</a> for further details on
+how to register a new project with Gerrit.  This step is necessary
+if existing Git repositories were not imported during 'init'.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="rc_d">Start/Stop Daemon</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To control the Gerrit Code Review daemon that is running in the
+background, use the rc.d style start script created by 'init':</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  review_site/bin/gerrit.sh start
+  review_site/bin/gerrit.sh stop
+  review_site/bin/gerrit.sh restart</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>('Optional') Configure the daemon to automatically start and stop
+with the operating system.</p>
+</div>
+<div class="paragraph">
+<p>Uncomment the following 3 lines in the <code>'$site_path/bin/gerrit.sh'</code>
+script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> chkconfig: 3 99 99
+ description: Gerrit Code Review
+ processname: gerrit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then link the <code>gerrit.sh</code> script into <code>rc3.d</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  sudo ln -snf `pwd`/review_site/bin/gerrit.sh /etc/init.d/gerrit
+  sudo ln -snf /etc/init.d/gerrit /etc/rc3.d/S90gerrit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>('Optional') To enable autocompletion of the gerrit.sh commands, install
+autocompletion from the <code>/contrib/bash_completion</code> script.  Refer to the
+script&#8217;s header comments for installation instructions.</p>
+</div>
+<div class="paragraph">
+<p>To install Gerrit into an existing servlet container instead of using
+the embedded Jetty server, see
+<a href="install-j2ee.html">J2EE installation</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installation_on_windows">Installation on Windows</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If new site is going to be initialized with Bouncy Castle cryptography,
+ssh-keygen command must be available during the init phase. If you have
+<a href="https://git-for-windows.github.io/">Git for Windows</a> installed,
+start Command Prompt and temporary add directory with ssh-keygen to the
+PATH environment variable just before running init command:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>PATH=%PATH%;c:\Program Files\Git\usr\bin</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Please note that the path in the above example must not be
+double-quoted.</p>
+</div>
+<div class="paragraph">
+<p>To run the daemon after site initialization execute:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>cd C:\MY\GERRIT\SITE
+java.exe -jar bin\gerrit.war daemon --console-log</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To stop the daemon press Ctrl+C.</p>
+</div>
+<div class="sect2">
+<h3 id="_install_the_daemon_as_windows_service">Install the daemon as Windows Service</h3>
+<div class="paragraph">
+<p>To install Gerrit as Windows Service use the
+<a href="http://commons.apache.org/proper/commons-daemon/procrun.html">Apache
+Commons Daemon Procrun</a>.</p>
+</div>
+<div class="paragraph">
+<p>Sample install command:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>prunsrv.exe //IS//Gerrit --DisplayName="Gerrit Code Review" --Startup=auto ^
+      --Jvm="C:\Program Files\Java\jre1.8.0_65\bin\server\jvm.dll" ^
+      --Classpath=C:\MY\GERRIT\SITE\bin\gerrit.war ^
+      --LogPath=C:\MY\GERRIT\SITE\logs ^
+      --StartPath=C:\MY\GERRIT\SITE ^
+      --StartMode=jvm --StopMode=jvm ^
+      --StartClass=com.google.gerrit.launcher.GerritLauncher --StartMethod=daemonStart ^
+      --StopClass=com.google.gerrit.launcher.GerritLauncher --StopMethod=daemonStop ^
+      ++DependsOn=postgresql-x64-9.4</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="customize">Site Customization</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit Code Review supports some site-specific customization options.
+For more information, see the related topics in this manual:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="config-reverseproxy.html">Reverse Proxy</a></p>
+</li>
+<li>
+<p><a href="config-sso.html">Single Sign-On Systems</a></p>
+</li>
+<li>
+<p><a href="config-themes.html">Themes</a></p>
+</li>
+<li>
+<p><a href="config-gitweb.html">Gitweb Integration</a></p>
+</li>
+<li>
+<p><a href="config-gerrit.html">Other System Settings</a></p>
+</li>
+<li>
+<p><a href="config-auto-site-initialization.html">Automatic Site Initialization on Startup</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="anonymous_access">Anonymous Access</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Exporting the Git repository directory
+(<a href="config-gerrit.html#gerrit.basePath">gerrit.basePath</a>) over the
+anonymous, unencrypted git:// protocol is more efficient than
+Gerrit&#8217;s internal SSH daemon.  See the <code>git-daemon</code> documentation
+for details on how to configure this if anonymous access is desired.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.kernel.org/pub/software/scm/git/docs/git-daemon.html">man git-daemon</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="plugins">Plugins</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Place Gerrit plugins in the review_site/plugins directory to have them loaded on Gerrit startup.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_external_documentation_links">External Documentation Links</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.postgresql.org/docs/">PostgreSQL Documentation</a></p>
+</li>
+<li>
+<p><a href="http://dev.mysql.com/doc/">MySQL Documentation</a></p>
+</li>
+<li>
+<p><a href="http://www.kernel.org/pub/software/scm/git/docs/git-daemon.html">git-daemon</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>invalid committer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>invalid committer</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_incorrect_configuration_of_the_e_mail_address_on_client_or_server_side">Incorrect configuration of the e-mail address on client or server side</a>
+<ul class="sectlevel2">
+<li><a href="#_configuration_of_e_mail_address_in_gerrit">Configuration of e-mail address in Gerrit</a></li>
+<li><a href="#_incorrect_committer_information">Incorrect committer information</a></li>
+</ul>
+</li>
+<li><a href="#_missing_privileges_to_push_commits_that_were_committed_by_other_users">Missing privileges to push commits that were committed by other users</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>For every pushed commit Gerrit verifies that the e-mail address of
+the committer matches one of the registered e-mail addresses of the
+pushing user. If this is not the case pushing the commit fails with
+the error message "invalid committer". This policy can be
+bypassed by having the access right
+<a href="access-control.html#category_forge_committer">'Forge Committer'</a>.</p>
+</div>
+<div class="paragraph">
+<p>This error may happen for two reasons:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>incorrect configuration of the e-mail address on client or server
+side</p>
+</li>
+<li>
+<p>missing privileges to push commits that were committed by other
+users</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_incorrect_configuration_of_the_e_mail_address_on_client_or_server_side">Incorrect configuration of the e-mail address on client or server side</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If pushing to Gerrit fails with the error message "invalid committer"
+and you committed the change for which the push fails,
+then either you have not successfully registered this e-mail address
+for your Gerrit account or the committer information of the pushed
+commit is incorrect.</p>
+</div>
+<div class="sect2">
+<h3 id="_configuration_of_e_mail_address_in_gerrit">Configuration of e-mail address in Gerrit</h3>
+<div class="paragraph">
+<p>Check in Gerrit under 'Settings &#8594; Identities' which e-mail addresses
+you&#8217;ve configured for your Gerrit account.  If no e-mail address is
+registered go to 'Settings &#8594; Contact Information' and register a new
+e-mail address there. Make sure you confirm your e-mail address by
+clicking on the link in the e-mail verification mail sent by Gerrit.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_incorrect_committer_information">Incorrect committer information</h3>
+<div class="paragraph">
+<p>For every commit Git maintains the user who did the commit, the so
+called committer. Git computes the committer out of the Git
+configuration parameters 'user.name' and 'user.email'.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git config -l
+  ...
+  user.name=John Doe
+  user.email=john.doe@example.com
+  ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A commit done with the above Git configuration would have
+"John Doe &lt;<a href="mailto:john.doe@example.com">john.doe@example.com</a>&gt;" as committer.</p>
+</div>
+<div class="paragraph">
+<p>To see the committer information for existing commits do
+"git log --format=full":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git log --format=full
+  commit cbe31bdba7d14963eb42f7e1e0eef1fe58698c05
+  Author: John Doe &lt;john.doe@example.com&gt;
+  Commit: John Doe &lt;john.doe@example.com&gt;
+
+      my commit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check in Git that the committer information of the commit that should
+be pushed is correct. As explained above you can do this by
+'git log --format=full'. The committer should have the same e-mail
+address that you&#8217;ve configured for your Gerrit account. If the
+committer information is incorrect set the Git configuration
+parameters 'user.name' and 'user.email' to the correct values (you
+might want to set this globally by including the option '--global'):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git config user.name "John Doe"
+  $
+  $ git config user.email john.doe@example.com
+  $</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you should rewrite the commits for which the committer
+information is wrong. If only the last commit is affected you can do
+this by doing a 'commit --amend'. If you need to update the committer
+information for several commits it gets more complicated. In this
+case you have to do an interactive git rebase for the affected
+commits. While doing the interactive rebase you have to ensure that
+the commits are rewritten (e.g. by choosing 'reword' for all these
+commits and then confirming all the commit messages). Just picking
+all the changes will not work as in this case the committer is not
+rewritten. For further details about git rebase please check the
+<a href="http://www.kernel.org/pub/software/scm/git/docs/git-rebase.html">Git documentation</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_missing_privileges_to_push_commits_that_were_committed_by_other_users">Missing privileges to push commits that were committed by other users</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If pushing to Gerrit fails with the error message "invalid committer"
+and somebody else committed the change for which the
+push fails, then you have no permissions to forge the committer
+identity. In this case you may contact the project owner to request
+the <a href="access-control.html#category_forge_committer">'Forge Committer'</a>
+access right or ask the maintainer to commit this change on the author&#8217;s
+behalf.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="error-messages.html">Gerrit Error Messages</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

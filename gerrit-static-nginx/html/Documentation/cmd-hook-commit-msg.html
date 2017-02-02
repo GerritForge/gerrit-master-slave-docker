@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>commit-msg Hook</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>commit-msg Hook</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_obtaining">OBTAINING</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+<li><a href="#_implementation">IMPLEMENTATION</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>commit-msg - Edit commit messages to insert a <code>Change-Id</code> tag.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A Git hook automatically invoked by <code>git commit</code>, and most other
+commit creation tools such as <code>git citool</code> or <code>git gui</code>.  The Gerrit
+Code Review supplied implementation of this hook is a short shell
+script which automatically inserts a globally unique <code>Change-Id</code> tag
+in the footer of a commit message.  When present, Gerrit uses this
+tag to track commits across cherry-picks and rebases.</p>
+</div>
+<div class="paragraph">
+<p>After the hook has been installed in the user&#8217;s local Git repository
+for a project, the hook will modify a commit message such as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Improve foo widget by attaching a bar.
+
+  We want a bar, because it improves the foo by providing more
+  wizbangery to the dowhatimeanery.
+
+  Signed-off-by: A. U. Thor &lt;author@example.com&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>by inserting a new `Change-Id: ` line in the footer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Improve foo widget by attaching a bar.
+
+  We want a bar, because it improves the foo by providing more
+  wizbangery to the dowhatimeanery.
+
+  Change-Id: Ic8aaa0728a43936cd4c6e1ed590e01ba8f0fbf5b
+  Signed-off-by: A. U. Thor &lt;author@example.com&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The hook implementation is reasonably intelligent at inserting the
+<code>Change-Id</code> line before any <code>Signed-off-by</code> or <code>Acked-by</code> lines placed
+at the end of the commit message by the author, but if no such
+lines are present then it will just insert a blank line, and add
+the <code>Change-Id</code> at the bottom of the message.</p>
+</div>
+<div class="paragraph">
+<p>If a <code>Change-Id</code> line is already present in the message footer, the
+script will do nothing, leaving the existing <code>Change-Id</code> unmodified.
+This permits amending an existing commit, or allows the user to
+insert the Change-Id manually after copying it from an existing
+change viewed on the web.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Change-Id</code> will not be added if <code>gerrit.createChangeId</code> is set
+to <code>false</code> in the git config.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_obtaining">OBTAINING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To obtain the <code>commit-msg</code> script use <code>scp</code>, <code>wget</code> or <code>curl</code> to download
+it to your local system from your Gerrit server.</p>
+</div>
+<div class="paragraph">
+<p>You can use either of the below commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ scp -p -P 29418 &lt;your username&gt;@&lt;your Gerrit review server&gt;:hooks/commit-msg &lt;local path to your git&gt;/.git/hooks/
+
+  $ curl -Lo &lt;local path to your git&gt;/.git/hooks/commit-msg &lt;your Gerrit http URL&gt;/tools/hooks/commit-msg</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A specific example of this might look something like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre>  $ scp -p -P 29418 john.doe@review.example.com:hooks/commit-msg ~/duhproject/.git/hooks/
+
+  $ curl -Lo ~/duhproject/.git/hooks/commit-msg http://review.example.com/tools/hooks/commit-msg</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Make sure the hook file is executable:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ chmod u+x ~/duhproject/.git/hooks/commit-msg</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="user-changeid.html">Change-Id Lines</a></p>
+</li>
+<li>
+<p><a href="http://www.kernel.org/pub/software/scm/git/docs/git-commit.html">git-commit(1)</a></p>
+</li>
+<li>
+<p><a href="http://www.kernel.org/pub/software/scm/git/docs/githooks.html">githooks(5)</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_implementation">IMPLEMENTATION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The hook generates unique <code>Change-Id</code> lines by creating a virtual
+commit object within the local Git repository, and obtaining the
+SHA-1 hash from it.  Like any other Git commit, the following
+properties are included in the computation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>SHA-1 of the tree being committed</p>
+</li>
+<li>
+<p>SHA-1 of the parent commit</p>
+</li>
+<li>
+<p>Name, email address, timestamp of the author</p>
+</li>
+<li>
+<p>Name, email address, timestamp of the committer</p>
+</li>
+<li>
+<p>Proposed commit message (before <code>Change-Id</code> was inserted)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Because the names of the tree and parent commit, as well as the
+committer timestamp are included in the hash computation, the output
+<code>Change-Id</code> is sufficiently unique.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

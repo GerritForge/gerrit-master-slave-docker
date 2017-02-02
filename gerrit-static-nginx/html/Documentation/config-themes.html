@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Themes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Themes</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_html_header_footer">HTML Header/Footer</a></li>
+<li><a href="#_static_images">Static Images</a></li>
+<li><a href="#_http_caching">HTTP Caching</a></li>
+<li><a href="#_google_analytics_integration">Google Analytics Integration</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit supports some customization of the HTML it sends to
+the browser, allowing organizations to alter the look and
+feel of the application to fit with their general scheme.</p>
+</div>
+<div class="paragraph">
+<p>Configuration can either be sitewide or per-project. Projects without a
+specified theme inherit from their parents, or from the sitewide theme
+for <code>All-Projects</code>.</p>
+</div>
+<div class="paragraph">
+<p>Sitewide themes are stored in <code>'$site_path'/etc</code>, and per-project
+themes are stored in <code>'$site_path'/themes/{project-name}</code>. Files are
+only served from a single theme directory; if you want to modify or
+extend an inherited theme, you must copy it into the appropriate
+per-project directory.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_html_header_footer">HTML Header/Footer</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>At startup Gerrit reads the following files (if they exist) and
+uses them to customize the HTML page it sends to clients:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>&lt;theme-dir&gt;/GerritSiteHeader.html</code></p>
+<div class="paragraph">
+<p>HTML is inserted below the menu bar, but above any page content.
+This is a good location for an organizational logo, or links to
+other systems like bug tracking.</p>
+</div>
+</li>
+<li>
+<p><code>&lt;theme-dir&gt;/GerritSiteFooter.html</code></p>
+<div class="paragraph">
+<p>HTML is inserted at the bottom of the page, below all other content,
+but just above the footer rule and the "Powered by Gerrit Code
+Review (v&#8230;&#8203;.)" message shown at the extreme bottom.</p>
+</div>
+</li>
+<li>
+<p><code>&lt;theme-dir&gt;/GerritSite.css</code></p>
+<div class="paragraph">
+<p>The CSS rules are inlined into the top of the HTML page, inside
+of a <code>&lt;style&gt;</code> tag.  These rules can be used to support styling
+the elements within either the header or the footer.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The *.html files must be valid XHTML, with one root element,
+typically a single <code>&lt;div&gt;</code> tag.  The server parses it as XML, and
+then inserts the root element into the host page.  If a file has
+more than one root level element, Gerrit will not start.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_static_images">Static Images</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Static image files can also be served from <code>'$site_path'/static</code>,
+and may be referenced in <code>GerritSite{Header,Footer}.html</code>
+or <code>GerritSite.css</code> by the relative URL <code>static/$name</code>
+(e.g. <code>static/logo.png</code>).</p>
+</div>
+<div class="paragraph">
+<p>To simplify security management, files are only served from
+<code>'$site_path'/static</code>.  Subdirectories are explicitly forbidden from
+being served from this location by enforcing the rule that file names
+cannot contain <code>/</code> or <code>\</code>.  (Client requests for <code>static/foo/bar</code>
+will result in 404 Not Found responses.)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_http_caching">HTTP Caching</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The header, footer, and CSS files are inlined into the host page,
+which is always sent with a no-cache header.  Clients will see any
+changes immediately after they are made.</p>
+</div>
+<div class="paragraph">
+<p>Assets under <code>'$site_path'/static</code> whose file name matches one of the
+following patterns are served with a 1 year expiration, permitting
+very aggressive caching by clients and edge-proxies:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>*.cache.html</code></p>
+</li>
+<li>
+<p><code>*.cache.gif</code></p>
+</li>
+<li>
+<p><code>*.cache.png</code></p>
+</li>
+<li>
+<p><code>*.cache.css</code></p>
+</li>
+<li>
+<p><code>*.cache.jar</code></p>
+</li>
+<li>
+<p><code>*.cache.swf</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All other assets under <code>'$site_path'/static</code> are served with a 5
+minute expire, permitting some (limited) caching.  It may take up
+to 5 minutes after making a change, before clients see the changes.</p>
+</div>
+<div class="paragraph">
+<p>It is recommended that static images used in the site header
+or footer be named with a unique caching file name, for example
+<code>my_logo1.cache.png</code>, to allow browsers to take advantage of their
+disk cache.  If the image needs to be modified, create a new file,
+<code>my_logo2.cache.png</code> and update the header (or footer) HTML to
+reference the new image path.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_google_analytics_integration">Google Analytics Integration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To connect Gerrit to Google Analytics add the following to your
+<code>GerritSiteFooter.html</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;div&gt;
+  &lt;!-- standard analytics code --&gt;
+    &lt;script type="text/javascript"&gt;
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    &lt;/script&gt;
+    &lt;script type="text/javascript"&gt;
+      var pageTracker = _gat._getTracker("UA-nnnnnnn-n");
+      pageTracker._trackPageview();
+    &lt;/script&gt;
+  be &lt;!-- /standard analytics code --&gt;
+
+  &lt;script type="text/javascript"&gt;
+    window.onload = function() {
+      var p = window.location.pathname;
+      Gerrit.on('history', function (s) {
+        pageTracker._trackPageview(p + '/' + s)
+      });
+    };
+  &lt;/script&gt;
+  &lt;/div&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Please consult the Google Analytics documentation for the correct
+setup code (the first two script tags).  The above is shown only
+as a reference example.</p>
+</div>
+<div class="paragraph">
+<p>If your footer is otherwise empty, wrap all of the script tags into
+a single <code>&lt;div&gt;</code> tag (like above) to ensure it is a well-formed
+XHTML document file.</p>
+</div>
+<div class="paragraph">
+<p>The global function <code>Gerrit.on("history")</code> accepts functions that
+accept a string parameter.  These functions are put into a list and
+invoked any time Gerrit shifts URLs.  You&#8217;ll see page names like
+<code>/c/123</code> be passed to these functions, which in turn are handed off
+to Google Analytics for tracking.  Our example hook above uses '/'
+instead of '#' because Analytics won&#8217;t track anchors.</p>
+</div>
+<div class="paragraph">
+<p>The <code>window.onload</code> callback is necessary to ensure that the
+<code>Gerrit.on()</code> function has actually been defined by the
+page.  Because GWT loads the module asynchronously any <code>&lt;script&gt;</code>
+block in the header or footer will execute before Gerrit has defined
+the function and is ready to register the hook callback.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

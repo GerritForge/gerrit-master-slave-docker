@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Mail Templates</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Mail Templates</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_template_locations_and_extensions">Template Locations and Extensions:</a></li>
+<li><a href="#_supported_mail_templates">Supported Mail Templates:</a>
+<ul class="sectlevel2">
+<li><a href="#_abandoned_soy_and_abandonedhtml_soy">Abandoned.soy and AbandonedHtml.soy</a></li>
+<li><a href="#_addkey_soy_and_addkeyhtml_soy">AddKey.soy and AddKeyHtml.soy</a></li>
+<li><a href="#_changefooter_soy_and_changefooterhtml_soy">ChangeFooter.soy and ChangeFooterHtml.soy</a></li>
+<li><a href="#_changesubject_soy">ChangeSubject.soy</a></li>
+<li><a href="#_comment_soy">Comment.soy</a></li>
+<li><a href="#_commentfooter_soy_and_commentfooterhtml_soy">CommentFooter.soy and CommentFooterHtml.soy</a></li>
+<li><a href="#_deletevote_soy_and_deletevotehtml_soy">DeleteVote.soy and DeleteVoteHtml.soy</a></li>
+<li><a href="#_deletereviewer_soy_and_deletereviewerhtml_soy">DeleteReviewer.soy and DeleteReviewerHtml.soy</a></li>
+<li><a href="#_footer_soy_and_footerhtml_soy">Footer.soy and FooterHtml.soy</a></li>
+<li><a href="#_merged_soy_and_mergedhtml_soy">Merged.soy and MergedHtml.soy</a></li>
+<li><a href="#_newchange_soy_and_newchangehtml_soy">NewChange.soy and NewChangeHtml.soy</a></li>
+<li><a href="#_registernewemail_soy">RegisterNewEmail.soy</a></li>
+<li><a href="#_replacepatchset_soy_and_replacepatchsethtml_soy">ReplacePatchSet.soy and ReplacePatchSetHtml.soy</a></li>
+<li><a href="#_restored_soy_and_restoredhtml_soy">Restored.soy and RestoredHtml.soy</a></li>
+<li><a href="#_reverted_soy_and_revertedhtml_soy">Reverted.soy and RevertedHtml.soy</a></li>
+<li><a href="#_setassignee_soy_and_setassigneehtml_soy">SetAssignee.soy and SetAssigneeHtml.soy</a></li>
+</ul>
+</li>
+<li><a href="#_mail_variables_and_methods">Mail Variables and Methods</a>
+<ul class="sectlevel2">
+<li><a href="#_warning">Warning</a></li>
+<li><a href="#_all_outgoingemails">All OutgoingEmails</a></li>
+<li><a href="#_change_emails">Change Emails</a></li>
+</ul>
+</li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit uses Closure Templates for the bulk of the standard mails it sends out.
+There are builtin default templates which are used if they are not overridden.
+These defaults are also provided as examples so that administrators may copy
+them and easily modify them to tweak their contents.</p>
+</div>
+<div class="paragraph">
+<p><strong>Compatibility Note:</strong> previously, Velocity Template Language (VTL) was used as
+the template language for Gerrit emails. VTL has now been deprecated in favor of
+Soy, but Velocity templates that modify text emails remain supported for now.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_template_locations_and_extensions">Template Locations and Extensions:</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The default example templates reside under:  <code>'$site_path'/etc/mail</code> and are
+terminated with the double extension <code>.soy.example</code>. Modifying these example
+files will have no effect on the behavior of Gerrit.  However, copying an
+example template to an equivalently named file without the <code>.example</code> extension
+and modifying it will allow an administrator to customize the template.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_supported_mail_templates">Supported Mail Templates:</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each mail that Gerrit sends out is controlled by at least one template.  These
+are listed below.  Change emails are influenced by two additional templates,
+one to set the subject line, and one to set the footer which gets appended to
+all the change emails (see <code>ChangeSubject.soy</code> and <code>ChangeFooter.soy</code> below.)</p>
+</div>
+<div class="paragraph">
+<p>Many types of Gerrit email message support HTML in addition to plain-text. Where
+both are supported, templates to control the HTML part have <code>&#8230;&#8203;Html</code> appended
+in their file names. For example, for "Abandoned" emails, the <code>Abandoned.soy</code>
+template determines the text part of the message, whereas <code>AbandonedHtml.soy</code>
+determines the HTML part.</p>
+</div>
+<div class="sect2">
+<h3 id="_abandoned_soy_and_abandonedhtml_soy">Abandoned.soy and AbandonedHtml.soy</h3>
+<div class="paragraph">
+<p>The "Abandoned" templates will determine the contents of the email related to a
+change being abandoned.  It is a <code>ChangeEmail</code>: see <code>ChangeSubject.soy</code> and
+ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_addkey_soy_and_addkeyhtml_soy">AddKey.soy and AddKeyHtml.soy</h3>
+<div class="paragraph">
+<p>AddKey templates will determine the contents of the email related to SSH and GPG
+keys being added to a user account. This notification is not sent when the key
+is administratively added to another user account.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_changefooter_soy_and_changefooterhtml_soy">ChangeFooter.soy and ChangeFooterHtml.soy</h3>
+<div class="paragraph">
+<p>The ChangeFooter templates will determine the contents of the footer that will
+be appended to emails related to changes (all `ChangeEmail`s).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_changesubject_soy">ChangeSubject.soy</h3>
+<div class="paragraph">
+<p>The <code>ChangeSubject.soy</code> template will determine the contents of the email
+subject line for ALL emails related to changes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_comment_soy">Comment.soy</h3>
+<div class="paragraph">
+<p>The <code>Comment.soy</code> template will determine the contents of the email related to
+a user submitting comments on changes.  It is a <code>ChangeEmail</code>: see
+<code>ChangeSubject.soy</code>, ChangeFooter and CommentFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_commentfooter_soy_and_commentfooterhtml_soy">CommentFooter.soy and CommentFooterHtml.soy</h3>
+<div class="paragraph">
+<p>The CommentFooter templates will determine the contents of the footer text that
+will be appended to emails related to a user submitting comments on changes.
+See <code>ChangeSubject.soy</code>, Comment and ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_deletevote_soy_and_deletevotehtml_soy">DeleteVote.soy and DeleteVoteHtml.soy</h3>
+<div class="paragraph">
+<p>The DeleteVote templates will determine the contents of the email related to
+removing votes on changes.  It is a <code>ChangeEmail</code>: see <code>ChangeSubject.soy</code>
+and ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_deletereviewer_soy_and_deletereviewerhtml_soy">DeleteReviewer.soy and DeleteReviewerHtml.soy</h3>
+<div class="paragraph">
+<p>The DeleteReviewer templates will determine the contents of the email related to
+a user removing a reviewer (with a vote) from a change.  It is a
+<code>ChangeEmail</code>: see <code>ChangeSubject.soy</code> and ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_footer_soy_and_footerhtml_soy">Footer.soy and FooterHtml.soy</h3>
+<div class="paragraph">
+<p>The Footer templates will determine the contents of the footer text appended to
+the end of all outgoing emails after the ChangeFooter and CommentFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_merged_soy_and_mergedhtml_soy">Merged.soy and MergedHtml.soy</h3>
+<div class="paragraph">
+<p>The Merged templates will determine the contents of the email related to a
+change successfully merged to the head.  It is a <code>ChangeEmail</code>: see
+<code>ChangeSubject.soy</code> and ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_newchange_soy_and_newchangehtml_soy">NewChange.soy and NewChangeHtml.soy</h3>
+<div class="paragraph">
+<p>The NewChange templates will determine the contents of the email related to a
+user submitting a new change for review. This includes changes created by
+actions made by the user in the Web UI such as cherry picking a commit or
+reverting a change.  It is a <code>ChangeEmail</code>: see <code>ChangeSubject.soy</code> and
+ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_registernewemail_soy">RegisterNewEmail.soy</h3>
+<div class="paragraph">
+<p>The <code>RegisterNewEmail.soy</code> template will determine the contents of the email
+related to registering new email accounts.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_replacepatchset_soy_and_replacepatchsethtml_soy">ReplacePatchSet.soy and ReplacePatchSetHtml.soy</h3>
+<div class="paragraph">
+<p>The ReplacePatchSet templates will determine the contents of the email related
+to a user submitting a new patchset for a change.  This includes patchsets
+created by actions made by the user in the Web UI such as editing the commit
+message, cherry picking a commit, or rebasing a change.  It is a <code>ChangeEmail</code>:
+see <code>ChangeSubject.soy</code> and ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_restored_soy_and_restoredhtml_soy">Restored.soy and RestoredHtml.soy</h3>
+<div class="paragraph">
+<p>The Restored templates will determine the contents of the email related to a
+change being restored.  It is a <code>ChangeEmail</code>: see <code>ChangeSubject.soy</code> and
+ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reverted_soy_and_revertedhtml_soy">Reverted.soy and RevertedHtml.soy</h3>
+<div class="paragraph">
+<p>The Reverted templates will determine the contents of the email related to a
+change being reverted.  It is a <code>ChangeEmail</code>: see <code>ChangeSubject.soy</code> and
+ChangeFooter.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setassignee_soy_and_setassigneehtml_soy">SetAssignee.soy and SetAssigneeHtml.soy</h3>
+<div class="paragraph">
+<p>The SetAssignee templates will determine the contents of the email related to a
+user being assigned to a change. It is a <code>ChangeEmail</code>: see <code>ChangeSubject.soy</code>
+and ChangeFooter.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_mail_variables_and_methods">Mail Variables and Methods</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Mail templates can access and display objects currently made available to them
+via the Soy context.</p>
+</div>
+<div class="sect2">
+<h3 id="_warning">Warning</h3>
+<div class="paragraph">
+<p>Be aware that modifying templates can cause them to fail to parse and therefore
+not send out the actual email.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_all_outgoingemails">All OutgoingEmails</h3>
+<div class="paragraph">
+<p>All outgoing emails have the following variables available to them:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">$email.settingsUrl</dt>
+<dd>
+<div class="paragraph">
+<p>The URL to view the user&#8217;s settings in the Gerrit web UI.</p>
+</div>
+</dd>
+<dt class="hdlist1">$email.gerritHost</dt>
+<dd>
+<div class="paragraph">
+<p>The name of the Gerrit instance.</p>
+</div>
+</dd>
+<dt class="hdlist1">$email.gerritUrl</dt>
+<dd>
+<div class="paragraph">
+<p>The URL to the Gerrit web UI.</p>
+</div>
+</dd>
+<dt class="hdlist1">$messageClass</dt>
+<dd>
+<div class="paragraph">
+<p>A String containing the messageClass.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_change_emails">Change Emails</h3>
+<div class="paragraph">
+<p>Change related emails have the following template data available to them, in
+addition to what&#8217;s available to all outgoing emails.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">$changeId</dt>
+<dd>
+<div class="paragraph">
+<p>Id of the current change (a <code>Change.Key</code>).</p>
+</div>
+</dd>
+<dt class="hdlist1">$coverLetter</dt>
+<dd>
+<div class="paragraph">
+<p>The text of the <code>ChangeMessage</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">$fromName</dt>
+<dd>
+<div class="paragraph">
+<p>The name of the from user.</p>
+</div>
+</dd>
+<dt class="hdlist1">$email.unifiedDiff</dt>
+<dd>
+<div class="paragraph">
+<p>The diff of the change.</p>
+</div>
+</dd>
+<dt class="hdlist1">$email.changeDetail</dt>
+<dd>
+<div class="paragraph">
+<p>The details of the change, including the commit message.</p>
+</div>
+</dd>
+<dt class="hdlist1">$email.changeUrl</dt>
+<dd>
+<div class="paragraph">
+<p>The URL to the change in the web UI.</p>
+</div>
+</dd>
+<dt class="hdlist1">$email.includeDiff</dt>
+<dd>
+<div class="paragraph">
+<p>Whether the Gerrit instance is configured to include diffs in emails.</p>
+</div>
+</dd>
+<dt class="hdlist1">$change.subject</dt>
+<dd>
+<div class="paragraph">
+<p>The subject of the current change.</p>
+</div>
+</dd>
+<dt class="hdlist1">$change.originalSubject</dt>
+<dd>
+<div class="paragraph">
+<p>The subject corresponding to the first patch set of the current change.</p>
+</div>
+</dd>
+<dt class="hdlist1">$change.shortSubject</dt>
+<dd>
+<div class="paragraph">
+<p>The subject limited to 63 characters, with an ellipsis if it exceeds that.</p>
+</div>
+</dd>
+<dt class="hdlist1">$change.ownerEmail</dt>
+<dd>
+<div class="paragraph">
+<p>The email address of the owner of the change.</p>
+</div>
+</dd>
+<dt class="hdlist1">$branch.shortName</dt>
+<dd>
+<div class="paragraph">
+<p>The name of the branch targeted by the current change.</p>
+</div>
+</dd>
+<dt class="hdlist1">$projectName</dt>
+<dd>
+<div class="paragraph">
+<p>The name of this change&#8217;s project.</p>
+</div>
+</dd>
+<dt class="hdlist1">$shortProjectName</dt>
+<dd>
+<div class="paragraph">
+<p>The project name with the path abbreviated.</p>
+</div>
+</dd>
+<dt class="hdlist1">$sshHost</dt>
+<dd>
+<div class="paragraph">
+<p>SSH hostname for the Gerrit instance.</p>
+</div>
+</dd>
+<dt class="hdlist1">$patchSet.patchSetId</dt>
+<dd>
+<div class="paragraph">
+<p>The current patch set number.</p>
+</div>
+</dd>
+<dt class="hdlist1">$patchSet.refname</dt>
+<dd>
+<div class="paragraph">
+<p>The refname of the patch set.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://developers.google.com/closure/templates/">Closure Templates</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review for Git</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review for Git</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_tutorial">Tutorial</a></li>
+<li><a href="#_project_management">Project Management</a></li>
+<li><a href="#_customization_and_integration">Customization and Integration</a></li>
+<li><a href="#_server_administration">Server Administration</a></li>
+<li><a href="#_developer">Developer</a></li>
+<li><a href="#_maintainer">Maintainer</a></li>
+<li><a href="#_resources">Resources</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_tutorial">Tutorial</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Getting started</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="intro-quick.html">A Quick Introduction to Gerrit</a></p>
+</li>
+<li>
+<p><a href="intro-user.html">User Guide</a></p>
+</li>
+<li>
+<p><a href="intro-project-owner.html">Project Owner Guide</a></p>
+</li>
+<li>
+<p><a href="http://source.android.com/submit-patches/workflow">Default Android Workflow</a> (external)</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Web</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="user-review-ui.html">Reviewing Changes</a></p>
+</li>
+<li>
+<p><a href="user-search.html">Searching Changes</a></p>
+</li>
+<li>
+<p><a href="user-inline-edit.html">Manipulating Changes in Browser</a></p>
+</li>
+<li>
+<p><a href="user-notify.html">Subscribing to Email Notifications</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>SSH</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="user-upload.html#ssh">SSH connection details</a></p>
+</li>
+<li>
+<p><a href="cmd-index.html">Command Line Tools</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Git</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Commands, scenarios</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p><a href="user-upload.html">Uploading Changes</a></p>
+</li>
+<li>
+<p><a href="error-messages.html">Error Messages</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Changes</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p><a href="user-changeid.html">Change-Id Lines</a></p>
+</li>
+<li>
+<p><a href="user-signedoffby.html">Signed-off-by Lines</a></p>
+</li>
+<li>
+<p><a href="user-change-cleanup.html">Change Cleanup</a></p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_project_management">Project Management</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="project-configuration.html">Project Configuration</a></p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="config-labels.html">Review Labels</a></p>
+</li>
+<li>
+<p><a href="config-project-config.html">Project Configuration File Format</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p><a href="access-control.html">Access Controls</a></p>
+</li>
+<li>
+<p>Multi-project management</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="user-submodules.html">Submodules</a></p>
+</li>
+<li>
+<p><a href="https://source.android.com/source/using-repo.html">Repo</a> (external)</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Prolog rules</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="prolog-cookbook.html">Prolog Cookbook</a></p>
+</li>
+<li>
+<p><a href="prolog-change-facts.html">Prolog Facts for Gerrit Changes</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p><a href="intro-project-owner.html#project-deletion">Project deletion</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_customization_and_integration">Customization and Integration</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="user-dashboards.html">Dashboards</a></p>
+</li>
+<li>
+<p><a href="rest-api.html">REST API</a></p>
+</li>
+<li>
+<p><a href="config-gitweb.html">Gitweb Integration</a></p>
+</li>
+<li>
+<p><a href="config-themes.html">Themes</a></p>
+</li>
+<li>
+<p><a href="config-sso.html">Single Sign-On Systems</a></p>
+</li>
+<li>
+<p><a href="config-hooks.html">Hooks</a></p>
+</li>
+<li>
+<p><a href="config-mail.html">Mail Templates</a></p>
+</li>
+<li>
+<p><a href="config-cla.html">Contributor Agreements</a></p>
+</li>
+<li>
+<p><a href="config-robot-comments.html">Robot Comments</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_server_administration">Server Administration</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="install.html">Installation Guide</a></p>
+</li>
+<li>
+<p><a href="config-gerrit.html">System Settings</a></p>
+</li>
+<li>
+<p><a href="cmd-index.html">Command Line Tools</a></p>
+</li>
+<li>
+<p><a href="config-plugins.html#replication">Replication</a></p>
+</li>
+<li>
+<p><a href="config-plugins.html">Plugins</a></p>
+</li>
+<li>
+<p><a href="metrics.html">Metrics</a></p>
+</li>
+<li>
+<p><a href="config-reverseproxy.html">Reverse Proxy</a></p>
+</li>
+<li>
+<p><a href="config-auto-site-initialization.html">Automatic Site Initialization on Startup</a></p>
+</li>
+<li>
+<p><a href="pgm-index.html">Server Side Administrative Tools</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_developer">Developer</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Getting Started</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="dev-readme.html">Developer Setup</a></p>
+</li>
+<li>
+<p><a href="dev-bazel.html">Building with Bazel</a></p>
+</li>
+<li>
+<p><a href="dev-eclipse.html">Eclipse Setup</a></p>
+</li>
+<li>
+<p><a href="dev-intellij.html">IntelliJ Setup</a></p>
+</li>
+<li>
+<p><a href="dev-contributing.html">Contributing to Gerrit</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Plugin Development</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p><a href="dev-plugins.html">Developing Plugins</a></p>
+</li>
+<li>
+<p><a href="dev-build-plugins.html">Building Gerrit plugins</a></p>
+</li>
+<li>
+<p><a href="js-api.html">JavaScript Plugin API</a></p>
+</li>
+<li>
+<p><a href="config-validation.html">Validation Interfaces</a></p>
+</li>
+<li>
+<p><a href="dev-stars.html">Starring Changes</a></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p><a href="dev-design.html">System Design</a></p>
+</li>
+<li>
+<p><a href="i18n-readme.html">i18n Support</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_maintainer">Maintainer</h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="dev-release.html">Making a Gerrit Release</a></p>
+</li>
+<li>
+<p><a href="dev-release-subproject.html">Making a Release of a Gerrit Subproject</a></p>
+</li>
+<li>
+<p><a href="dev-release-jgit.html">Making a Release of JGit</a></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_resources">Resources</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="licenses.html">Licenses and Notices</a></p>
+</li>
+<li>
+<p><a href="https://www.gerritcodereview.com/">Homepage</a></p>
+</li>
+<li>
+<p><a href="https://www.gerritcodereview.com/download/index.html">Downloads</a></p>
+</li>
+<li>
+<p><a href="https://bugs.chromium.org/p/gerrit/issues/list">Issue Tracking</a></p>
+</li>
+<li>
+<p><a href="https://gerrit.googlesource.com/gerrit">Source Code</a></p>
+</li>
+<li>
+<p><a href="https://www.gerritcodereview.com/about.md">A History of Gerrit Code Review</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="https://www.gerritcodereview.com/">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

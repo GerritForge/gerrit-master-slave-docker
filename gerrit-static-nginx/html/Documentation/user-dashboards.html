@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Dashboards</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Dashboards</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#custom-dashboards">Custom Dashboards</a></li>
+<li><a href="#project-dashboards">Project Dashboards</a>
+<ul class="sectlevel2">
+<li><a href="#_token_code_project_code">Token <code>${project}</code></a></li>
+<li><a href="#_section_code_dashboard_code">Section <code>dashboard</code></a></li>
+<li><a href="#_section_code_section_code">Section <code>section</code></a></li>
+</ul>
+</li>
+<li><a href="#project-default-dashboard">Project Default Dashboard</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="custom-dashboards">Custom Dashboards</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A custom dashboard is shown in a layout similar to the per-user
+dashboard, but the sections are entirely configured from the URL.
+Because of this custom dashboards are stateless on the server side.
+Users or projects can simply trade URLs using an external system like
+a project wiki, or site administrators can put the links into the
+site&#8217;s <code>GerritHeader.html</code> or <code>GerritFooter.html</code>.</p>
+</div>
+<div class="paragraph">
+<p>Dashboards are available via URLs like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  /#/dashboard/?title=Custom+View&amp;To+Review=reviewer:john.doe@example.com&amp;Pending+In+myproject=project:myproject+is:open</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This opens a view showing the title "Custom View" with two sections,
+"To Review" and "Pending in myproject":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Custom View
+
+  To Review
+
+    Results of `reviewer:john.doe@example.com`
+
+  Pending In myproject
+
+    Results of `project:myproject is:open`</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The dashboard URLs are easy to configure. All keys and values in the
+URL are encoded as query parameters. Set the page and window title
+using an optional <code>title=Text</code> parameter.</p>
+</div>
+<div class="paragraph">
+<p>Each section&#8217;s title is defined by the parameter name, the section
+display order is defined by the order the parameters appear in the
+URL, and the query results are defined by the parameter value. To
+limit the number of rows in a query use <code>limit:N</code>, otherwise the
+entire result set will be shown (up to the user&#8217;s query limit).</p>
+</div>
+<div class="paragraph">
+<p>Parameters may be separated from each other using any of the following
+characters, as some users may find one more readable than another:
+<code>&amp;</code> or <code>;</code> or <code>,</code></p>
+</div>
+<div class="paragraph">
+<p>The special <code>foreach=&#8230;&#8203;</code> parameter is designed to facilitate
+more easily writing similar queries in a dashboard.  The value of the
+foreach parameter will be used in every query in the dashboard by
+appending it to their ends with a space (ANDing it with the queries).</p>
+</div>
+<div class="paragraph">
+<p>Example custom dashboard using foreach to constrain a dashboard
+to changes for the current user:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  /#/dashboard/?title=Mine&amp;foreach=owner:self&amp;My+Pending=is:open&amp;My+Merged=is:merged</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project-dashboards">Project Dashboards</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is possible to share custom dashboards at a project level. To do
+this define the dashboards in a <code>refs/meta/dashboards/*</code> branch of the
+project. For each dashboard create a config file. The file path/name
+will be used as name (equivalent to a title in a custom dashboard) for
+the dashboard.</p>
+</div>
+<div class="paragraph">
+<p>Example of a dashboard config file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[dashboard]
+  description = Most recent open and merged changes.
+[section "Open Changes"]
+  query = status:open project:myProject limit:15
+[section "Merged Changes"]
+  query = status:merged project:myProject limit:15</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once defined, project dashboards are accessible using stable URLs by
+using the project name, refname and pathname of the dashboard via URLs
+, e.g. create a dashboard config file named <code>Main</code> and push it
+to <code>refs/meta/dashboards/Site</code> branch of All-Projects, then access it
+like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  /#/projects/All-Projects,dashboards/Site:Main</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Project dashboards are inherited from ancestor projects unless
+overridden by dashboards with the same ref and name.  This makes
+it easy to define common dashboards for every project by simply
+defining project dashboards on the All-Projects project.</p>
+</div>
+<div class="sect2">
+<h3 id="_token_code_project_code">Token <code>${project}</code></h3>
+<div class="paragraph">
+<p>Project dashboard queries may contain the special <code>${project}</code> token
+which will be replaced with the name of the project to which the
+dashboard is being applied.  This is useful for defining dashboards
+designed to be inherited.  With this token, it is possible to cause a
+query in a project dashboard to be restricted to only changes for the
+project in which an inherited dashboard is being applied by simply
+adding <code>project:${project}</code> to the query in the dashboard.</p>
+</div>
+<div class="paragraph">
+<p>The <code>${project}</code> token can also be used in the <a href="#dashboard.title">
+dashboard title</a> and in the <a href="#dashboard.description">dashboard
+description</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_section_code_dashboard_code">Section <code>dashboard</code></h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a id="dashboard.title"></a>dashboard.title</dt>
+<dd>
+<div class="paragraph">
+<p>The title of the dashboard.</p>
+</div>
+<div class="paragraph">
+<p>If not specified the path of the dashboard config file is used as
+title.</p>
+</div>
+</dd>
+<dt class="hdlist1"><a id="dashboard.description"></a>dashboard.description</dt>
+<dd>
+<div class="paragraph">
+<p>The description of the dashboard.</p>
+</div>
+</dd>
+<dt class="hdlist1">dashboard.foreach</dt>
+<dd>
+<div class="paragraph">
+<p>The value of the foreach parameter gets appended to every query in the
+dashboard.</p>
+</div>
+<div class="paragraph">
+<p>Example dashboard config section to constrain the entire dashboard to
+the project to which it is applied:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[dashboard]
+  foreach = project:${project}</pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_section_code_section_code">Section <code>section</code></h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">section.&lt;name&gt;.query</dt>
+<dd>
+<div class="paragraph">
+<p>The change query that should be used to populate the section with the
+given name.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project-default-dashboard">Project Default Dashboard</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is possible to define a default dashboard for a project in the
+projects <code>project.config</code> file in the <code>refs/meta/config</code> branch:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[dashboard]
+  default = refs/meta/dashboards/main:default</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The dashboard set as the default dashboard will be inherited as the
+default dashboard by child projects if they do not define their own
+default dashboard. The <code>local-default</code> entry makes it possible to
+define a different default dashboard that is only used by this project
+but not inherited to the child projects.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[dashboard]
+  default = refs/meta/dashboards/main:default
+  local-default = refs/meta/dashboards/main:local</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

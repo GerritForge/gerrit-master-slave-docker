@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Uploading Changes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Uploading Changes</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#http">HTTP/HTTPS</a></li>
+<li><a href="#ssh">SSH</a>
+<ul class="sectlevel2">
+<li><a href="#configure_ssh">Configuration</a></li>
+<li><a href="#test_ssh">Testing Connections</a></li>
+</ul>
+</li>
+<li><a href="#_git_push">git push</a>
+<ul class="sectlevel2">
+<li><a href="#push_create">Create Changes</a></li>
+<li><a href="#push_options">Push Options</a></li>
+<li><a href="#push_replace">Replace Changes</a></li>
+<li><a href="#bypass_review">Bypass Review</a></li>
+<li><a href="#auto_merge">Auto-Merge during Push</a></li>
+<li><a href="#base">Selecting Merge Base</a></li>
+<li><a href="#merged">Creating Changes for Merged Commits</a></li>
+</ul>
+</li>
+<li><a href="#_repo_upload">repo upload</a>
+<ul class="sectlevel2">
+<li><a href="#repo_create">Create Changes</a></li>
+<li><a href="#repo_replace">Replace Changes</a></li>
+</ul>
+</li>
+<li><a href="#_gritty_details">Gritty Details</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit supports three methods of uploading changes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Use <code>repo upload</code>, to create changes for review</p>
+</li>
+<li>
+<p>Use <code>git push</code>, to create changes for review</p>
+</li>
+<li>
+<p>Use <code>git push</code>, and bypass code review</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All three methods rely on authentication, which must first be configured
+by the uploading user.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit supports two methods of authenticating the uploading user.  SSH
+public key, and HTTP/HTTPS.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="http">HTTP/HTTPS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On Gerrit installations that do not support SSH authentication, the
+user must authenticate via HTTP/HTTPS.</p>
+</div>
+<div class="paragraph">
+<p>When <a href="config-gerrit.html#auth.gitBasicAuth">gitBasicAuth</a> is enabled,
+the user is authenticated using standard BasicAuth. Depending on the value of
+<a href="#auth.gitBasicAuthPolicy">auth.gitBasicAuthPolicy</a>, credentials are
+validated using:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The randomly generated HTTP password on the <code>HTTP Password</code> tab
+in the user settings page if <code>gitBasicAuthPolicy</code> is <code>HTTP</code>.</p>
+</li>
+<li>
+<p>The LDAP password if <code>gitBasicAuthPolicy</code> is <code>LDAP</code></p>
+</li>
+<li>
+<p>Both, the HTTP and the LDAP passwords (in this order) if <code>gitBasicAuthPolicy</code>
+is <code>HTTP_LDAP</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When gitBasicAuthPolicy is not <code>LDAP</code>, the user&#8217;s HTTP credentials can be
+accessed within Gerrit by going to <code>Settings</code>, and then accessing the <code>HTTP
+Password</code> tab.</p>
+</div>
+<div class="paragraph">
+<p>For Gerrit installations where an <a href="config-gerrit.html#auth.httpPasswordUrl">HTTP password URL</a>
+is configured, the password can be obtained by clicking on <code>Obtain Password</code>
+and then following the site-specific instructions.  On sites where this URL is
+not configured, the password can be obtained by clicking on <code>Generate Password</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ssh">SSH</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each user uploading changes to Gerrit must configure one or more SSH
+public keys.  The per-user SSH key list can be accessed over the web
+within Gerrit by <code>Settings</code>, and then accessing the <code>SSH Public Keys</code>
+tab.</p>
+</div>
+<div class="sect2">
+<h3 id="configure_ssh">Configuration</h3>
+<div class="paragraph">
+<p>To register a new SSH key for use with Gerrit, paste the contents of
+your <code>id_rsa.pub</code> or <code>id_dsa.pub</code> file into the text box and click
+the add button.  Gerrit only understands SSH version 2 public keys.
+Keys may be supplied in either the OpenSSH format (key starts with
+<code>ssh-rsa</code> or <code>ssh-dss</code>) or the RFC 4716 format (file starts with
+<code>---- BEGIN SSH2 PUBLIC KEY ----</code>).</p>
+</div>
+<div class="paragraph">
+<p>Typically SSH keys are stored in your home directory, under <code>~/.ssh</code>.
+If you don&#8217;t have any keys yet, you can create a new one and protect
+it with a passphrase:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  ssh-keygen -t rsa</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then copy the content of the public key file onto your clipboard,
+and paste it into Gerrit&#8217;s web interface:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  cat ~/.ssh/id_rsa.pub</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Users who frequently upload changes will also want to consider
+starting an <code>ssh-agent</code>, and adding their private key to the list
+managed by the agent, to reduce the frequency of entering the
+key&#8217;s passphrase.  Consult <code>man ssh-agent</code>, or your SSH client&#8217;s
+documentation, for more details on configuration of the agent
+process and how to add the private key.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="test_ssh">Testing Connections</h3>
+<div class="paragraph">
+<p>To verify your SSH key is working correctly, try using an SSH client
+to connect to Gerrit&#8217;s SSHD port.  By default Gerrit runs on
+port 29418, using the same hostname as the web server:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 sshusername@hostname
+
+    ****    Welcome to Gerrit Code Review    ****
+
+    Hi John Doe, you have successfully connected over SSH.
+
+    Unfortunately, interactive shells are disabled.
+    To clone a hosted Git repository, use:
+
+    git clone ssh://sshusername@hostname:29418/REPOSITORY_NAME.git
+
+  Connection to hostname closed.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the command above, <code>sshusername</code> was configured as <code>Username</code> on
+the <code>Profile</code> tab of the <code>Settings</code> screen.  If it is not set,
+propose a name and use <code>Select Username</code> to select the name.</p>
+</div>
+<div class="paragraph">
+<p>To determine the port number Gerrit is running on, visit the special
+information URL <code><a href="http://'hostname'/ssh_info" class="bare">http://'hostname'/ssh_info</a></code>, and copy the port
+number from the second field:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ curl http://hostname/ssh_info
+  hostname 29418</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you are developing an automated tool to perform uploads to Gerrit,
+let the user supply the hostname or the web address for Gerrit,
+and obtain the port number on the fly from the <code>/ssh_info</code> URL.
+The returned output from this URL is always <code>'hostname' SP 'port'</code>,
+or <code>NOT_AVAILABLE</code> if the SSHD server is not currently running.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git_push">git push</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="push_create">Create Changes</h3>
+<div class="paragraph">
+<p>To create new changes for review, simply push to the project&#8217;s
+magical <code>refs/for/'branch'</code> ref using any Git client tool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://sshusername@hostname:29418/projectname HEAD:refs/for/branch</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>E.g. <code>john.doe</code> can use git push to upload new changes for the
+<code>experimental</code> branch of project <code>kernel/common</code>, hosted at the
+<code>git.example.com</code> Gerrit server:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/experimental</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each new commit uploaded by the <code>git push</code> client will be
+converted into a change record on the server.  The remote ref
+<code>refs/for/experimental</code> is not actually created by Gerrit, even
+though the client&#8217;s status messages may say otherwise.</p>
+</div>
+<div class="paragraph">
+<p>Other users (e.g. project owners) who have configured Gerrit to
+notify them of new changes will be automatically sent an email
+message when the push is completed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="push_options">Push Options</h3>
+<div class="paragraph">
+<p>Additional options may be specified when pushing changes.</p>
+</div>
+<div class="sect3">
+<h4 id="notify">Email Notifications</h4>
+<div class="paragraph">
+<p>Uploaders can control to whom email notifications are sent by setting
+the <code>notify</code> option:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>NONE</code>: No email notification will be sent to anyone.</p>
+</li>
+<li>
+<p><code>OWNER</code>: Only the change owner is notified.</p>
+</li>
+<li>
+<p><code>OWNER_REVIEWERS</code>: Only owners and reviewers will be  notified. This
+includes all reviewers, existing reviewers of the change and new
+reviewers that are added by the <code>reviewer</code> option or by mentioning
+in the commit message.</p>
+</li>
+<li>
+<p><code>ALL</code>: All email notifications will be sent. This includes
+notifications to watchers, users that have starred the change, CCs
+and the committer and author of the uploaded commit.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>By default all email notifications are sent.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://bot@git.example.com:29418/kernel/common HEAD:refs/for/master%notify=NONE</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In addition uploaders can explicitly specify accounts that should be
+notified, regardless of the value that is given for the <code>notify</code>
+option. To notify a specific account specify it by an
+<code>notify-to='email'</code>, <code>notify-cc='email'</code> or <code>notify-bcc='email'</code>
+option. These options can be specified as many times as necessary to
+cover all interested parties. Gerrit will automatically avoid sending
+duplicate email notifications, such as if one of the specified accounts
+had also requested to receive all new change notifications. The
+accounts that are specified by <code>notify-to='email'</code>, <code>notify-cc='email'</code>
+and <code>notify-bcc='email'</code> will only be notified about this one push.
+They are not added as <a href="#reviewers">reviewers or CCs</a>, hence they are
+not automatically signed up to be notified on further updates of the
+change.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://bot@git.example.com:29418/kernel/common HEAD:refs/for/master%notify=NONE,notify-to=a@a.com</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="topic">Topic</h4>
+<div class="paragraph">
+<p>To include a short tag associated with all of the changes in the
+same group, such as the local topic branch name, append it after
+the destination branch name or add it with the command line flag
+<code>--push-option</code>, aliased to <code>-o</code>. In this example the short topic
+tag 'driver/i42' will be saved on each change this push creates or
+updates:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/experimental%topic=driver/i42
+
+  // this is the same as:
+  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/experimental -o topic=driver/i42</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="message">Message</h4>
+<div class="paragraph">
+<p>A comment message can be applied to the change by using the <code>message</code> (or <code>m</code>)
+option:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/experimental%m=This_is_a_rebase_on_master</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+git push refs parameter does not allow spaces.  Use the '_' character instead,
+it will then be applied as "This is a rebase on master".
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="review_labels">Review Labels</h4>
+<div class="paragraph">
+<p>Review labels can be applied to the change by using the <code>label</code> (or <code>l</code>)
+option in the reference:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/experimental%l=Verified+1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>l='label[score]'</code> option may be specified more than once to
+apply multiple review labels.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/experimental%l=Code-Review+1,l=Verified+1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The value is optional.  If not specified, it defaults to +1 (if
+the label range allows it).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="change_edit">Change Edits</h4>
+<div class="paragraph">
+<p>A change edit can be pushed by specifying the <code>edit</code> (or <code>e</code>) option on
+the reference:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/master%edit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There is at most one change edit per user and change. In order to push
+a change edit the change must already exist.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+When a change edit already exists for a change then pushing with
+<code>%edit</code> replaces the existing change edit. This option is useful to
+rebase a change edit on the newest patch set when the rebase of the
+change edit in the web UI fails due to conflicts.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you are frequently uploading changes to the same Gerrit server,
+consider adding an SSH host block in <code>~/.ssh/config</code> to remember
+your username, hostname and port number.  This permits the use of
+shorter URLs on the command line, such as:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ cat ~/.ssh/config
+  ...
+  Host tr
+    Hostname git.example.com
+    Port 29418
+    User john.doe
+
+  $ git push tr:kernel/common HEAD:refs/for/experimental</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="reviewers">Reviewers</h4>
+<div class="paragraph">
+<p>Specific reviewers can be requested and/or additional 'carbon
+copies' of the notification message may be sent by including the
+<code>reviewer</code> (or <code>r</code>) and <code>cc</code> options in the reference:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push tr:kernel/common HEAD:refs/for/experimental%r=a@a.com,cc=b@o.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>r='email'</code> and <code>cc='email'</code> options may be specified as many
+times as necessary to cover all interested parties. Gerrit will
+automatically avoid sending duplicate email notifications, such as
+if one of the specified reviewers or CC addresses had also requested
+to receive all new change notifications.</p>
+</div>
+<div class="paragraph">
+<p>If you are frequently sending changes to the same parties and/or
+branches, consider adding a custom remote block to your project&#8217;s
+<code>.git/config</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ cat .git/config
+  ...
+  [remote "exp"]
+    url = tr:kernel/common
+    push = HEAD:refs/for/experimental%r=a@a.com,cc=b@o.com
+
+  $ git push exp</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="push_replace">Replace Changes</h3>
+<div class="paragraph">
+<p>To add an additional patch set to a change, ensure Change-Id
+lines were created in the original commit messages, and just use
+<code>git push URL HEAD:refs/for/&#8230;&#8203;</code> as <a href="#push_create">described above</a>.
+Gerrit Code Review will automatically match the commits back to
+their original changes by taking advantage of the Change-Id lines.</p>
+</div>
+<div class="paragraph">
+<p>If Change-Id lines are not present in the commit messages, consider
+amending the message and copying the line from the change&#8217;s page
+on the web, and then using <code>git push</code> as described above.</p>
+</div>
+<div class="paragraph">
+<p>If Change-Id lines are not available, then the user must use the
+manual mapping technique described below.</p>
+</div>
+<div class="paragraph">
+<p>For more about Change-Ids, see <a href="user-changeid.html">Change-Id Lines</a>.</p>
+</div>
+<div class="sect3">
+<h4 id="manual_replacement_mapping">Manual Replacement Mapping</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The remainder of this section describes a manual method of replacing
+changes by matching each commit name to an existing change number.
+End-users should instead prefer to use Change-Id lines in their
+commit messages, as the process is then fully automated by Gerrit
+during normal uploads.</p>
+</div>
+<div class="paragraph">
+<p>See above for the preferred technique of replacing changes.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To add an additional patch set to a change, replacing it with an
+updated version of the same logical modification, send the new
+commit to the change&#8217;s ref.  For example, to add the commit whose
+SHA-1 starts with <code>c0ffee</code> as a new patch set for change number
+<code>1979</code>, use the push refspec <code>c0ffee:refs/changes/1979</code> as below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://sshusername@hostname:29418/projectname c0ffee:refs/changes/1979</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This form can be combined together with <code>refs/for/'branchname'</code>
+(above) to simultaneously create new changes and replace changes
+during one network transaction.</p>
+</div>
+<div class="paragraph">
+<p>For example, consider the following sequence of events:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git commit -m A                    ; # create 3 commits
+  $ git commit -m B
+  $ git commit -m C
+
+  $ git push ... HEAD:refs/for/master  ; # upload for review
+  ... A is 1500 ...
+  ... B is 1501 ...
+  ... C is 1502 ...
+
+  $ git rebase -i HEAD~3               ; # edit "A", insert D before B
+                                       ; # now series is A'-D-B'-C'
+  $ git push ...
+      HEAD:refs/for/master
+      HEAD~3:refs/changes/1500
+      HEAD~1:refs/changes/1501
+      HEAD~0:refs/changes/1502         ; # upload replacements</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At the final step during the push Gerrit will attach A' as a new
+patch set on change 1500; B' as a new patch set on change 1501; C'
+as a new patch set on 1502; and D will be created as a new change.</p>
+</div>
+<div class="paragraph">
+<p>Ensuring D is created as a new change requires passing the refspec
+<code>HEAD:refs/for/branchname</code>, otherwise Gerrit will ignore D and
+won&#8217;t do anything with it.  For this reason it is a good idea to
+always include the create change refspec when uploading replacements.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="bypass_review">Bypass Review</h3>
+<div class="paragraph">
+<p>Changes (and annotated tags) can be pushed directly into a
+repository, bypassing the review process.  This is primarily useful
+for a project owner to create new branches, create annotated tags
+for releases, or to force-update a branch whose history needed to
+be rewritten.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit restricts direct pushes that bypass review to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>refs/heads/*</code>: any branch can be updated, created, deleted,
+or rewritten by the pusher.</p>
+</li>
+<li>
+<p><code>refs/tags/*</code>: annotated tag objects pointing to any other type
+of Git object can be created.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To push branches, the proper access rights must be configured first.
+Here follows a few examples of how to configure this in Gerrit:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Update: Any existing branch can be fast-forwarded to a new commit.
+This is the safest mode as commits cannot be discarded.  Creation
+of new branches is rejected. Can be configured with
+<a href="access-control.html#category_push_direct">'Push'</a> access.</p>
+</li>
+<li>
+<p>Create: Allows creation of a new branch if the name does not
+already designate an existing branch name.  Needs
+<a href="access-control.html#category_create">'Create Reference'</a>
+configured. Please note that once created, this permission doesn&#8217;t
+grant the right to update the branch with further commits (see above
+for update details).</p>
+</li>
+<li>
+<p>Delete: Implies Update, but also allows an existing
+branch to be deleted.  Since a force push is effectively a delete
+followed by a create, but performed atomically on the server and
+logged, this also permits forced push updates to branches.
+To grant this access, configure
+<a href="access-control.html#category_push_direct">'Push'</a> with the
+'Force' option ticked.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To push annotated tags, the <code>Create Annotated Tag</code> project right must
+be granted to one (or more) of the user&#8217;s groups.  There is only
+one level of access in this category.</p>
+</div>
+<div class="paragraph">
+<p>Project owners may wish to grant themselves <code>Create Annotated Tag</code>
+only at times when a new release is being prepared, and otherwise
+grant nothing at all.  This ensures that accidental pushes don&#8217;t
+make undesired changes to the public repository.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="auto_merge">Auto-Merge during Push</h3>
+<div class="paragraph">
+<p>Changes can be directly submitted on push.  This is primarily useful
+for teams that don&#8217;t want to do code review but want to use Gerrit&#8217;s
+submit strategies to handle contention on busy branches.  Using
+<code>%submit</code> creates a change and submits it immediately:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/master%submit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On auto-merge of a change neither labels nor submit rules are checked.
+If the merge fails the change stays open, but when pushing a new patch
+set the merge can be reattempted by using <code>%submit</code> again.</p>
+</div>
+<div class="paragraph">
+<p>This requires the caller to have <a href="access-control.html#category_submit">Submit</a>
+permission on <code>refs/for/&lt;ref&gt;</code> (e.g. on <code>refs/for/refs/heads/master</code>).
+Note how this is different from the <code>Submit</code> permission on <code>refs/heads/&lt;ref&gt;</code>,
+and in particular you typically do not want to apply the <code>Submit</code> permission
+on <code>refs/*</code> (unless you are ok with bypassing submit rules).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="base">Selecting Merge Base</h3>
+<div class="paragraph">
+<p>By default new changes are opened only for new unique commits
+that have never before been seen by the Gerrit server. Clients
+may override that behavior and force new changes to be created
+by setting the merge base SHA-1 using the '%base' argument:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/master%base=$(git rev-parse origin/master)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible to specify more than one '%base' argument.
+This may be useful when pushing a merge commit. Note that the '%'
+character has only to be provided once, for the first '%base'
+argument:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common HEAD:refs/for/master%base=commit-id1,base=commit-id2</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="merged">Creating Changes for Merged Commits</h3>
+<div class="paragraph">
+<p>Normally, changes are only created for commits that have not yet
+been merged into the branch. In some cases, you may want to review a
+change that has already been merged. A new change for a merged commit
+can be created by using the '%merged' argument:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git push ssh://john.doe@git.example.com:29418/kernel/common my-merged-commit:refs/for/master%merged</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This only creates one merged change at a time, corresponding to
+exactly <code>my-merged-commit</code>. It doesn&#8217;t walk all of history up to that
+point, which could be slow and create lots of unintended new changes.
+To create multiple new changes, run push multiple times.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_repo_upload">repo upload</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>repo is a multiple repository management tool, most commonly
+used by the Android Open Source Project.  For more details, see
+<a href="http://source.android.com/source/using-repo.html">using repo</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="repo_create">Create Changes</h3>
+<div class="paragraph">
+<p>To upload changes to a project using <code>repo</code>, ensure the manifest&#8217;s
+review field has been configured to point to the Gerrit server.
+Only the hostname or the web address needs to be given in the
+manifest file. During upload <code>repo</code> will automatically determine the
+correct port number by reading <code><a href="http://'reviewhostname'/ssh_info" class="bare">http://'reviewhostname'/ssh_info</a></code>
+when its invoked.</p>
+</div>
+<div class="paragraph">
+<p>Each new commit uploaded by <code>repo upload</code> will be converted into
+a change record on the server.  Other users (e.g. project owners)
+who have configured Gerrit to notify them of new changes will be
+automatically sent an email message.  Additional notifications can
+be sent through command line options.</p>
+</div>
+<div class="paragraph">
+<p>For more details on using <code>repo upload</code>, see <code>repo help upload</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="repo_replace">Replace Changes</h3>
+<div class="paragraph">
+<p>To replace changes, ensure Change-Id lines were created in the
+commit messages, and just use <code>repo upload</code>.
+Gerrit Code Review will automatically match the commits back to
+their original changes by taking advantage of their Change-Id lines.</p>
+</div>
+<div class="paragraph">
+<p>If Change-Id lines are not present in the commit messages, consider
+amending the message and copying the line from the change&#8217;s page
+on the web.</p>
+</div>
+<div class="paragraph">
+<p>If Change-Id lines are not available, then the user must use the much
+more <a href="#manual_replacement_mapping">manual mapping technique</a> offered
+by using <code>git push</code> to a specific <code>refs/changes/change#</code> reference.</p>
+</div>
+<div class="paragraph">
+<p>For more about Change-Ids, see <a href="user-changeid.html">Change-Id Lines</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gritty_details">Gritty Details</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As Gerrit implements the entire SSH and Git server stack within its
+own process space, Gerrit maintains complete control over how the
+repository is updated, and what responses are sent to the <code>git push</code>
+client invoked by the end-user, or by <code>repo upload</code>.  This allows
+Gerrit to provide magical refs, such as <code>refs/for/*</code> for new
+change submission and <code>refs/changes/*</code> for change replacement.
+When a push request is received to create a ref in one of these
+namespaces Gerrit performs its own logic to update the database,
+and then lies to the client about the result of the operation.
+A successful result causes the client to believe that Gerrit has
+created the ref, but in reality Gerrit hasn&#8217;t created the ref at all.</p>
+</div>
+<div class="paragraph">
+<p>By implementing the entire server stack, Gerrit is also able to
+perform project level access control checks (to verify the end-user
+is permitted to access a project) prior to advertising the available
+refs, and potentially leaking information to a snooping client.
+Clients cannot tell the difference between 'project not found' and
+'project exists, but access is denied'.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit can also ensure users have completed a valid Contributor
+Agreement prior to accepting any transferred objects, and if an
+agreement is required, but not completed, it aborts the network
+connection before data is sent.  This ensures that project owners
+can be certain any object available in their repository has been
+supplied under at least one valid agreement.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

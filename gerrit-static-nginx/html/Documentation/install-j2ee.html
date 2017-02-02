@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - J2EE Installation</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - J2EE Installation</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#_installation">Installation</a></li>
+<li><a href="#_jetty_7_x">Jetty 7.x</a></li>
+<li><a href="#tomcat">Tomcat 7.x</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit binary distributions include a standalone Jetty servlet
+container, but are packaged as a standard WAR file to permit easy
+deployment to other existing container installations if using the
+standalone daemon is not desired.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit Code Review can be installed into any J2EE servlet container,
+including popular open source containers such as Jetty or Tomcat, or
+any commercial server which supports the J2EE servlet specification.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation">Installation</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Complete the <a href="install.html#createdb">database setup</a> and
+<a href="install.html#init">site initialization</a> tasks described
+in the standard installation documentation.</p>
+</li>
+<li>
+<p>Stop the embedded daemon that was automatically started by 'init':</p>
+<div class="listingblock">
+<div class="content">
+<pre>  review_site/bin/gerrit.sh stop</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Configure JNDI DataSource 'jdbc/ReviewDb'.</p>
+<div class="paragraph">
+<p>This DataSource must point to the database you created above.
+Don&#8217;t forget to ensure your JNDI configuration can load the
+necessary JDBC drivers.  You may wish to ensure connection pooling
+is configured and enabled within the DataSource.</p>
+</div>
+</li>
+<li>
+<p>Deploy the 'gerrit.war' file to your application server.</p>
+<div class="paragraph">
+<p>The deployment process differs between servers, but typically this
+can be accomplished by copying 'gerrit.war' into the 'webapps/'
+subdirectory of the container&#8217;s installation.</p>
+</div>
+</li>
+<li>
+<p>('Optional') Install Bouncy Castle Crypto API</p>
+<div class="paragraph">
+<p>If you enabled Bouncy Castle Crypto during 'init', copy the JAR
+from <code>'$site_path'/lib</code> into your servlet container&#8217;s extensions
+directory so it&#8217;s available to Gerrit Code Review.</p>
+</div>
+</li>
+<li>
+<p>('Optional') <a href="config-auto-site-initialization.html">
+Configure Automatic Site Initialization on Startup</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_jetty_7_x">Jetty 7.x</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These directions will configure Gerrit as the default web
+application, allowing URLs like <code><a href="http://example.com/4543" class="bare">http://example.com/4543</a></code> to jump
+directly to change 4543.</p>
+</div>
+<div class="paragraph">
+<p>Download and unzip a release version of Jetty.  From here on we
+call the unpacked directory <code>$JETTY_HOME</code>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.eclipse.org/jetty/downloads.php">Jetty Downloads</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If this is a fresh installation of Jetty, move into the installation
+directory and do some cleanup to remove the sample webapps:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  cd $JETTY_HOME
+  rm -rf contexts/* webapps/*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Copy Gerrit Code Review into the deployment:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  cp ~/gerrit.war webapps/gerrit.war
+  java -jar webapps/gerrit.war cat extra/jetty7/gerrit.xml &gt;contexts/gerrit.xml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Install the required additional libraries by copying them into the
+<code>'$JETTY_HOME'/lib/ext</code> directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  cp ../review_db/lib/* lib/ext/
+  java -jar webapps/gerrit.war cat lib/commons-dbcp-1.2.2.jar &gt;lib/ext/commons-dbcp-1.2.2.jar
+  java -jar webapps/gerrit.war cat lib/commons-pool-1.5.4.jar &gt;lib/ext/commons-pool-1.5.4.jar
+  java -jar webapps/gerrit.war cat lib/h2-1.2.128.jar &gt;lib/ext/h2-1.2.128.jar
+  java -jar webapps/gerrit.war cat lib/postgresql-8.4-701.jdbc4.jar &gt;lib/ext/postgresql-8.4-701.jdbc4.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Edit <code>'$JETTY_HOME'/contexts/gerrit.xml</code> to correctly configure
+the database and outgoing SMTP connections, especially the user
+and password fields.</p>
+</div>
+<div class="paragraph">
+<p>If OpenID authentication (or certain enterprise single-sign-on
+solutions) is being used, you may need to increase the
+header buffer size parameter, due to very long header lines
+being used by the OpenID authentication handshake process.
+Add the following to <code>'$JETTY_HOME'/etc/jetty.xml</code> under
+<code>org.eclipse.jetty.server.nio.SelectChannelConnector</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;Set name="headerBufferSize"&gt;16384&lt;/Set&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To start automatically when the system boots, create a start
+script and modify it for your configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  java -jar webapps/gerrit.war --cat extra/jetty7/gerrit-jetty.sh &gt;/etc/init.d/gerrit-jetty
+  vi /etc/init.d/gerrit-jetty</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Under Jetty, restarting the web application (e.g. after modifying
+<code>system_config</code>) is as simple as touching the context config file:
+<code>'$JETTY_HOME'/contexts/gerrit.xml</code>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tomcat">Tomcat 7.x</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If a reverse proxy is used in front of Tomcat then see the
+<a href="config-reverseproxy.html">configuration instructions for encoding
+slashes</a>. Otherwise Tomcat must be configured to encode slashes, by adding
+<code>-Dorg.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH=true</code> to the
+<code>CATALINA_OPTS</code> environment variable.</p>
+</div>
+<div class="paragraph">
+<p>Excerpt from the
+<a href="https://tomcat.apache.org/tomcat-7.0-doc/config/systemprops.html">
+documentation</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Property org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH:
+If this is true '%2F' and '%5C' will be permitted as path delimiters.
+If not specified, the default value of false will be used.</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

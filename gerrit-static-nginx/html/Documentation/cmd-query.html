@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>gerrit query</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>gerrit query</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_access">ACCESS</a></li>
+<li><a href="#_scripting">SCRIPTING</a></li>
+<li><a href="#_examples">EXAMPLES</a></li>
+<li><a href="#_schema">SCHEMA</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>gerrit query - Query the change database</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>ssh</em> -p &lt;port&gt; &lt;host&gt; <em>gerrit query</em>
+  [--format {TEXT | JSON}]
+  [--current-patch-set]
+  [--patch-sets | --all-approvals]
+  [--files]
+  [--comments]
+  [--commit-message]
+  [--dependencies]
+  [--submit-records]
+  [--all-reviewers]
+  [--start &lt;n&gt; | -S &lt;n&gt;]
+  [--]
+  &lt;query&gt;
+  [limit:&lt;n&gt;]</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Queries the change database and returns results describing changes
+that match the input query.  More recently updated changes appear
+before older changes, which is the same order presented in the
+web interface.  For each matching change, the result contains data
+for the change&#8217;s latest patch set, even if the query matched on an
+older patch set (for example an older patch set&#8217;s sha1 revision).</p>
+</div>
+<div class="paragraph">
+<p>A query may be limited on the number of results it returns with the
+'limit:' operator.  If no limit is supplied an internal default
+limit is used to prevent explosion of the result set.  To obtain
+results beyond the limit, the '--start' flag can be used to resume
+the query after skipping a certain number of results.</p>
+</div>
+<div class="paragraph">
+<p>Non-option arguments to this command are joined with spaces and
+then parsed as a query. This simplifies calling conventions over
+SSH by permitting operators to appear in different arguments.</p>
+</div>
+<div class="paragraph">
+<p>Query operators may quote values using matched curly braces
+(e.g. <code>reviewerin:{Developer Group}</code>) to sidestep issues with 2
+levels of shell quoting (caller shell invoking SSH, and the SSH
+command line parser in the server).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--format</dt>
+<dd>
+<p>Formatting method for the results. <code>TEXT</code> is the default,
+presenting a human readable display. <code>JSON</code> returns
+<a href="json.html#change">change attributes</a>, one line
+per matching record, with embedded LFs escaped.</p>
+</dd>
+<dt class="hdlist1">--current-patch-set</dt>
+<dd>
+<p>Include information about the current patch set in the results.
+Note that the information will only be included when the current
+patch set is visible to the caller.</p>
+</dd>
+<dt class="hdlist1">--patch-sets</dt>
+<dd>
+<p>Include information about all patch sets visible to the caller.
+       If combined with the --current-patch-set flag then the current patch
+set information will be output twice, once in each field.</p>
+</dd>
+<dt class="hdlist1">--all-approvals</dt>
+<dd>
+<p>Include information about all patch sets visible to the caller along
+with the approval information for each patch set.  If combined with
+the --current-patch-set flag then the current patch set
+information will be output twice, once in each field.</p>
+</dd>
+<dt class="hdlist1">--files</dt>
+<dd>
+<p>Support for listing files with patch sets and their
+attributes (ADDED, MODIFIED, DELETED, RENAMED, COPIED)
+and size information (number of insertions and deletions).
+Note that this option requires either the --current-patch-set
+or the --patch-sets option in order to give any file information.</p>
+</dd>
+<dt class="hdlist1">--comments</dt>
+<dd>
+<p>Include comments for all changes. If combined with the
+--patch-sets flag then all inline/file comments are included for
+each patch set that is visible to the caller.</p>
+</dd>
+<dt class="hdlist1">--commit-message</dt>
+<dd>
+<p>Include the full commit message in the change description.</p>
+</dd>
+<dt class="hdlist1">--dependencies</dt>
+<dd>
+<p>Show information about patch sets which depend on, or are needed by,
+each patch set.</p>
+</dd>
+<dt class="hdlist1">--all-reviewers</dt>
+<dd>
+<p>Show the name and email of all reviewers which are added to a change
+(irrespective of whether they have been voting on that change or not).</p>
+</dd>
+<dt class="hdlist1">--submit-records</dt>
+<dd>
+<p>Show submit record information about the change, which
+includes whether the change meets the criteria for submission
+(including information for each review label).</p>
+</dd>
+<dt class="hdlist1">--start</dt>
+<dt class="hdlist1">-S</dt>
+<dd>
+<p>Number of changes to skip.</p>
+</dd>
+<dt class="hdlist1">limit:&lt;n&gt;</dt>
+<dd>
+<p>Maximum number of results to return.  This is actually a
+query operator, and not a command line option.	If more
+than one limit: operator is provided, the smallest limit
+will be used to cut the result set.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_access">ACCESS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Any user who has configured an SSH key.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scripting">SCRIPTING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command is intended to be used in scripts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">EXAMPLES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Find the 2 most recent open changes in the tools/gerrit project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 review.example.com gerrit query --format=JSON status:open project:tools/gerrit limit:2
+  {"project":"tools/gerrit", ...}
+  {"project":"tools/gerrit", ...}
+  {"type":"stats","rowCount":2,"runningTimeMilliseconds:15}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Skip number of changes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 review.example.com gerrit query --format=JSON --start 42 status:open project:tools/gerrit limit:2
+  {"project":"tools/gerrit", ...}
+  {"project":"tools/gerrit", ...}
+  {"type":"stats","rowCount":1,"runningTimeMilliseconds:15}</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_schema">SCHEMA</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The JSON messages consist of nested objects referencing the
+<a href="json.html#change">change</a>,
+<a href="json.html#patchSet">patchset</a>,
+<a href="json.html#">account</a>
+involved, and other attributes as appropriate.</p>
+</div>
+<div class="paragraph">
+<p>Note that any field may be missing in the JSON messages, so consumers
+of this JSON stream should deal with that appropriately.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="user-search.html">Query Operators</a></p>
+</li>
+<li>
+<p><a href="json.html">JSON Data Formats</a></p>
+</li>
+<li>
+<p><a href="access-control.html">Access Controls</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

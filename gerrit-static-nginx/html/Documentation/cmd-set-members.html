@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>gerrit set-members</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>gerrit set-members</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_access">ACCESS</a></li>
+<li><a href="#_scripting">SCRIPTING</a></li>
+<li><a href="#_examples">EXAMPLES</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>gerrit set-members - Set group members</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>ssh</em> -p &lt;port&gt; &lt;host&gt; <em>gerrit set-members</em>
+  [--add USER &#8230;&#8203;]
+  [--remove USER &#8230;&#8203;]
+  [--include GROUP &#8230;&#8203;]
+  [--exclude GROUP &#8230;&#8203;]
+  [--]
+  &lt;GROUP&gt; &#8230;&#8203;</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Set the group members for the specified groups.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">&lt;GROUP&gt;</dt>
+<dd>
+<p>Required; name of the group for which the members should be set.
+The members for multiple groups can be set at once by specifying
+multiple groups.</p>
+</dd>
+<dt class="hdlist1">--add</dt>
+<dt class="hdlist1">-a</dt>
+<dd>
+<p>A user that should be added to the specified groups. Multiple
+users can be added at once by using this option multiple times.</p>
+</dd>
+<dt class="hdlist1">--remove</dt>
+<dt class="hdlist1">-r</dt>
+<dd>
+<p>Remove this user from the specified groups. Multiple users can be
+removed at once by using this option multiple times.</p>
+</dd>
+<dt class="hdlist1">--include</dt>
+<dt class="hdlist1">-i</dt>
+<dd>
+<p>A group that should be included to the specified groups. Multiple
+groups can be included at once by using this option multiple
+times.</p>
+</dd>
+<dt class="hdlist1">--exclude</dt>
+<dt class="hdlist1">-e</dt>
+<dd>
+<p>Exclude this group from the specified groups. Multiple groups can
+be excluded at once by using this option multiple times.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>The <code>set-members</code> command is processing the options in the following
+order: <code>--remove</code>, <code>--exclude</code>, <code>--add</code>, <code>--include</code></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_access">ACCESS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Any user who has configured an SSH key.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scripting">SCRIPTING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command is intended to be used in scripts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">EXAMPLES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Add alice and bob, but remove eve from the groups my-committers and
+my-verifiers.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit set-members \
+	  -a alice@example.com -a bob@example.com \
+	  -r eve@example.com my-committers my-verifiers</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Include the group my-friends into the group my-committers, but
+exclude the included group my-testers from the group my-committers.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	$ ssh -p 29418 review.example.com gerrit set-members \
+	  -i my-friends -e my-testers my-committers</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

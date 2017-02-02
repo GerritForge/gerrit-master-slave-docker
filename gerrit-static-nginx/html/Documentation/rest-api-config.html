@@ -1,0 +1,2853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - /config/ REST API</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - /config/ REST API</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#config-endpoints">Config Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#get-version">Get Version</a></li>
+<li><a href="#get-info">Get Server Info</a></li>
+<li><a href="#confirm-email">Confirm Email</a></li>
+<li><a href="#list-caches">List Caches</a></li>
+<li><a href="#cache-operations">Cache Operations</a></li>
+<li><a href="#get-cache">Get Cache</a></li>
+<li><a href="#flush-cache">Flush Cache</a></li>
+<li><a href="#get-summary">Get Summary</a></li>
+<li><a href="#list-capabilities">List Capabilities</a></li>
+<li><a href="#list-tasks">List Tasks</a></li>
+<li><a href="#get-task">Get Task</a></li>
+<li><a href="#delete-task">Delete Task</a></li>
+<li><a href="#get-top-menus">Get Top Menus</a></li>
+<li><a href="#get-user-preferences">Get Default User Preferences</a></li>
+<li><a href="#set-user-preferences">Set Default User Preferences</a></li>
+<li><a href="#get-diff-preferences">Get Default Diff Preferences</a></li>
+<li><a href="#set-diff-preferences">Set Default Diff Preferences</a></li>
+</ul>
+</li>
+<li><a href="#ids">IDs</a>
+<ul class="sectlevel2">
+<li><a href="#cache-name">{cache-name}</a></li>
+<li><a href="#task-id">{task-id}</a></li>
+</ul>
+</li>
+<li><a href="#json-entities">JSON Entities</a>
+<ul class="sectlevel2">
+<li><a href="#auth-info">AuthInfo</a></li>
+<li><a href="#cache-info">CacheInfo</a></li>
+<li><a href="#cache-operation-input">CacheOperationInput</a></li>
+<li><a href="#capability-info">CapabilityInfo</a></li>
+<li><a href="#change-config-info">ChangeConfigInfo</a></li>
+<li><a href="#download-info">DownloadInfo</a></li>
+<li><a href="#download-scheme-info">DownloadSchemeInfo</a></li>
+<li><a href="#email-confirmation-input">EmailConfirmationInput</a></li>
+<li><a href="#entries-info">EntriesInfo</a></li>
+<li><a href="#gerrit-info">GerritInfo</a></li>
+<li><a href="#hit-ration-info">HitRatioInfo</a></li>
+<li><a href="#jvm-summary-info">JvmSummaryInfo</a></li>
+<li><a href="#mem-summary-info">MemSummaryInfo</a></li>
+<li><a href="#plugin-config-info">PluginConfigInfo</a></li>
+<li><a href="#receive-info">ReceiveInfo</a></li>
+<li><a href="#server-info">ServerInfo</a></li>
+<li><a href="#sshd-info">SshdInfo</a></li>
+<li><a href="#suggest-info">SuggestInfo</a></li>
+<li><a href="#summary-info">SummaryInfo</a></li>
+<li><a href="#task-info">TaskInfo</a></li>
+<li><a href="#task-summary-info">TaskSummaryInfo</a></li>
+<li><a href="#thread-summary-info">ThreadSummaryInfo</a></li>
+<li><a href="#top-menu-entry-info">TopMenuEntryInfo</a></li>
+<li><a href="#top-menu-item-info">TopMenuItemInfo</a></li>
+<li><a href="#user-config-info">UserConfigInfo</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page describes the config related REST endpoints.
+Please also take note of the general information on the
+<a href="rest-api.html">REST API</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="config-endpoints">Config Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="get-version">Get Version</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/version'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the version of the Gerrit server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/version HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  "2.7"</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-info">Get Server Info</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/info'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the information about the Gerrit server configuration.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/info HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As result a <a href="#server-info">ServerInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "auth": {
+      "auth_type": "LDAP",
+      "use_contributor_agreements": true,
+      "contributor_agreements": [
+        {
+          "name": "Individual",
+          "description": "If you are going to be contributing code on your own, this is the one you want. You can sign this one online.",
+          "url": "static/cla_individual.html"
+        }
+      ],
+      "editable_account_fields": [
+        "FULL_NAME",
+        "REGISTER_NEW_EMAIL"
+      ]
+    },
+    "download": {
+      "schemes": {
+        "anonymous http": {
+          "url": "http://gerrithost:8080/${project}",
+          "commands": {
+            "Checkout": "git fetch http://gerrithost:8080/${project} ${ref} \u0026\u0026 git checkout FETCH_HEAD",
+            "Format Patch": "git fetch http://gerrithost:8080/${project} ${ref} \u0026\u0026 git format-patch -1 --stdout FETCH_HEAD",
+            "Pull": "git pull http://gerrithost:8080/${project} ${ref}",
+            "Cherry Pick": "git fetch http://gerrithost:8080/${project} ${ref} \u0026\u0026 git cherry-pick FETCH_HEAD"
+          },
+          "clone_commands": {
+            "Clone": "git clone http://gerrithost:8080/${project}",
+            "Clone with commit-msg hook": "git clone http://gerrithost:8080/${project} \u0026\u0026 scp -p -P 29418 jdoe@gerrithost:hooks/commit-msg ${project}/.git/hooks/"
+          }
+        },
+        "http": {
+          "url": "http://jdoe@gerrithost:8080/${project}",
+          "is_auth_required": true,
+          "is_auth_supported": true,
+          "commands": {
+            "Checkout": "git fetch http://jdoe@gerrithost:8080/${project} ${ref} \u0026\u0026 git checkout FETCH_HEAD",
+            "Format Patch": "git fetch http://jdoe@gerrithost:8080/${project} ${ref} \u0026\u0026 git format-patch -1 --stdout FETCH_HEAD",
+            "Pull": "git pull http://jdoe@gerrithost:8080/${project} ${ref}",
+            "Cherry Pick": "git fetch http://jdoe@gerrithost:8080/${project} ${ref} \u0026\u0026 git cherry-pick FETCH_HEAD"
+          },
+          "clone_commands": {
+            "Clone": "git clone http://jdoe@gerrithost:8080/${project}",
+            "Clone with commit-msg hook": "git clone http://jdoe@gerrithost:8080/${project} \u0026\u0026 scp -p -P 29418 jdoe@gerrithost:hooks/commit-msg ${project}/.git/hooks/"
+          }
+        },
+        "ssh": {
+          "url": "ssh://jdoe@gerrithost:29418/${project}",
+          "is_auth_required": true,
+          "is_auth_supported": true,
+          "commands": {
+            "Checkout": "git fetch ssh://jdoe@gerrithost:29418/${project} ${ref} \u0026\u0026 git checkout FETCH_HEAD",
+            "Format Patch": "git fetch ssh://jdoe@gerrithost:29418/${project} ${ref} \u0026\u0026 git format-patch -1 --stdout FETCH_HEAD",
+            "Pull": "git pull ssh://jdoe@gerrithost:29418/${project} ${ref}",
+            "Cherry Pick": "git fetch ssh://jdoe@gerrithost:29418/${project} ${ref} \u0026\u0026 git cherry-pick FETCH_HEAD"
+          },
+          "clone_commands": {
+            "Clone": "git clone ssh://jdoe@gerrithost:29418/${project}",
+            "Clone with commit-msg hook": "git clone ssh://jdoe@gerrithost:29418/${project} \u0026\u0026 scp -p -P 29418 jdoe@gerrithost:hooks/commit-msg ${project}/.git/hooks/"
+          }
+        }
+      },
+      "archives": [
+        "tgz",
+        "tar",
+        "tbz2",
+        "txz"
+      ]
+    },
+    "gerrit": {
+      "all_projects": "All-Projects",
+      "all_users": "All-Users"
+      "doc_search": true,
+      "web_uis": [
+        "gwt"
+      ]
+    },
+    "sshd": {},
+    "suggest": {
+      "from": 0
+    },
+    "user": {
+      "anonymous_coward_name": "Anonymous Coward"
+    }
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="confirm-email">Confirm Email</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /config/server/email.confirm'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Confirms that the user owns an email address.</p>
+</div>
+<div class="paragraph">
+<p>The email token must be provided in the request body inside
+an <a href="#email-confirmation-input">EmailConfirmationInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /config/server/email.confirm HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "token": "Enim+QNbAo6TV8Hur8WwoUypI6apG7qBPvF+bw==$MTAwMDAwNDp0ZXN0QHRlc3QuZGU="
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The response is &#8220;204 No Content&#8221;.</p>
+</div>
+<div class="paragraph">
+<p>If the token is invalid or if it&#8217;s the token of another user the
+request fails and the response is &#8220;422 Unprocessable Entity&#8221;.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list-caches">List Caches</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/caches/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lists the caches of the server. Caches defined by plugins are included.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be a member of a group that is granted one of the
+following capabilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html#capability_viewCaches">View Caches</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_maintainServer">Maintain Server</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_administrateServer">Administrate Server</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As result a map of <a href="#cache-info">CacheInfo</a> entities is returned.</p>
+</div>
+<div class="paragraph">
+<p>The entries in the map are sorted by cache name.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/caches/ HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "accounts": {
+      "type": "MEM",
+      "entries": {
+        "mem": 4
+      },
+      "average_get": "2.5ms",
+      "hit_ratio": {
+        "mem": 94
+      }
+    },
+    "accounts_byemail": {
+      "type": "MEM",
+      "entries": {
+        "mem": 4
+      },
+      "average_get": "771.8us",
+      "hit_ratio": {
+        "mem": 95
+      }
+    },
+    "accounts_byname": {
+      "type": "MEM",
+      "entries": {
+        "mem": 4
+      },
+      "hit_ratio": {
+        "mem": 100
+      }
+    },
+    "adv_bases": {
+      "type": "MEM",
+      "entries": {},
+      "hit_ratio": {}
+    },
+    "change_kind": {
+      "type": "DISK",
+      "entries": {
+        "space": "0.00k"
+      },
+      "hit_ratio": {}
+    },
+    "changes": {
+      "type": "MEM",
+      "entries": {},
+      "hit_ratio": {}
+    },
+    "conflicts": {
+      "type": "DISK",
+      "entries": {
+        "mem": 2,
+        "disk": 3,
+        "space": "2.75k"
+      },
+      "hit_ratio": {
+        "mem": 0,
+        "disk": 100
+      }
+    },
+    "diff": {
+      "type": "DISK",
+      "entries": {
+        "mem": 177,
+        "disk": 253,
+        "space": "170.97k"
+      },
+      "average_get": "1.1ms",
+      "hit_ratio": {
+        "mem": 67,
+        "disk": 100
+      }
+    },
+    "diff_intraline": {
+      "type": "DISK",
+      "entries": {
+        "mem": 1,
+        "disk": 1,
+        "space": "0.37k"
+      },
+      "average_get": "6.8ms",
+      "hit_ratio": {
+        "mem": 0
+      }
+    },
+    "git_tags": {
+      "type": "DISK",
+      "entries": {
+        "space": "0.00k"
+      },
+      "hit_ratio": {}
+    },
+    groups": {
+      "type": "MEM",
+      "entries": {
+        "mem": 27
+      },
+      "average_get": "183.2us",
+      "hit_ratio": {
+        "mem": 12
+      }
+    },
+    "groups_byinclude": {
+      "type": "MEM",
+      "entries": {},
+      "hit_ratio": {}
+    },
+    "groups_byname": {
+      "type": "MEM",
+      "entries": {},
+      "hit_ratio": {}
+    },
+    "groups_byuuid": {
+      "type": "MEM",
+      "entries": {
+        "mem": 25
+      },
+      "average_get": "173.4us",
+      "hit_ratio": {
+        "mem": 13
+      }
+    },
+    "groups_external": {
+      "type": "MEM",
+      "entries": {},
+      "hit_ratio": {}
+    },
+    groups_members": {
+      "type": "MEM",
+      "entries": {
+        "mem": 4
+      },
+      "average_get": "697.8us",
+      "hit_ratio": {
+        "mem": 82
+      }
+    },
+    "permission_sort": {
+      "type": "MEM",
+      "entries": {
+        "mem": 16
+      },
+      "hit_ratio": {
+        "mem": 96
+      }
+    },
+    "plugin_resources": {
+      "type": "MEM",
+      "entries": {
+        "mem": 2
+      },
+      "hit_ratio": {
+        "mem": 83
+      }
+    },
+    "project_list": {
+      "type": "MEM",
+      "entries": {
+        "mem": 1
+      },
+      "average_get": "18.6ms",
+      "hit_ratio": {
+        "mem": 0
+      }
+    },
+    "projects": {
+      "type": "MEM",
+      "entries": {
+        "mem": 35
+      },
+      "average_get": "8.6ms",
+      "hit_ratio": {
+        "mem": 99
+      }
+    },
+    "quota-repo_size": {
+      "type": "DISK",
+      "entries": {
+        "space": "0.00k"
+      },
+      "hit_ratio": {}
+    },
+    "sshkeys": {
+      "type": "MEM",
+      "entries": {
+        "mem": 1
+      },
+      "average_get": "3.2ms",
+      "hit_ratio": {
+        "mem": 50
+      }
+    },
+    "web_sessions": {
+      "type": "DISK",
+      "entries": {
+        "mem": 1,
+        "disk": 2,
+        "space": "0.78k"
+      },
+      "hit_ratio": {
+        "mem": 82
+      }
+    }
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is possible to get different output formats by specifying the
+<code>format</code> option:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>LIST</code>:</p>
+<div class="paragraph">
+<p>Returns the cache names as JSON list.</p>
+</div>
+<div class="paragraph">
+<p>The cache names are lexicographically sorted.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/caches/?format=LIST HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    "accounts",
+    "accounts_byemail",
+    "accounts_byname",
+    "adv_bases",
+    "change_kind",
+    "changes",
+    "conflicts",
+    "diff",
+    "diff_intraline",
+    "git_tags",
+    "groups",
+    "groups_byinclude",
+    "groups_byname",
+    "groups_byuuid",
+    "groups_external",
+    "groups_members",
+    "permission_sort",
+    "plugin_resources",
+    "project_list",
+    "projects",
+    "quota-repo_size",
+    "sshkeys",
+    "web_sessions"
+  ]</pre>
+</div>
+</div>
+</li>
+<li>
+<p><code>TEXT_LIST</code>:</p>
+<div class="paragraph">
+<p>Returns the cache names as a UTF-8 list that is base64 encoded. The
+cache names are delimited by '\n'.</p>
+</div>
+<div class="paragraph">
+<p>The cache names are lexicographically sorted.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/caches/?format=TEXT_LIST HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: text/plain; charset=UTF-8
+
+  YWNjb3VudHMKYW...ViX3Nlc3Npb25z</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>E.g. this could be used to flush all caches:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  for c in $(curl --digest --user jdoe:TNAuLkXsIV7w http://gerrit/a/config/server/caches/?format=TEXT_LIST | base64 -D)
+  do
+    curl --digest --user jdoe:TNAuLkXsIV7w -X POST http://gerrit/a/config/server/caches/$c/flush
+  done</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="cache-operations">Cache Operations</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /config/server/caches/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Executes a cache operation that is specified in the request body in a
+<a href="#cache-operation-input">CacheOperationInput</a> entity.</p>
+</div>
+<div class="sect3">
+<h4 id="flush-all-caches">Flush All Caches</h4>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /config/server/caches/ HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "operation": "FLUSH_ALL"
+  }</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="flush-several-caches">Flush Several Caches At Once</h4>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /config/server/caches/ HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "operation": "FLUSH",
+    "caches": [
+      "projects",
+      "project_list"
+    ]
+  }</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-cache">Get Cache</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/caches/<a href="#cache-name">{cache-name}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves information about a cache.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be a member of a group that is granted one of the
+following capabilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html#capability_viewCaches">View Caches</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_maintainServer">Maintain Server</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_administrateServer">Administrate Server</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As result a <a href="#cache-info">CacheInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/caches/projects HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "name": "projects",
+    "type": "MEM",
+    "entries": {
+      "mem": 35
+    },
+    "average_get": " 8.6ms",
+    "hit_ratio": {
+      "mem": 99
+    }
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="flush-cache">Flush Cache</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /config/server/caches/<a href="#cache-name">{cache-name}</a>/flush'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Flushes a cache.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be a member of a group that is granted one of the
+following capabilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html#capability_flushCaches">Flush Caches</a> (any cache
+except "web_sessions")</p>
+</li>
+<li>
+<p><a href="access-control.html#capability_maintainServer">Maintain Server</a> (any cache
+including "web_sessions")</p>
+</li>
+<li>
+<p><a href="access-control.html#capability_administrateServer">Administrate Server</a>
+(any cache including "web_sessions")</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /config/server/caches/projects/flush HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-summary">Get Summary</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/summary'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a summary of the current server state.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be a member of a group that is granted the
+<a href="access-control.html#capability_administrateServer">Administrate
+Server</a> capability.</p>
+</div>
+<div class="paragraph">
+<p>The following options are supported:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>jvm</code>:</p>
+<div class="paragraph">
+<p>Includes a JVM summary.</p>
+</div>
+</li>
+<li>
+<p><code>gc</code>:</p>
+<div class="paragraph">
+<p>Requests a Java garbage collection before computing the information
+about the Java memory heap.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/summary?jvm HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As result a <a href="#summary-info">SummaryInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "task_summary": {
+      "total": 2,
+      "sleeping": 2
+    },
+    "mem_summary": {
+      "total": "341.06m",
+      "used": "57.16m",
+      "free": "283.90m",
+      "buffers": "0.00k",
+      "max": "1.67g",
+    }
+    "thread_summary": {
+      "cpus": 8,
+      "threads": 44,
+      "counts": {
+        "HTTP": {
+          "RUNNABLE": 3,
+          "TIMED_WAITING": 2
+        },
+        "SSH-Interactive-Worker": {
+          "WAITING": 1
+        },
+        "Other": {
+          "WAITING": 10,
+          "RUNNABLE": 2,
+          "TIMED_WAITING": 25
+        },
+        "SshCommandStart": {
+          "WAITING": 1
+        }
+      }
+    },
+    "jvm_summary": {
+      "vm_vendor": "Oracle Corporation",
+      "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+      "vm_version": "23.25-b01",
+      "os_name": "Mac OS X",
+      "os_version": "10.8.5",
+      "os_arch": "x86_64",
+      "user": "gerrit",
+      "host": "GERRIT",
+      "current_working_directory": "/Users/gerrit/site",
+      "site": "/Users/gerrit/site"
+    }
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list-capabilities">List Capabilities</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/capabilities'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lists the capabilities that are available in the system. There are two
+kinds of capabilities: core and plugin-owned capabilities.</p>
+</div>
+<div class="paragraph">
+<p>As result a map of <a href="#capability-info">CapabilityInfo</a> entities is
+returned.</p>
+</div>
+<div class="paragraph">
+<p>The entries in the map are sorted by capability ID.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/capabilities/ HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "accessDatabase": {
+      "id": "accessDatabase",
+      "name": "Access Database"
+    },
+    "administrateServer": {
+      "id": "administrateServer",
+      "name": "Administrate Server"
+    },
+    "createAccount": {
+      "id": "createAccount",
+      "name": "Create Account"
+    },
+    "createGroup": {
+      "id": "createGroup",
+      "name": "Create Group"
+    },
+    "createProject": {
+      "id": "createProject",
+      "name": "Create Project"
+    },
+    "emailReviewers": {
+      "id": "emailReviewers",
+      "name": "Email Reviewers"
+    },
+    "flushCaches": {
+      "id": "flushCaches",
+      "name": "Flush Caches"
+    },
+    "killTask": {
+      "id": "killTask",
+      "name": "Kill Task"
+    },
+    "priority": {
+      "id": "priority",
+      "name": "Priority"
+    },
+    "queryLimit": {
+      "id": "queryLimit",
+      "name": "Query Limit"
+    },
+    "runGC": {
+      "id": "runGC",
+      "name": "Run Garbage Collection"
+    },
+    "streamEvents": {
+      "id": "streamEvents",
+      "name": "Stream Events"
+    },
+    "viewCaches": {
+      "id": "viewCaches",
+      "name": "View Caches"
+    },
+    "viewConnections": {
+      "id": "viewConnections",
+      "name": "View Connections"
+    },
+    "viewPlugins": {
+      "id": "viewPlugins",
+      "name": "View Plugins"
+    },
+    "viewQueue": {
+      "id": "viewQueue",
+      "name": "View Queue"
+    }
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list-tasks">List Tasks</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/tasks/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lists the tasks from the background work queues that the Gerrit daemon
+is currently performing, or will perform in the near future.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit contains an internal scheduler, similar to cron, that it uses to
+queue and dispatch both short and long term tasks.</p>
+</div>
+<div class="paragraph">
+<p>Tasks that are completed or canceled exit the queue very quickly once
+they enter this state, but it can be possible to observe tasks in these
+states.</p>
+</div>
+<div class="paragraph">
+<p>End-users may see a task only if they can also see the project the task
+is associated with. Tasks operating on other projects, or that do not
+have a specific project, are hidden.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be a member of a group that is granted one of the
+following capabilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html#capability_viewQueue">View Queue</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_maintainServer">Maintain Server</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_administrateServer">Administrate Server</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As result a list of <a href="#task-info">TaskInfo</a> entities is returned.</p>
+</div>
+<div class="paragraph">
+<p>The entries in the list are sorted by task state, remaining delay and
+command.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/tasks/ HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "id": "1e688bea",
+      "state": "SLEEPING",
+      "start_time": "2014-06-11 12:58:51.991000000",
+      "delay": 3453,
+      "command": "Reload Submit Queue"
+    },
+    {
+      "id": "3e6d4ffa",
+      "state": "SLEEPING",
+      "start_time": "2014-06-11 12:58:51.508000000",
+      "delay": 3287966,
+      "command": "Log File Compressor"
+    }
+  ]</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-task">Get Task</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/tasks/<a href="#task-id">{task-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a task from the background work queue that the Gerrit daemon
+is currently performing, or will perform in the near future.</p>
+</div>
+<div class="paragraph">
+<p>End-users may see a task only if they can also see the project the task
+is associated with. Tasks operating on other projects, or that do not
+have a specific project, are hidden.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be a member of a group that is granted one of the
+following capabilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html#capability_viewQueue">View Queue</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_maintainServer">Maintain Server</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_administrateServer">Administrate Server</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As result a <a href="#task-info">TaskInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/tasks/1e688bea HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "1e688bea",
+    "state": "SLEEPING",
+    "start_time": "2014-06-11 12:58:51.991000000",
+    "delay": 3453,
+    "command": "Reload Submit Queue"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-task">Delete Task</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'DELETE /config/server/tasks/<a href="#task-id">{task-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Kills a task from the background work queue that the Gerrit daemon
+is currently performing, or will perform in the near future.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be a member of a group that is granted one of the
+following capabilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html#capability_kill">Kill Task</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_maintainServer">Maintain Server</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_administrateServer">Administrate Server</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>End-users may see a task only if they can also see the project the task
+is associated with. Tasks operating on other projects, or that do not
+have a specific project, are hidden.</p>
+</div>
+<div class="paragraph">
+<p>Members of a group granted one of the following capabilities may view
+all tasks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="access-control.html#capability_viewQueue">View Queue</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_maintainServer">Maintain Server</a></p>
+</li>
+<li>
+<p><a href="access-control.html#capability_administrateServer">Administrate Server</a></p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  DELETE /config/server/tasks/1e688bea HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 204 No Content</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-top-menus">Get Top Menus</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/top-menus'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the list of additional top menu entries.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /config/server/top-menus HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a list of the additional top menu entries as
+<a href="#top-menu-entry-info">TopMenuEntryInfo</a> entities is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "name": "Top Menu Entry",
+      "items": [
+        {
+          "url": "http://gerrit.googlecode.com/",
+          "name": "Gerrit",
+          "target": "_blank"
+        }
+      ]
+    }
+  ]</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-user-preferences">Get Default User Preferences</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/preferences'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the default user preferences for the server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /a/config/server/preferences HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="rest-api-accounts.html#preferences-info">
+PreferencesInfo</a> is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "changes_per_page": 25,
+    "show_site_header": true,
+    "use_flash_clipboard": true,
+    "download_command": "CHECKOUT",
+    "date_format": "STD",
+    "time_format": "HHMM_12",
+    "diff_view": "SIDE_BY_SIDE",
+    "size_bar_in_change_table": true,
+    "review_category_strategy": "NONE",
+    "mute_common_path_prefixes": true,
+    "my": [
+      {
+        "url": "#/dashboard/self",
+        "name": "Changes"
+      },
+      {
+        "url": "#/q/owner:self+is:draft",
+        "name": "Drafts"
+      },
+      {
+        "url": "#/q/has:draft",
+        "name": "Draft Comments"
+      },
+      {
+        "url": "#/q/has:edit",
+        "name": "Edits"
+      },
+      {
+        "url": "#/q/is:watched+is:open",
+        "name": "Watched Changes"
+      },
+      {
+        "url": "#/q/is:starred",
+        "name": "Starred Changes"
+      },
+      {
+        "url": "#/groups/self",
+        "name": "Groups"
+      }
+    ],
+    "email_strategy": "ENABLED"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-user-preferences">Set Default User Preferences</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /config/server/preferences'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets the default user preferences for the server.</p>
+</div>
+<div class="paragraph">
+<p>The new user preferences must be provided in the request body as a
+<a href="rest-api-accounts.html#preferences-input">PreferencesInput</a>
+entity.</p>
+</div>
+<div class="paragraph">
+<p>To be allowed to set default preferences, a user must be a member of
+a group that is granted the
+<a href="access-control.html#capability_administrateServer">
+Administrate Server</a> capability.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /a/config/server/preferences HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "changes_per_page": 50
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="rest-api-accounts.html#preferences-info">
+PreferencesInfo</a> is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "changes_per_page": 50,
+    "show_site_header": true,
+    "use_flash_clipboard": true,
+    "download_command": "CHECKOUT",
+    "date_format": "STD",
+    "time_format": "HHMM_12",
+    "diff_view": "SIDE_BY_SIDE",
+    "size_bar_in_change_table": true,
+    "review_category_strategy": "NONE",
+    "mute_common_path_prefixes": true,
+    "my": [
+      {
+        "url": "#/dashboard/self",
+        "name": "Changes"
+      },
+      {
+        "url": "#/q/owner:self+is:draft",
+        "name": "Drafts"
+      },
+      {
+        "url": "#/q/has:draft",
+        "name": "Draft Comments"
+      },
+      {
+        "url": "#/q/has:edit",
+        "name": "Edits"
+      },
+      {
+        "url": "#/q/is:watched+is:open",
+        "name": "Watched Changes"
+      },
+      {
+        "url": "#/q/is:starred",
+        "name": "Starred Changes"
+      },
+      {
+        "url": "#/groups/self",
+        "name": "Groups"
+      }
+    ],
+    "email_strategy": "ENABLED"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-diff-preferences">Get Default Diff Preferences</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /config/server/preferences.diff'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the default diff preferences for the server.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /a/config/server/preferences.diff HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="rest-api-accounts.html#diff-preferences-info">
+DiffPreferencesInfo</a> is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "context": 10,
+    "tab_size": 8,
+    "line_length": 100,
+    "cursor_blink_rate": 0,
+    "intraline_difference": true,
+    "show_line_endings": true,
+    "show_tabs": true,
+    "show_whitespace_errors": true,
+    "syntax_highlighting": true,
+    "auto_hide_diff_table_header": true,
+    "theme": "DEFAULT",
+    "ignore_whitespace": "IGNORE_NONE"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-diff-preferences">Set Default Diff Preferences</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /config/server/preferences.diff'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets the default diff preferences for the server.</p>
+</div>
+<div class="paragraph">
+<p>The new diff preferences must be provided in the request body as a
+<a href="rest-api-accounts.html#diff-preferences-input">
+DiffPreferencesInput</a> entity.</p>
+</div>
+<div class="paragraph">
+<p>To be allowed to set default diff preferences, a user must be a member
+of a group that is granted the
+<a href="access-control.html#capability_administrateServer">
+Administrate Server</a> capability.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /a/config/server/preferences.diff HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "context": 10,
+    "tab_size": 8,
+    "line_length": 80,
+    "cursor_blink_rate": 0,
+    "intraline_difference": true,
+    "show_line_endings": true,
+    "show_tabs": true,
+    "show_whitespace_errors": true,
+    "syntax_highlighting": true,
+    "auto_hide_diff_table_header": true,
+    "theme": "DEFAULT",
+    "ignore_whitespace": "IGNORE_NONE"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="rest-api-accounts.html#diff-preferences-info">
+DiffPreferencesInfo</a> is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "context": 10,
+    "tab_size": 8,
+    "line_length": 80,
+    "cursor_blink_rate": 0,
+    "intraline_difference": true,
+    "show_line_endings": true,
+    "show_tabs": true,
+    "show_whitespace_errors": true,
+    "syntax_highlighting": true,
+    "auto_hide_diff_table_header": true,
+    "theme": "DEFAULT",
+    "ignore_whitespace": "IGNORE_NONE"
+  }</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ids">IDs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="cache-name">{cache-name}</h3>
+<div class="paragraph">
+<p>The name of the cache.</p>
+</div>
+<div class="paragraph">
+<p>If the cache is defined by a plugin the cache name must include the
+plugin name: "&lt;plugin-name&gt;-&lt;cache-name&gt;".</p>
+</div>
+<div class="paragraph">
+<p>Gerrit core caches can optionally be prefixed with "gerrit":
+"gerrit-&lt;cache-name&gt;".</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="task-id">{task-id}</h3>
+<div class="paragraph">
+<p>The ID of the task (hex string).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="json-entities">JSON Entities</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="auth-info">AuthInfo</h3>
+<div class="paragraph">
+<p>The <code>AuthInfo</code> entity contains information about the authentication
+configuration of the Gerrit server.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.type">authentication type</a> that is
+configured on the server. Can be <code>OPENID</code>, <code>OPENID_SSO</code>, <code>OAUTH</code>,
+<code>HTTP</code>, <code>HTTP_LDAP</code>, <code>CLIENT_SSL_CERT_LDAP</code>, <code>LDAP</code>, <code>LDAP_BIND</code>,
+<code>CUSTOM_EXTENSION</code> or <code>DEVELOPMENT_BECOME_ANY_ACCOUNT</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_contributor_agreements</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether <a href="config-gerrit.html#auth.contributorAgreements">contributor
+agreements</a> are required.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>contributor_agreements</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>use_contributor_agreements</code> is <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of contributor agreements as <a href="rest-api-accounts.html#contributor-agreement-info">
+ContributorAgreementInfo</a> entities.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>editable_account_fields</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of account fields that are editable. Possible values are
+<code>FULL_NAME</code>, <code>USER_NAME</code> and <code>REGISTER_NEW_EMAIL</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>login_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.loginUrl">login URL</a>. Only set if
+<a href="config-gerrit.html#auth.type">authentication type</a> is <code>HTTP</code> or
+<code>HTTP_LDAP</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>login_text</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.loginText">login text</a>. Only set if
+<a href="config-gerrit.html#auth.type">authentication type</a> is <code>HTTP</code> or
+<code>HTTP_LDAP</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>switch_account_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.switchAccountUrl">URL to switch
+accounts</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>register_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.registerUrl">register URL</a>. Only set if
+<a href="config-gerrit.html#auth.type">authentication type</a> is <code>LDAP</code>,
+<code>LDAP_BIND</code> or <code>CUSTOM_EXTENSION</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>register_text</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.registerText">register text</a>. Only set
+if <a href="config-gerrit.html#auth.type">authentication type</a> is <code>LDAP</code>,
+<code>LDAP_BIND</code> or <code>CUSTOM_EXTENSION</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>edit_full_name_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.editFullNameUrl">URL to edit the full
+name</a>. Only set if <a href="config-gerrit.html#auth.type">authentication
+type</a> is <code>LDAP</code>, <code>LDAP_BIND</code> or <code>CUSTOM_EXTENSION</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>http_password_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.httpPasswordUrl">URL to obtain an HTTP
+password</a>. Only set if <a href="config-gerrit.html#auth.type">authentication
+type</a> is <code>CUSTOM_EXTENSION</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>is_git_basic_auth</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional, not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether <a href="config-gerrit.html#auth.gitBasicAuth">basic authentication
+is used for Git over HTTP/HTTPS</a>. Only set if
+<a href="config-gerrit.html#auth.type">authentication type</a> is is <code>LDAP</code> or
+<code>LDAP_BIND</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>git_basic_auth_policy</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#auth.gitBasicAuthPolicy">policy</a> to authenticate
+Git over HTTP and REST API requests when
+<a href="config-gerrit.html#auth.type">authentication type</a> is <code>LDAP</code> and
+<a href="config-gerrit.html#auth.gitBasicAuth">basic authentication</a> is set to true.
+Can be <code>HTTP</code>, <code>LDAP</code> or <code>HTTP_LDAP</code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="cache-info">CacheInfo</h3>
+<div class="paragraph">
+<p>The <code>CacheInfo</code> entity contains information about a cache.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if returned in a map where the cache name is used as map key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The cache name. If the cache is defined by a plugin the cache name
+includes the plugin name: "&lt;plugin-name&gt;-&lt;cache-name&gt;".</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The type of the cache (<code>MEM</code>: in memory cache, <code>DISK</code>: disk cache).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>entries</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the entries in the cache as a
+<a href="#entries-info">EntriesInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>average_get</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The average duration of getting one entry from the cache. The value is
+returned with a standard time unit abbreviation (<code>ns</code>: nanoseconds,
+<code>us</code>: microseconds, <code>ms</code>: milliseconds, <code>s</code>: seconds).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hit_ratio</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the hit ratio as a <a href="#hit-ration-info">
+HitRatioInfo</a> entity.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="cache-operation-input">CacheOperationInput</h3>
+<div class="paragraph">
+<p>The <code>CacheOperationInput</code> entity contains information about an
+operation that should be executed on caches.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>operation</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The cache operation that should be executed:
+</p><p class="tableblock"><code>FLUSH_ALL</code>: Flushes all caches, except the <code>web_sessions</code> cache.
+</p><p class="tableblock"><code>FLUSH</code>: Flushes the specified caches.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>caches</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of cache names. This list defines the caches on which the
+specified operation should be executed. Whether this list must be
+specified depends on the operation being executed.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="capability-info">CapabilityInfo</h3>
+<div class="paragraph">
+<p>The <code>CapabilityInfo</code> entity contains information about a capability.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">capability ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">capability name</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="change-config-info">ChangeConfigInfo</h3>
+<div class="paragraph">
+<p>The <code>ChangeConfigInfo</code> entity contains information about Gerrit
+configuration from the <a href="config-gerrit.html#change">change</a>
+section.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>allow_blame</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#change.allowBlame">Whether blame on side by side diff is
+allowed</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>allow_drafts</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#change.allowDrafts">Whether draft workflow is
+allowed</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>large_change</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#change.largeChange">Number of changed lines from
+which on a change is considered as a large change</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reply_label</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#change.replyTooltip">Label name for the reply
+button</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reply_tooltip</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#change.replyTooltip">Tooltip for the reply
+button</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>update_delay</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#change.updateDelay">How often in seconds the web
+interface should poll for updates to the currently open change</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>submit_whole_topic</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#change.submitWholeTopic">A configuration if
+the whole topic is submitted</a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="download-info">DownloadInfo</h3>
+<div class="paragraph">
+<p>The <code>DownloadInfo</code> entity contains information about supported download
+options.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>schemes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The supported download schemes as a map which maps the scheme name to a
+of <a href="#download-scheme-info">DownloadSchemeInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>archives</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of supported archive formats. Possible values are <code>tgz</code>, <code>tar</code>,
+<code>tbz2</code> and <code>txz</code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="download-scheme-info">DownloadSchemeInfo</h3>
+<div class="paragraph">
+<p>The <code>DownloadSchemeInfo</code> entity contains information about a supported
+download scheme and its commands.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL of the download scheme, where '${project}' is used as
+placeholder for the project name.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>is_auth_required</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether this download scheme requires authentication.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>is_auth_supported</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether this download scheme supports authentication.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commands</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Download commands as a map which maps the command name to the download
+command. In the download command '${project}' is used as
+placeholder for the project name, and '${ref}' is used as
+placeholder for the (change) ref.
+</p><p class="tableblock">Empty, if accessed anonymously and the download scheme requires
+authentication.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>clone_commands</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Clone commands as a map which maps the command name to the clone
+command. In the clone command '${project}' is used as
+placeholder for the project name and '${project-base-name}' as name
+for the project base name (e.g. for a project 'foo/bar' '${project}'
+is a placeholder for 'foo/bar' and '${project-base-name}' is a
+placeholder for 'bar').
+</p><p class="tableblock">Empty, if accessed anonymously and the download scheme requires
+authentication.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="email-confirmation-input">EmailConfirmationInput</h3>
+<div class="paragraph">
+<p>The <code>EmailConfirmationInput</code> entity contains information for confirming
+an email address.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>token</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The token that was sent by mail to a newly registered email address.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="entries-info">EntriesInfo</h3>
+<div class="paragraph">
+<p>The <code>EntriesInfo</code> entity contains information about the entries in a
+cache.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mem</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of cache entries that are held in memory.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disk</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of cache entries on the disk. For non-disk
+caches this value is not set; for disk caches it is only set if there
+are entries in the cache.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>space</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The space that is consumed by the cache on disk. The value is returned
+with a unit abbreviation (<code>k</code>: kilobytes, <code>m</code>: megabytes,
+<code>g</code>: gigabytes). Only set for disk caches.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="gerrit-info">GerritInfo</h3>
+<div class="paragraph">
+<p>The <code>GerritInfo</code> entity contains information about Gerrit
+configuration from the <a href="config-gerrit.html#gerrit">gerrit</a> section.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>all_projects_name</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the <a href="config-gerrit.html#gerrit.allProjects">root project</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>all_users_name</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the <a href="config-gerrit.html#gerrit.allUsers">project in which
+meta data of all users is stored</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>doc_search</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether documentation search is available.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>doc_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Custom base URL where Gerrit server documentation is located.
+(Documentation may still be available at /Documentation relative to the
+Gerrit base path even if this value is unset.)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>edit_gpg_keys</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to enable the web UI for editing GPG keys.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>report_bug_url</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#gerrit.reportBugUrl">URL to report bugs</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>report_bug_text</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional, not set if default</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#gerrit.reportBugText">Display text for report
+bugs link</a>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>web_uis</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of web UIs supported by the HTTP server. Possible values are <code>GWT</code>
+and <code>POLYGERRIT</code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="hit-ration-info">HitRatioInfo</h3>
+<div class="paragraph">
+<p>The <code>HitRatioInfo</code> entity contains information about the hit ratio of a
+cache.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mem</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hit ratio for cache entries that are held in memory (0 &lt;= value &lt;= 100).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>disk</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hit ratio for cache entries that are held on disk (0 &lt;= value &lt;= 100).
+Only set for disk caches.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="jvm-summary-info">JvmSummaryInfo</h3>
+<div class="paragraph">
+<p>The <code>JvmSummaryInfo</code> entity contains information about the JVM.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>vm_vendor</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The vendor of the virtual machine.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>vm_name</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the virtual machine.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>vm_version</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The version of the virtual machine.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>os_name</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the operating system.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>os_version</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The version of the operating system.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>os_arch</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The architecture of the operating system.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>user</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The user that is running Gerrit.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>host</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The host on which Gerrit is running.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>current_working_directory</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The current working directory.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>site</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The path to the review site.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="mem-summary-info">MemSummaryInfo</h3>
+<div class="paragraph">
+<p>The <code>MemSummaryInfo</code> entity contains information about the current
+memory usage.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The total size of the memory. The value is returned with a unit
+abbreviation (<code>k</code>: kilobytes, <code>m</code>: megabytes, <code>g</code>: gigabytes).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>used</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The size of used memory. The value is returned with a unit abbreviation
+(<code>k</code>: kilobytes, <code>m</code>: megabytes, <code>g</code>: gigabytes).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>free</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The size of free memory. The value is returned with a unit abbreviation
+(<code>k</code>: kilobytes, <code>m</code>: megabytes, <code>g</code>: gigabytes).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>buffers</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The size of memory used for JGit buffers. The value is returned with a
+unit abbreviation (<code>k</code>: kilobytes, <code>m</code>: megabytes, <code>g</code>: gigabytes).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>max</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The maximal memory size. The value is returned with a unit abbreviation
+(<code>k</code>: kilobytes, <code>m</code>: megabytes, <code>g</code>: gigabytes).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>open_files</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The number of open files.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="plugin-config-info">PluginConfigInfo</h3>
+<div class="paragraph">
+<p>The <code>PluginConfigInfo</code> entity contains information about Gerrit
+extensions by plugins.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>has_avatars</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether an avatar provider is registered.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="receive-info">ReceiveInfo</h3>
+<div class="paragraph">
+<p>The <code>ReceiveInfo</code> entity contains information about the configuration
+of git-receive-pack behavior on the server.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>enableSignedPush</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether signed push validation support is enabled on the server; see the
+<a href="config-gerrit.html#receive.certNonceSeed">global configuration</a> for
+details.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="server-info">ServerInfo</h3>
+<div class="paragraph">
+<p>The <code>ServerInfo</code> entity contains information about the configuration of
+the Gerrit server.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>auth</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the authentication configuration as
+<a href="#auth-info">AuthInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>change</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the configuration from the
+<a href="config-gerrit.html#change">change</a> section as
+<a href="#change-config-info">ChangeConfigInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>download</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the configured download options as
+<a href="#download-info">DownloadInfo</a> entity.
+information about Gerrit</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>gerrit</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the configuration from the
+<a href="config-gerrit.html#gerrit">gerrit</a> section as <a href="#gerrit-info">
+GerritInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>note_db_enabled</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the NoteDb storage backend is fully enabled.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">`plugin `</p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about Gerrit extensions by plugins as
+<a href="#plugin-config-info">PluginConfigInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>receive</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the receive-pack configuration as a
+<a href="#receive-info">ReceiveInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sshd</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the configuration from the
+<a href="config-gerrit.html#sshd">sshd</a> section as <a href="#sshd-info">SshdInfo</a>
+entity. Not set if SSHD is disabled.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>suggest</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the configuration from the
+<a href="config-gerrit.html#suggest">suggest</a> section as <a href="#suggest-info">
+SuggestInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url_aliases</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A map of URL aliases, where a regular expression for an URL token is
+mapped to a target URL token. The target URL token can contain
+placeholders for the groups matched by the regular expression: <code>$1</code> for
+the first matched group, <code>$2</code> for the second matched group, etc.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>user</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Information about the configuration from the
+<a href="config-gerrit.html#user">user</a> section as <a href="#user-config-info">
+UserConfigInfo</a> entity.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="sshd-info">SshdInfo</h3>
+<div class="paragraph">
+<p>The <code>SshdInfo</code> entity contains information about Gerrit
+configuration from the <a href="config-gerrit.html#sshd">sshd</a>
+section.</p>
+</div>
+<div class="paragraph">
+<p>This entity doesn&#8217;t contain any data, but the presence of this (empty)
+entity in the <a href="#server-info">ServerInfo</a> entity means that SSHD is
+enabled on the server.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="suggest-info">SuggestInfo</h3>
+<div class="paragraph">
+<p>The <code>SuggestInfo</code> entity contains information about Gerrit
+configuration from the <a href="config-gerrit.html#suggest">suggest</a>
+section.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>from</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#suggest.from">number of characters</a> that a
+user must have typed before suggestions are provided.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="summary-info">SummaryInfo</h3>
+<div class="paragraph">
+<p>The <code>SummaryInfo</code> entity contains information about the current state
+of the server.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>task_summary</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Summary about current tasks as a <a href="#task-summary-info">
+TaskSummaryInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>mem_summary</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Summary about current memory usage as a <a href="#mem-summary-info">
+MemSummaryInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>thread_summary</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Summary about current threads as a <a href="#thread-summary-info">
+ThreadSummaryInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jvm_summary</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Summary about the JVM <a href="#jvm-summary-info">JvmSummaryInfo</a> entity.
+Only set if the <code>jvm</code> option was set.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="task-info">TaskInfo</h3>
+<div class="paragraph">
+<p>The <code>TaskInfo</code> entity contains information about a task in a background
+work queue.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ID of the task.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>state</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The state of the task, can be <code>DONE</code>, <code>CANCELLED</code>, <code>RUNNING</code>, <code>READY</code>,
+<code>SLEEPING</code> and <code>OTHER</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>start_time</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The start time of the task.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>delay</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The remaining delay of the task.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>command</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The command of the task.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>remote_name</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The remote name. May only be set for tasks that are associated with a
+project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>project</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The project the task is associated with.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="task-summary-info">TaskSummaryInfo</h3>
+<div class="paragraph">
+<p>The <code>TaskSummaryInfo</code> entity contains information about the current
+tasks.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Total number of current tasks.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>running</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of currently running tasks.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ready</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of currently ready tasks.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sleeping</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of currently sleeping tasks.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="thread-summary-info">ThreadSummaryInfo</h3>
+<div class="paragraph">
+<p>The <code>ThreadSummaryInfo</code> entity contains information about the current
+threads.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cpus</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The number of available processors.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>threads</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The total number of current threads.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>counts</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Detailed thread counts as a map that maps a thread kind to a map that
+maps a thread state to the thread count. The thread kinds group the
+counts by threads that have the same name prefix (<code>HTTP</code>,
+<code>IntraLineDiff</code>, <code>ReceiveCommits</code>, <code>SSH git-receive-pack</code>,
+<code>SSH git-upload-pack</code>, <code>SSH-Interactive-Worker</code>, <code>SSH-Stream-Worker</code>,
+<code>SshCommandStart</code>). The counts for other threads are available under
+the thread kind <code>Other</code>. Counts for the following thread states can be
+included: <code>NEW</code>, <code>RUNNABLE</code>, <code>BLOCKED</code>, <code>WAITING</code>, <code>TIMED_WAITING</code> and
+<code>TERMINATED</code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="top-menu-entry-info">TopMenuEntryInfo</h3>
+<div class="paragraph">
+<p>The <code>TopMenuEntryInfo</code> entity contains information about a top menu
+entry.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the top menu entry.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of <a href="#top-menu-item-info">menu items</a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="top-menu-item-info">TopMenuItemInfo</h3>
+<div class="paragraph">
+<p>The <code>TopMenuItemInfo</code> entity contains information about a menu item in
+a top menu entry.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 14.2857%;">
+<col style="width: 71.4286%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL of the menu item link.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the menu item.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>target</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Target attribute of the menu item link.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <code>id</code> attribute of the menu item link.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="user-config-info">UserConfigInfo</h3>
+<div class="paragraph">
+<p>The <code>UserConfigInfo</code> entity contains information about Gerrit
+configuration from the <a href="config-gerrit.html#user">user</a> section.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>anonymous_coward_name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="config-gerrit.html#user.anonymousCoward">Username</a> that is
+displayed in the Gerrit Web UI and in e-mail notifications if the full
+name of the user is not set.</p></td>
+</tr>
+</tbody>
+</table>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

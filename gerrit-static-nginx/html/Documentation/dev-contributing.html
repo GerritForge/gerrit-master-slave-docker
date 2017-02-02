@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Contributing</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Contributing</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_contributor_license_agreement">Contributor License Agreement</a></li>
+<li><a href="#_code_review">Code Review</a></li>
+<li><a href="#_review_criteria">Review Criteria</a>
+<ul class="sectlevel2">
+<li><a href="#commit-message">Commit Message</a></li>
+<li><a href="#_setting_up_vim_for_git_commit_message">Setting up Vim for Git commit message</a></li>
+<li><a href="#git_commit_settings">A sample good Gerrit commit message:</a></li>
+<li><a href="#_style">Style</a></li>
+<li><a href="#_code_organization">Code Organization</a></li>
+<li><a href="#_design">Design</a></li>
+<li><a href="#_tests">Tests</a></li>
+<li><a href="#_change_size_number_of_files_touched">Change Size/Number of Files Touched</a></li>
+</ul>
+</li>
+<li><a href="#process">Process</a>
+<ul class="sectlevel2">
+<li><a href="#_backporting_to_stable_branches">Backporting to stable branches</a></li>
+<li><a href="#_updating_to_new_version_of_gwt">Updating to new version of GWT</a></li>
+<li><a href="#_finding_starter_projects_to_work_on">Finding starter projects to work on</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit is developed as a
+<a href="https://gerrit-review.googlesource.com/">self-hosting open source project</a>
+and very much welcomes contributions from anyone with a contributor&#8217;s
+agreement on file with the project.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_contributor_license_agreement">Contributor License Agreement</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A Contributor License Agreement must be completed before contributions
+are accepted.  To view and accept the agreements do the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Click 'Sign In' at the top right corner of <a href="https://gerrit-review.googlesource.com/" class="bare">https://gerrit-review.googlesource.com/</a></p>
+</li>
+<li>
+<p>Sign In with your Google account</p>
+</li>
+<li>
+<p>After signing in, go to the
+<a href="https://gerrit-review.googlesource.com/#/settings/agreements">Agreements</a>
+tab on the settings page</p>
+</li>
+<li>
+<p>Click 'New Contributor Agreement' and follow the instructions</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For reference, the actual agreements are linked below</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://cla.developers.google.com/about/android-individual">Individual Agreement</a></p>
+</li>
+<li>
+<p><a href="https://source.android.com/source/cla-corporate.pdf">Corporate Agreement</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_code_review">Code Review</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As Gerrit is a code review tool, naturally contributions will
+be reviewed before they will get submitted to the code base.  To
+start your contribution, please make a git commit and upload it
+for review to the main Gerrit review server.  To help speed up the
+review of your change, review these guidelines before submitting
+your change.  You can view the pending Gerrit contributions and
+their statuses
+<a href="https://gerrit-review.googlesource.com/#/q/status:open+project:gerrit">here</a>.</p>
+</div>
+<div class="paragraph">
+<p>Depending on the size of that list it might take a while for
+your change to get reviewed.  Naturally there are fewer
+approvers than contributors; so anything that you can do to
+ensure that your contribution will undergo fewer revisions
+will speed up the contribution process.  This includes helping
+out reviewing other people&#8217;s changes to relieve the load from
+the approvers.  Even if you are not familiar with Gerrit&#8217;s
+internals, it would be of great help if you can download, try
+out, and comment on new features.  If it works as advertised,
+say so, and if you have the privileges to do so, go ahead
+and give it a +1 Verified.  If you would find the feature
+useful, say so and give it a +1 code review.</p>
+</div>
+<div class="paragraph">
+<p>And finally, the quicker you respond to the comments of your
+reviewers, the quicker your change might get merged!  Try to
+reply to every comment after submitting your new patch,
+particularly if you decided against making the suggested change.
+Reviewers don&#8217;t want to seem like nags and pester you if you
+haven&#8217;t replied or made a fix, so it helps them know if you
+missed it or decided against it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_review_criteria">Review Criteria</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Here are some hints as to what approvers may be looking for
+before approving or submitting changes to the Gerrit project.
+Let&#8217;s start with the simple nit picky stuff.  You are likely
+excited that your code works; help us share your excitement
+by not distracting us with the simple stuff.  Thanks to Gerrit,
+problems are often highlighted and we find it hard to look
+beyond simple spacing issues.  Blame it on our short attention
+spans, we really do want your code.</p>
+</div>
+<div class="sect2">
+<h3 id="commit-message">Commit Message</h3>
+<div class="paragraph">
+<p>It is essential to have a good commit message if you want your
+change to be reviewed.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Keep lines no longer than 72 chars</p>
+</li>
+<li>
+<p>Start with a short one line summary</p>
+</li>
+<li>
+<p>Followed by a blank line</p>
+</li>
+<li>
+<p>Followed by one or more explanatory paragraphs</p>
+</li>
+<li>
+<p>Use the present tense (fix instead of fixed)</p>
+</li>
+<li>
+<p>Use the past tense when describing the status before this commit</p>
+</li>
+<li>
+<p>Include a <code>Bug: Issue &lt;#&gt;</code> line if fixing a Gerrit issue, or a
+<code>Feature: Issue &lt;#&gt;</code> line if implementing a feature request.</p>
+</li>
+<li>
+<p>Include a <code>Change-Id</code> line</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setting_up_vim_for_git_commit_message">Setting up Vim for Git commit message</h3>
+<div class="paragraph">
+<p>Git uses Vim as the default commit message editor. Put this into your
+<code>$HOME/.vimrc</code> file to configure Vim for Git commit message formatting
+and writing:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>" Enable spell checking, which is not on by default for commit messages.
+au FileType gitcommit setlocal spell</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>" Reset textwidth if you've previously overridden it.
+au FileType gitcommit setlocal textwidth=72</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="git_commit_settings">A sample good Gerrit commit message:</h3>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>Add sample commit message to guidelines doc</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>The original patch set for the contributing guidelines doc did not
+include a sample commit message, this new patchset does.  Hopefully this
+makes things a bit clearer since examples can sometimes help when
+explanations don't.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Note that the body of this commit message can be several paragraphs, and
+that I word wrap it at 72 characters.  Also note that I keep the summary
+line under 50 characters since it is often truncated by tools which
+display just the git summary.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Bug: Issue 98765605
+Change-Id: Ic4a7c07eeb98cdeaf44e9d231a65a51f3fceae52</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>Change-Id</code> line is, as usual, created by a local git hook.  To install it,
+simply copy it from the checkout and make it executable:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>cp ./gerrit-server/src/main/resources/com/google/gerrit/server/tools/root/hooks/commit-msg .git/hooks/
+chmod +x .git/hooks/commit-msg</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If you are working on core plugins, you will also need to install the
+same hook in the submodules:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>export hook=$(pwd)/.git/hooks/commit-msg
+git submodule foreach 'cp -p "$hook" "$(git rev-parse --git-dir)/hooks/"'</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To set up git&#8217;s remote for easy pushing, run the following:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre>git remote add gerrit https://gerrit.googlesource.com/gerrit</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The HTTPS access requires proper username and password; this can be obtained
+by clicking the 'Obtain Password' link on the
+<a href="https://gerrit-review.googlesource.com/#/settings/http-password">HTTP
+Password tab of the user settings page</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_style">Style</h3>
+<div class="paragraph">
+<p>The basic coding style is covered by the tools/GoogleFormat.xml
+doc, see the <a href="dev-eclipse.html#Formatting">Eclipse Setup</a>
+for that.</p>
+</div>
+<div class="paragraph">
+<p>Highlighted/additional styling notes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>It is generally more important to match the style of the nearby
+code which you are modifying than it is to match the style
+in the formatting guidelines.  This is especially true within the
+same file.</p>
+</li>
+<li>
+<p>Review your change in Gerrit to see if it highlights
+mistakenly deleted/added spaces on lines, trailing spaces.</p>
+</li>
+<li>
+<p>Line length should be 80 or less, unless the code reads
+better with something slightly longer.  Shorter lines not only
+help reviewers who may use a tablet to review the code, but future
+contributors may also like to open several editors side by
+side while editing new changes.</p>
+</li>
+<li>
+<p>Use 2 spaces for indent (no tabs)</p>
+</li>
+<li>
+<p>Use braces in all if/else/for/do/while/catch blocks, spaces before/after
+if/for/while/catch parens.</p>
+</li>
+<li>
+<p>Use /** */ style Javadocs for variables.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Additionally, you will notice that most of the newline spacing
+is fairly consistent throughout the code in Gerrit, it helps to
+stick to the blank line conventions.  Here are some specific
+examples:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Keep a blank line between all class and method declarations.</p>
+</li>
+<li>
+<p>Do not add blank lines at the beginning or end of class/methods.</p>
+</li>
+<li>
+<p>Put a blank line between external import sources, but not
+between internal ones.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When to use <code>final</code> modifier and when not (in new code):</p>
+</div>
+<div class="paragraph">
+<p>Always:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>final fields: marking fields as final forces them to be
+initialized in the constructor or at declaration</p>
+</li>
+<li>
+<p>final static fields: clearly communicates the intent</p>
+</li>
+<li>
+<p>to use final variables in inner anonymous classes</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Optional:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>final classes: use when appropriate, e.g. API restriction</p>
+</li>
+<li>
+<p>final methods: similar to final classes</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Never:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>local variables: it clutters the code, and make the code less
+readable. When copying old code to new location, finals should
+be removed</p>
+</li>
+<li>
+<p>method parameters: similar to local variables</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_code_organization">Code Organization</h3>
+<div class="paragraph">
+<p>Do your best to organize classes and methods in a logical way.
+Here are some guidelines that Gerrit uses:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Ensure a standard copyright header is included at the top
+of any new files (copy it from another file, update the year).</p>
+</li>
+<li>
+<p>Always place loggers first in your class!</p>
+</li>
+<li>
+<p>Define any static interfaces next in your class.</p>
+</li>
+<li>
+<p>Define non static interfaces after static interfaces in your
+class.</p>
+</li>
+<li>
+<p>Next you should define static types, static members, and
+static methods, in decreasing order of visibility (public to private).</p>
+</li>
+<li>
+<p>Finally instance types, instance members, then constructors,
+and then instance methods.</p>
+</li>
+<li>
+<p>Some common exceptions are private helper static methods, which
+might appear near the instance methods which they help (but may
+also appear at the top).</p>
+</li>
+<li>
+<p>Getters and setters for the same instance field should usually
+be near each other barring a good reason not to.</p>
+</li>
+<li>
+<p>If you are using assisted injection, the factory for your class
+should be before the instance members.</p>
+</li>
+<li>
+<p>Annotations should go before language keywords (<code>final</code>, <code>private</code>, etc)<br>
+Example: <code>@Assisted @Nullable final type varName</code></p>
+</li>
+<li>
+<p>The <code>@Inject</code>-ed constructor arguments should be listed one per line.</p>
+</li>
+<li>
+<p>Imports should be mostly alphabetical (uppercase sorts before
+all lowercase, which means classes come before packages at the
+same level).</p>
+</li>
+<li>
+<p>Prefer to open multiple AutoCloseable resources in the same
+try-with-resources block instead of nesting the try-with-resources
+blocks and increasing the indentation level more than necessary.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Wow that&#8217;s a lot!  But don&#8217;t worry, you&#8217;ll get the habit and most
+of the code is organized this way already; so if you pay attention
+to the class you are editing you will likely pick up on it.
+Naturally new classes are a little harder; you may want to come
+back and consult this section when creating them.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_design">Design</h3>
+<div class="paragraph">
+<p>Here are some design level objectives that you should keep in mind
+when coding:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ORM entity objects should match exactly one row in the database.</p>
+</li>
+<li>
+<p>Most client pages should perform only one RPC to load so as to
+keep latencies down.  Exceptions would apply to RPCs which need
+to load large data sets if splitting them out will help the
+page load faster.  Generally page loads are expected to complete
+in under 100ms.  This will be the case for most operations,
+unless the data being fetched is not using Gerrit&#8217;s caching
+infrastructure.  In these slower cases, it is worth considering
+mitigating this longer load by using a second RPC to fill in
+this data after the page is displayed (or alternatively it might
+be worth proposing caching this data).</p>
+</li>
+<li>
+<p><code>@Inject</code> should be used on constructors, not on fields.  The
+current exceptions are the ssh commands, these were implemented
+earlier in Gerrit&#8217;s development.  To stay consistent, new ssh
+commands should follow this older pattern; but eventually these
+should get converted to eliminate this exception.</p>
+</li>
+<li>
+<p>Don&#8217;t leave repository objects (git or schema) open.  A .close()
+after every open should be placed in a finally{} block.</p>
+</li>
+<li>
+<p>Don&#8217;t leave UI components, which can cause new actions to occur,
+enabled during RPCs which update the DB.  This is to prevent
+people from submitting actions more than once when operating
+on slow links.  If the action buttons are disabled, they cannot
+be resubmitted and the user can see that Gerrit is still busy.</p>
+</li>
+<li>
+<p>GWT EventBus is the new way forward.</p>
+</li>
+<li>
+<p>&#8230;&#8203;and so is Guava (previously known as Google Collections).</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tests">Tests</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Tests for new code will greatly help your change get approved.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_change_size_number_of_files_touched">Change Size/Number of Files Touched</h3>
+<div class="paragraph">
+<p>And finally, I probably cannot say enough about change sizes.
+Generally, smaller is better, hopefully within reason.  Do try to
+keep things which will be confusing on their own together,
+especially if changing one without the other will break something!</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If a new feature is implemented and it is a larger one, try to
+identify if it can be split into smaller logical features; when
+in doubt, err on the smaller side.</p>
+</li>
+<li>
+<p>Separate bug fixes from feature improvements.  The bug fix may
+be an easy candidate for approval and should not need to wait
+for new features to be approved.  Also, combining the two makes
+reviewing harder since then there is no clear line between the
+fix and the feature.</p>
+</li>
+<li>
+<p>Separate supporting refactoring from feature changes.  If your
+new feature requires some refactoring, it helps to make the
+refactoring a separate change which your feature change
+depends on.  This way, reviewers can easily review the refactor
+change as a something that should not alter the current
+functionality, and feel more confident they can more easily
+spot errors this way.  Of course, it also makes it easier to
+test and locate later on if an unfortunate error does slip in.
+Lastly, by not having to see refactoring changes at the same
+time, it helps reviewers understand how your feature changes
+the current functionality.</p>
+</li>
+<li>
+<p>Separate logical features into separate changes.  This
+is often the hardest part.  Here is an example:  when adding a
+new ability, make separate changes for the UI and the ssh
+commands if possible.</p>
+</li>
+<li>
+<p>Do only what the commit message describes.  In other words, things which
+are not strictly related to the commit message shouldn&#8217;t be part of
+a change, even trivial things like externalizing a string somewhere
+or fixing a typo.  This helps keep <code>git blame</code> more useful in the future
+and it also makes <code>git revert</code> more useful.</p>
+</li>
+<li>
+<p>Use topics to link your separate changes together.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="process">Process</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_backporting_to_stable_branches">Backporting to stable branches</h3>
+<div class="paragraph">
+<p>From time to time bug fix releases are made for existing stable branches.</p>
+</div>
+<div class="paragraph">
+<p>Developers concerned with stable branches are encouraged to backport or push
+patchsets to these branches, even if no new release is planned.</p>
+</div>
+<div class="paragraph">
+<p>Fixes that are known to be needed for a particular release should be pushed
+for review on that release&#8217;s stable branch.  It will then be included in
+the master branch when the stable branch is merged back.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_updating_to_new_version_of_gwt">Updating to new version of GWT</h3>
+<div class="paragraph">
+<p>When updating to a new version of GWT, there are several things that also need
+to be updated or at least checked.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Update common and plugin dependencies in <code>tools/gwt-constants.defs</code>.</p>
+</li>
+<li>
+<p>Update to the same GWT version in the cookbook plugin and optionally in other
+plugins that have a dependency on GWT.</p>
+</li>
+<li>
+<p>Update the GWT version in the archetype metadata in the
+<code>gerrit-plugin-gwt-archetype</code>.</p>
+</li>
+<li>
+<p>Update the version of <code>gwt-maven-plugin</code> in the example pom.xml file in
+<a href="dev-plugins.html">dev-plugins</a>.</p>
+</li>
+<li>
+<p>Update to the same GWT version in the <code>gwtjsonrpc</code> project, and release a
+new version.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_finding_starter_projects_to_work_on">Finding starter projects to work on</h3>
+<div class="paragraph">
+<p>We have created a
+<a href="https://bugs.chromium.org/p/gerrit/issues/list?can=2&amp;q=label%3AStarterProject">StarterProject</a>
+category in the issue tracker and try to assign easy hack projects to it. If in
+doubt, do not hesitate to ask on the developer mailing list.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>git-receive-pack</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>git-receive-pack</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_name">NAME</a></li>
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_access">ACCESS</a></li>
+<li><a href="#_examples">EXAMPLES</a></li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_name">NAME</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>git-receive-pack - Receive what is pushed into the repository</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>git receive-pack</em>
+  [--reviewer &lt;address&gt; | --re &lt;address&gt;]
+  [--cc &lt;address&gt;]
+  &lt;project&gt;</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Invoked by 'git push' and updates the project&#8217;s repository with
+the information fed from the 'git push' end.</p>
+</div>
+<div class="paragraph">
+<p>End users can supply options to this command by passing them through
+to 'git push', which will relay them automatically.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">&lt;project&gt;</dt>
+<dd>
+<p>The remote repository that will receive the pushed objects,
+and create (or update) changes.  Within Gerrit Code Review
+this is the name of a project.  The optional leading <code>/</code>
+and or trailing <code>.git</code> suffix will be removed, if supplied.</p>
+</dd>
+<dt class="hdlist1">--reviewer &lt;address&gt;</dt>
+<dt class="hdlist1">--re &lt;address&gt;</dt>
+<dd>
+<p>Automatically add &lt;address&gt; as a reviewer to any change.
+Deprecated, use <code>refs/for/branch%r=address</code> instead.</p>
+</dd>
+<dt class="hdlist1">--cc &lt;address&gt;</dt>
+<dd>
+<p>Carbon-copy &lt;address&gt; on the created or updated changes.
+Deprecated, use <code>refs/for/branch%cc=address</code> instead.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_access">ACCESS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Any user who has configured an SSH key.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">EXAMPLES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Send a review for a change on the master branch to <a href="mailto:charlie@example.com">charlie@example.com</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	git push ssh://review.example.com:29418/project HEAD:refs/for/master%r=charlie@example.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Send reviews, but tagging them with the topic name 'bug42':</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	git push ssh://review.example.com:29418/project HEAD:refs/for/master%r=charlie@example.com,topic=bug42</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Also CC two other parties:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	git push ssh://review.example.com:29418/project HEAD:refs/for/master%r=charlie@example.com,cc=alice@example.com,cc=bob@example.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Configure a push macro to perform the last action:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	git config remote.charlie.url ssh://review.example.com:29418/project
+	git config remote.charlie.push HEAD:refs/for/master%r=charlie@example.com,cc=alice@example.com,cc=bob@example.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>afterwards <code>.git/config</code> contains the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[remote "charlie"]
+  url = ssh://review.example.com:29418/project
+  push = HEAD:refs/for/master%r=charlie@example.com,cc=alice@example.com,cc=bob@example.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and now sending a new change for review to charlie, CC&#8217;ing both
+alice and bob is much easier:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	git push charlie</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="user-upload.html">Uploading Changes</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>
