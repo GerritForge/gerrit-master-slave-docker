@@ -1,6 +1,6 @@
-# Gerrit master + slave Docker playground
+# Gerrit haproxy + master + slave Docker playground
 
-Example of set-up of a Gerrit master-slave replication scenario.
+Example of set-up of a Gerrit master-slave replication scenario load balanced with haproxy.
 
 This docker compose configuration creates the following scenario:
 - Gerrit DB on PostgreSQL shared between master and slaves
@@ -8,6 +8,7 @@ This docker compose configuration creates the following scenario:
 - First Gerrit slave listening to port 18081 (Git/HTTP) 
 - Second Gerrit slave listening to port 18082 (Git/HTTP)
 - Gerrit user 'admin' with password 'secret'
+- HaProxy listening on port 80 that redirects traffic to either the master or slaves
 
 ## Pre-requisites
 
@@ -18,7 +19,7 @@ This docker compose configuration creates the following scenario:
 
 ## How to start
 
-Just type 'make' to trigger the Docker images download and startup.
+Just type 'make' or 'docker-compose build' to trigger the Docker images download and startup.
 
 Example:
 ```
@@ -27,9 +28,10 @@ $ make
 Successfully built d7ed58376801
 docker-compose up -d
 Creating gerritmasterslavedocker_postgres_1
-Creating gerritmasterslavedocker_gerrit-master_1
+Creating gerritmasterslavedocker_gerrit-master-nginx_1
 Creating gerritmasterslavedocker_gerrit-slave-httpd_1
 Creating gerritmasterslavedocker_gerrit-slave-nginx_1
+Creating gerritmasterslavedocker_gerrit-haproxy_1
 ```
 
 ## Display the VMs
@@ -38,12 +40,14 @@ To display list of docker VMs active type 'make status'
 
 Example:
 ```
-$ make status
-CONTAINER ID        IMAGE                COMMAND                  CREATED             STATUS              PORTS                                               NAMES
-9dd54f6ded91        gerrit-slave-nginx   "/bin/sh -c /bin/star"   11 seconds ago      Up 9 seconds        29418/tcp, 0.0.0.0:18081->8080/tcp                  gerritmasterslavedocker_gerrit-slave-nginx_1
-d5d1b91706e3        gerrit-slave-httpd   "/bin/sh -c /bin/star"   11 seconds ago      Up 9 seconds        29418/tcp, 0.0.0.0:18082->8080/tcp                  gerritmasterslavedocker_gerrit-slave-httpd_1
-3c04ba9a7e87        gerrit-master        "/bin/sh -c /bin/star"   12 seconds ago      Up 10 seconds       0.0.0.0:29418->29418/tcp, 0.0.0.0:18080->8080/tcp   gerritmasterslavedocker_gerrit-master_1
-6d4adba0cac2        postgres:9.5.4       "/docker-entrypoint.s"   13 seconds ago      Up 11 seconds       5432/tcp                                            gerritmasterslavedocker_postgres_1
+$ docker-compose ps
+                    Name                                   Command               State                         Ports
+------------------------------------------------------------------------------------------------------------------------------------------
+gerritmasterslavedocker_gerrit-haproxy_1        /docker-entrypoint.sh hapr ...   Up      0.0.0.0:80->80/tcp
+gerritmasterslavedocker_gerrit-master-nginx_1   /bin/sh -c /bin/start.sh         Up      0.0.0.0:29418->29418/tcp, 0.0.0.0:18080->8080/tcp
+gerritmasterslavedocker_gerrit-slave-httpd_1    /bin/sh -c /bin/start.sh         Up      29418/tcp, 0.0.0.0:18082->8080/tcp
+gerritmasterslavedocker_gerrit-slave-nginx_1    /bin/sh -c /bin/start.sh         Up      29418/tcp, 0.0.0.0:18081->8080/tcp
+gerritmasterslavedocker_postgres_1              /docker-entrypoint.sh postgres   Up      5432/tcp
 ```
 
 ## Display the logs
@@ -53,7 +57,7 @@ one of them, type the command 'docker logs <SHA1>'.
 
 Example:
 ```
-$ docker logs 3c04ba9a7e87
+$ docker-compose logs gerrit-master-nginx
 + chown -R gerrit: /var/gerrit/.ssh
 + chmod 600 /var/gerrit/.ssh/id_rsa
 + wait-for-it.sh gerrit-slave-nginx:22 -- echo 'Slave is up'
@@ -94,22 +98,49 @@ Starting Gerrit Code Review: OK
 ### Access Gerrit master and slaves
 
 Assuming you are running Docker on your localhost, open the Gerrit master Web GUI at:
-http://localhost:18080
+
+- http://localhost
 
 On the top-right choose "Become" and select "Administrator" to login as admin user.
 You can then create a new repository, called test-project, from the "Projects" and then "Create New Project" menu.
 Enter the "test-project" in the Project Name, select "Create initial empty commit" field and press the "Create Project" button.
 
-### Cloning the project from one of the slaves
+### Load balance
 
-To clone the projects from one of the slaves, use one of the following URLs:
+There is a haproxy frontend that will redirect all git clones/fetch requests to the slaves while everything else gets
+redirected to the master.  Traffic to slaves are load balanced in round robin manner.
+
+- Cloning/Pushing: http://localhost/test-project
+- Haproxy stats: http://localhost/haproxy?stats
+- Username/password: admin/secret
+
+### Clone/Pushing
+
+To clone and push new changes use the following URL:
+
+- http://localhost/test-project
+
+
+### Bypassing haproxy
+
+The ports to the master and slaves are exposed for testing.
+
+#### Cloning the project from the master
+
+To access Gerrit UI directly on the master use the following URL:
+
+- http://localhost:18080
+
+To clone projects directly from the master use the following URL:
+
+- http://localhost:18080/test-project
+
+
+#### Cloning the project from one of the slaves
+
+To clone the projects directly from one of the slaves, use one of the following URLs:
 
 - http://localhost:18081/test-project
 - http://localhost:18082/test-project
 
-### Pushing to Gerrit master
-
-To push new changes to Gerrit master, use the following URL:
-
-- http://localhost:18080/test-project
-
+Slaves are read only git servers therefore pushes to slaves are not allowed.
