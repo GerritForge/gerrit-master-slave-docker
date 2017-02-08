@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Developer Setup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Developer Setup</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_getting_the_source">Getting the Source</a></li>
+<li><a href="#compile_project">Compiling</a></li>
+<li><a href="#_switching_between_branches">Switching between branches</a></li>
+<li><a href="#_configuring_eclipse">Configuring Eclipse</a></li>
+<li><a href="#_configuring_intellij_idea">Configuring IntelliJ IDEA</a></li>
+<li><a href="#_mac_os_x">Mac OS X</a></li>
+<li><a href="#init">Site Initialization</a></li>
+<li><a href="#localdev">Working with the Local Server</a></li>
+<li><a href="#_testing">Testing</a>
+<ul class="sectlevel2">
+<li><a href="#tests">Running the Acceptance Tests</a></li>
+<li><a href="#run_daemon">Running the Daemon</a></li>
+<li><a href="#_running_the_daemon_with_gerrit_inspector">Running the Daemon with Gerrit Inspector</a></li>
+<li><a href="#_querying_the_database">Querying the Database</a></li>
+<li><a href="#debug-javascript">Debugging JavaScript</a></li>
+</ul>
+</li>
+<li><a href="#_client_server_rpc">Client-Server RPC</a></li>
+<li><a href="#_why_gwt">Why GWT?</a></li>
+<li><a href="#_external_links">External Links</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Google Bazel is needed to compile the code, and an SQL database to
+house the review metadata.  H2 is recommended for development
+databases, as it requires no external server process.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_getting_the_source">Getting the Source</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Create a new client workspace:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git clone --recursive https://gerrit.googlesource.com/gerrit
+  cd gerrit</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>--recursive</code> option is needed on <code>git clone</code> to ensure that
+the core plugins, which are included as git submodules, are also
+cloned.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="compile_project">Compiling</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Please refer to <a href="dev-bazel.html">Building with Bazel</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_switching_between_branches">Switching between branches</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When switching between branches with <code>git checkout</code>, be aware that
+submodule revisions are not altered.  This may result in the wrong
+plugin revisions being present, unneeded plugins being present, or
+expected plugins being missing.</p>
+</div>
+<div class="paragraph">
+<p>After switching branches, make sure the submodules are at the correct
+revisions for the new branch with the commands:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git submodule update
+  git clean -fdx</pre>
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+If you decide to store your Eclipse/IntelliJ project files in the
+Gerrit source directories, executing <code>git clean -fdx</code> will remove them and hence
+screw up your project.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_eclipse">Configuring Eclipse</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To use the Eclipse IDE for development, please see
+<a href="dev-eclipse.html">Eclipse Setup</a>.</p>
+</div>
+<div class="paragraph">
+<p>For details on how to configure the Eclipse workspace with Bazel,
+refer to: <a href="dev-bazel.html#eclipse">Eclipse integration with Bazel</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuring_intellij_idea">Configuring IntelliJ IDEA</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Please refer to <a href="dev-intellij.html">IntelliJ Setup</a> for detailed
+instructions.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_mac_os_x">Mac OS X</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On Mac OS X ensure "Java For Mac OS X 10.5 Update 4" (or later) has
+been installed, and that <code>JAVA_HOME</code> is set to the
+<a href="install.html#Requirements">required Java version</a>.</p>
+</div>
+<div class="paragraph">
+<p>Java installations can typically be found in
+"/System/Library/Frameworks/JavaVM.framework/Versions".</p>
+</div>
+<div class="paragraph">
+<p>You can check the installed Java version by running <code>java -version</code> in
+the terminal.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="init">Site Initialization</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>After compiling <a href="#compile_project">(above)</a>, run Gerrit&#8217;s 'init' command to
+create a testing site for development use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $(bazel info output_base)/external/local_jdk/bin/java \
+     -jar bazel-bin/gerrit.war init -d ../gerrit_testsite</pre>
+</div>
+</div>
+<div id="special_bazel_java_version" class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You must use the same Java version that Bazel used for the build.
+This Java version is available at
+<code>$(bazel info output_base)/external/local_jdk/bin/java</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>During initialization, make two changes to the default settings:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Change the listen addresses from '*' to 'localhost' to prevent outside
+connections from contacting the development instance; and</p>
+</li>
+<li>
+<p>Change the auth type from 'OPENID' to 'DEVELOPMENT_BECOME_ANY_ACCOUNT' to
+allow yourself to create and act as arbitrary test accounts on your
+development instance.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Continue through init until it completes. The daemon will automatically start in
+the background and a web browser will launch to the start page. From here you
+can sign in as the account created during init, register additional accounts,
+create projects, and more.</p>
+</div>
+<div class="paragraph">
+<p>When you want to shut down the daemon, simply run:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  ../gerrit_testsite/bin/gerrit.sh stop</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="localdev">Working with the Local Server</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If you need to create additional accounts on your development instance, click
+'become' in the upper right corner, select 'Switch User', and then register
+a new account.</p>
+</div>
+<div class="paragraph">
+<p>Use the <code>ssh</code> protocol to clone from and push to the local server. For
+example, to clone a repository that you&#8217;ve created through the admin
+interface, run:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone ssh://username@localhost:29418/projectname</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then you&#8217;ll be able to create changes the same way users do, with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git push origin HEAD:refs/for/master</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing">Testing</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="tests">Running the Acceptance Tests</h3>
+<div class="paragraph">
+<p>Gerrit has a set of integration tests that test the Gerrit daemon via
+REST, SSH and the git protocol.</p>
+</div>
+<div class="paragraph">
+<p>A new review site is created for each test and the Gerrit daemon is
+started on that site. When the test has finished the Gerrit daemon is
+shutdown.</p>
+</div>
+<div class="paragraph">
+<p>For instructions on running the integration tests with Bazel,
+please refer to:  <a href="dev-bazel.html#tests">Running Unit Tests with Bazel</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="run_daemon">Running the Daemon</h3>
+<div class="paragraph">
+<p>The daemon can be directly launched from the build area, without
+copying to the test site:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $(bazel info output_base)/external/local_jdk/bin/java \
+     -jar bazel-bin/gerrit.war daemon -d ../gerrit_testsite \
+     --console-log</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Please refer to <a href="#special_bazel_java_version">this explanation</a>
+for details why using <code>java -jar</code> isn&#8217;t sufficient.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_running_the_daemon_with_gerrit_inspector">Running the Daemon with Gerrit Inspector</h3>
+<div class="paragraph">
+<p><a href="dev-inspector.html">Gerrit Inspector</a> is an interactive scriptable
+environment to inspect and modify internal state of the system.</p>
+</div>
+<div class="paragraph">
+<p>This environment is available on the system console after
+the system starts. Leaving the Inspector will shutdown the Gerrit
+instance.</p>
+</div>
+<div class="paragraph">
+<p>The environment allows interactive work as well as running of
+Python scripts for troubleshooting.</p>
+</div>
+<div class="paragraph">
+<p>Gerrit Inspect can be started by adding '-s' option to the
+command used to launch the daemon:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $(bazel info output_base)/external/local_jdk/bin/java \
+     -jar bazel-bin/gerrit.war daemon -d ../gerrit_testsite -s</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Please refer to <a href="#special_bazel_java_version">this explanation</a>
+for details why using <code>java -jar</code> isn&#8217;t sufficient.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Gerrit Inspector examines Java libraries first, then loads
+its initialization scripts and then starts a command line
+prompt on the console:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  Welcome to the Gerrit Inspector
+  Enter help() to see the above again, EOF to quit and stop Gerrit
+  Jython 2.5.2 (Release_2_5_2:7206, Mar 2 2011, 23:12:06)
+  [OpenJDK 64-Bit Server VM (Sun Microsystems Inc.)] on java1.6.0 running for Gerrit 2.3-rc0-163-g01967ef
+  &gt;&gt;&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With the Inspector enabled Gerrit can be used normally and all
+interfaces (HTTP, SSH etc.) are available.</p>
+</div>
+<div class="paragraph">
+<p>Care must be taken not to modify internal state of the system
+when using the Inspector.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_querying_the_database">Querying the Database</h3>
+<div class="paragraph">
+<p>The embedded H2 database can be queried and updated from the
+command line.  If the daemon is not currently running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $(bazel info output_base)/external/local_jdk/bin/java \
+     -jar bazel-bin/gerrit.war gsql -d ../gerrit_testsite -s</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Please refer to <a href="#special_bazel_java_version">this explanation</a>
+for details why using <code>java -jar</code> isn&#8217;t sufficient.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Or, if it is running and the database is in use, connect over SSH
+using an administrator user account:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  ssh -p 29418 user@localhost gerrit gsql</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="debug-javascript">Debugging JavaScript</h3>
+<div class="paragraph">
+<p>When debugging browser specific issues add <code>?dbg=1</code> to the URL so the
+resulting JavaScript more closely matches the Java sources.  The debug
+pages use the GWT pretty format, where function and variable names
+match the Java sources.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  http://localhost:8080/?dbg=1</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_client_server_rpc">Client-Server RPC</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The client-server RPC implementation is gwtjsonrpc, not the stock RPC
+system that comes with GWT.  This buys us automatic XSRF protection.
+It also makes all of the messages readable and writable by any JSON
+implementation, facilitating "mashups" and 3rd party clients.</p>
+</div>
+<div class="paragraph">
+<p>The programming API is virtually identical, except service interfaces
+extend RemoteJsonService instead of RemoteService.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_why_gwt">Why GWT?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We like it.  Plus we can write Java code once and run it both in
+the browser and on the server side.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_external_links">External Links</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Google Web Toolkit:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://code.google.com/webtoolkit/download.html">Download</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Apache SSHD:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://mina.apache.org/sshd/">SSHD</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>H2:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.h2database.com/">H2</a></p>
+</li>
+<li>
+<p><a href="http://www.h2database.com/html/grammar.html">SQL Reference</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>PostgreSQL:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://www.postgresql.org/download/">Download</a></p>
+</li>
+<li>
+<p><a href="http://www.postgresql.org/docs/">Documentation</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

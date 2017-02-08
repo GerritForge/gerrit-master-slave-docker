@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Building plugins</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Building plugins</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_maven_driven_build">Maven driven build</a>
+<ul class="sectlevel2">
+<li><a href="#_exception_1">Exception 1:</a></li>
+<li><a href="#_exception_2">Exception 2:</a></li>
+</ul>
+</li>
+<li><a href="#_bazel_in_tree_driven">Bazel in tree driven</a>
+<ul class="sectlevel2">
+<li><a href="#_plugins_with_external_dependencies">Plugins with external dependencies</a></li>
+</ul>
+</li>
+<li><a href="#_bazel_standalone_driven">Bazel standalone driven</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>From build process perspective there are three types of plugins:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Maven driven</p>
+</li>
+<li>
+<p>Bazel tree driven</p>
+</li>
+<li>
+<p>Bazel standalone</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These types can be combined: if both files in plugin&#8217;s root directory exist:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>BUILD</code></p>
+</li>
+<li>
+<p><code>pom.xml</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>the plugin can be built with both Bazel and Maven.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_maven_driven_build">Maven driven build</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If plugin contains <code>pom.xml</code> file, it can be built with Maven as usually:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>mvn clean package</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Exceptions from the rule above:</p>
+</div>
+<div class="sect2">
+<h3 id="_exception_1">Exception 1:</h3>
+<div class="paragraph">
+<p>Plugin&#8217;s <code>pom.xml</code> references snapshot version of plugin API:
+<code>2.8-SNAPSHOT</code>. In this case there are two possibilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>switch to release API. Change plugin API version in <code>pom.xml</code> from
+<code>2.8-SNAPSHOT</code> to <code>2.8.1</code> and repeat step 1 above.</p>
+</li>
+<li>
+<p>build and install <code>SNAPSHOT</code> version of plugin API in local Maven repository:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>./tools/maven/api.sh install</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exception_2">Exception 2:</h3>
+<div class="paragraph">
+<p>Plugin&#8217;s <code>pom.xml</code> references other own or foreign (unpublished) libraries or
+even other Gerrit plugins. These libraries and/or plugins must be built and
+installed in local Maven repository. Clone the related projects and issue</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>mvn install</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Repeat step 1. above.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bazel_in_tree_driven">Bazel in tree driven</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The fact that plugin contains <code>BUILD</code> file doesn&#8217;t mean that building this
+plugin from the plugin directory works.</p>
+</div>
+<div class="paragraph">
+<p>Bazel in tree driven means it can only be built from within Gerrit tree. Clone
+or link the plugin into gerrit/plugins directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cd gerrit
+bazel build plugins/&lt;plugin-name&gt;:&lt;plugin-name&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output can be normally found in the following directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>bazel-genfiles/plugins/&lt;plugin-name&gt;/&lt;plugin-name&gt;.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Some plugins describe their build process in <code>src/main/resources/Documentation/build.md</code>
+file. It may worth checking.</p>
+</div>
+<div class="sect2">
+<h3 id="_plugins_with_external_dependencies">Plugins with external dependencies</h3>
+<div class="paragraph">
+<p>If the plugin has external dependencies, then they must be included from Gerrit&#8217;s
+own WORKSPACE file. This can be achieved by including them in <code>external_plugin_deps.bzl</code>.
+During the build in Gerrit tree, this file must be copied over the dummy one in
+<code>plugins</code> directory.</p>
+</div>
+<div class="paragraph">
+<p>Example for content of <code>external_plugin_deps.bzl</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>load("//tools/bzl:maven_jar.bzl", "maven_jar")
+
+def external_plugin_deps():
+  maven_jar(
+      name = 'org_apache_tika_tika_core',
+      artifact = 'org.apache.tika:tika-core:1.12',
+      sha1 = '5ab95580d22fe1dee79cffbcd98bb509a32da09b',
+  )</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_bazel_standalone_driven">Bazel standalone driven</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Only few plugins support that mode for now:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>cd reviewers
+bazel build reviewers</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

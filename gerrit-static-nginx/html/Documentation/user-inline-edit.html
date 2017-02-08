@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Inline Edit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Inline Edit</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#create-change">Creating a New Change</a></li>
+<li><a href="#editing-change">Editing Changes</a></li>
+<li><a href="#reviewing-changes-made-in-change-edit">Reviewing Change Edits</a></li>
+<li><a href="#change-edit-actions">Change Edit Actions</a></li>
+<li><a href="#not-implemented-features">Not Implemented Features</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page explains the workflow for creating and amending changes in the
+browser.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="create-change">Creating a New Change</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A new change can be created directly in the browser, meaning it is not necessary
+to clone the whole repository to make trivial changes.</p>
+</div>
+<div class="paragraph">
+<p>The new change is created as a draft change, unless
+<a href="config-gerrit.html#change.allowDrafts">change.allowDrafts</a> is set to false,
+in which case the change is created as a normal new change.</p>
+</div>
+<div class="paragraph">
+<p>There are two different ways to create a new change:</p>
+</div>
+<div class="paragraph">
+<p>By clicking on the 'Create Change' button in the project screen:</p>
+</div>
+<div id="create-change-from-project-info-screen" class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-create-change-project-screen.png"><img src="images/inline-edit-create-change-project-screen.png" alt="inline edit create change project screen" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>The user can select the branch on which the new change should be created:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-create-change-project-screen-dialog.png"><img src="images/inline-edit-create-change-project-screen-dialog.png" alt="inline edit create change project screen dialog" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>By clicking the 'Follow-Up' button on the change screen, to create a new change
+based on the selected change.</p>
+</div>
+<div id="create-change-from-change-screen" class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-create-follow-up-change.png"><img src="images/inline-edit-create-follow-up-change.png" alt="inline edit create follow up change" width="800"></a>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="editing-change">Editing Changes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To switch to edit mode, press the 'Edit' button at the top of the file list:</p>
+</div>
+<div id="switch-to-edit-mode" class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-enter-edit-mode-from-file-list.png"><img src="images/inline-edit-enter-edit-mode-from-file-list.png" alt="inline edit enter edit mode from file list" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>While in edit mode, it is possible to add new files to the change by clicking
+the 'Add&#8230;&#8203;' button at the top of the file list.</p>
+</div>
+<div class="paragraph">
+<p>File changes can be reverted or files can be removed from the change or
+deleted files can be restored, by clicking the icons to the left of the file
+name.</p>
+</div>
+<div class="paragraph">
+<p>To switch from edit mode back to review mode, click the 'Done Editing' button.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-file-list-in-edit-mode.png"><img src="images/inline-edit-file-list-in-edit-mode.png" alt="inline edit file list in edit mode" width="800"></a>
+</div>
+</div>
+<div id="open-full-screen-editor" class="paragraph">
+<p>While in edit mode, clicking on a file name in the file list opens a full
+screen editor for that file.</p>
+</div>
+<div class="paragraph">
+<p>To save edits, click the 'Save' button or press <code>CTRL-S</code>.  To return to the
+change screen, click the 'Close' button.</p>
+</div>
+<div class="paragraph">
+<p>Note that when editing the commit message, trailing blank lines will be stripped.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-full-screen-editor.png"><img src="images/inline-edit-full-screen-editor.png" alt="inline edit full screen editor" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>If there are unsaved edits when the 'Close' button is pressed, a dialog will
+pop up asking to confirm the edits.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-confirm-unsaved-edits.png"><img src="images/inline-edit-confirm-unsaved-edits.png" alt="inline edit confirm unsaved edits" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>To discard the unsaved edits and return to the change screen, click the 'OK'
+button. To continue editing, click 'Cancel'.</p>
+</div>
+<div id="switch-to-edit-mode-from-side-by-side" class="paragraph">
+<p>While in review mode, it is possible to switch directly to edit mode and into an
+editor for a file under review by clicking on the edit icon in the patch set list
+on the side-by-side diff view.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-enter-edit-mode-from-diff.png"><img src="images/inline-edit-enter-edit-mode-from-diff.png" alt="inline edit enter edit mode from diff" width="800"></a>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="reviewing-changes-made-in-change-edit">Reviewing Change Edits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Change edits are reviewed in the same way as regular patch sets, using the
+side-by-side diff screen. Change edits are shown as 'edit' in the patch list
+on the diff screen:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-edit-in-diff-screen-patch-list.png"><img src="images/inline-edit-edit-in-diff-screen-patch-list.png" alt="inline edit edit in diff screen patch list" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>and on the change screen:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/inline-edit-edit-in-patch-list.png"><img src="images/inline-edit-edit-in-patch-list.png" alt="inline edit edit in patch list" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that patch sets may exist that were created after the change edit was created.</p>
+</div>
+<div class="paragraph">
+<p>For example this sequence:</p>
+</div>
+<div class="paragraph">
+<p><code>1 2 3 4 5 6 7 8 9 edit 10</code></p>
+</div>
+<div class="paragraph">
+<p>means that the change edit was created on top of patch set number 9 and a regular
+patch set was uploaded later.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="change-edit-actions">Change Edit Actions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Change edits can be deleted, published and rebased, and a patch set that
+represents a change edit can be downloaded like a regular patch set.</p>
+</div>
+<div id="delete-change-edit" class="paragraph">
+<p>There is a special ref for a change edit. When the change edit is deleted, this
+ref is deleted as well. To delete a change edit click on the "Delete Edit"
+button.</p>
+</div>
+<div id="publish-change-edit" class="paragraph">
+<p>When a change edit is based on the current patch set, it can be published. By
+publishing a change edit it is promoted to a regular patch set. The special ref
+that represents the change edit is deleted on publish. To publish a change edit
+click on the "Publish Edit" button. This button is only shown when the change
+edit is based on the current patch set. Otherwise the change edit must first be
+rebased onto the current patch set.</p>
+</div>
+<div id="rebase-change-edit" class="paragraph">
+<p>Only change edits that are based on the current patch set can be published. If
+in the meantime a new patch set was uploaded, the change edit must be rebased on
+top of the current patch set before it can be published. Rebasing a change
+edit is done by clicking on the "Rebase Edit" button. If the rebase results in
+conflicts, these conflicts cannot be resolved in the browser. In this case the
+change edit must be downloaded (see below) and the conflicts must be resolved in
+the local environment. The commit that contains the conflict resolution can then
+be uploaded by setting <code>edit</code> as option on the target ref:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ git push host HEAD:refs/for/master%edit</pre>
+</div>
+</div>
+<div id="download-change-edit-patch" class="paragraph">
+<p>Like regular patch sets, change edits can be downloaded by the download
+commands (e.g. provided by the <code>download-commands</code> plugin). To download a
+change edit, select the desired scheme from the "Download" dropdown and copy the
+command to your terminal. Note: only change edit owners and users that were
+granted the <a href="access-control.html#capability_accessDatabase">accessDatabase</a>
+global capability are able to access change edit refs.</p>
+</div>
+<div id="search-for-change-edits" class="paragraph">
+<p>To search change edits from the UI the <a href="user-search.html#has">has:edit</a>
+predicate can be used.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively change edits can be accessed through "My &#8658; Edits" dashboard.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="not-implemented-features">Not Implemented Features</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Support default configuration options for inline editor that an
+administrator has set in <code>refs/users/default:preferences.config</code> file.</p>
+</li>
+<li>
+<p>Allow to rename files that are already contained in the change (from the file table).
+The same rename file dialog can be used with preselected and disabled original file
+name.</p>
+</li>
+<li>
+<p>Changed files in change edit should be marked as changed in file table in edit mode.
+One option is to use dirty icon or "*" char in front of changed files, another option
+is to use different hyperlink color for changed files (red?), to avoid adding yet another
+column to the file table</p>
+</li>
+<li>
+<p>Add navigation icons in header area of edit screen. When dozen files need to be changed
+in context of change edit, this is not the best workflow to open one file in edit screen,
+change it, save it, close edit screen and select next file from the file table to edit.
+"&#8592;" | "&#8594;" icons in header of edit screen could be used to navigate to the next file to
+change from the file table. This would behave like the navigation icons in side by side
+with the following logic on click:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>"save-when-file-was-changed" or</p>
+</li>
+<li>
+<p>"close-when-no-changes"</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Implement conflict resolution during rebase of change edit using inline edit
+feature by creating new edit on top of current patch set with auto merge content</p>
+</li>
+<li>
+<p>Similarly, reuse inline edit feature for conflict resolution during rebase of regular
+patch sets</p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

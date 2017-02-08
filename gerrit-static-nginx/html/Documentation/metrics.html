@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Metrics</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Metrics</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_metrics">Metrics</a>
+<ul class="sectlevel2">
+<li><a href="#_general">General</a></li>
+<li><a href="#_process">Process</a></li>
+<li><a href="#_caches">Caches</a></li>
+<li><a href="#_http">HTTP</a></li>
+<li><a href="#_query">Query</a></li>
+<li><a href="#_ssh_sessions">SSH sessions</a></li>
+<li><a href="#_sql_connections">SQL connections</a></li>
+<li><a href="#_jgit">JGit</a></li>
+<li><a href="#_git">Git</a></li>
+<li><a href="#_batchupdate">BatchUpdate</a></li>
+<li><a href="#_notedb">NoteDb</a></li>
+<li><a href="#_reviewer_suggestion">Reviewer Suggestion</a></li>
+<li><a href="#_replication_plugin">Replication Plugin</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Metrics about Gerrit&#8217;s internal state can be sent to external monitoring systems
+via plugins. See the <a href="dev-plugins.html#metrics">plugin documentation</a> for
+details of plugin implementations.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_metrics">Metrics</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following metrics are reported.</p>
+</div>
+<div class="sect2">
+<h3 id="_general">General</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>build/label</code>: Version of Gerrit server software.</p>
+</li>
+<li>
+<p><code>events</code>: Triggered events.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_process">Process</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>proc/birth_timestamp</code>: Time at which the Gerrit process started.</p>
+</li>
+<li>
+<p><code>proc/uptime</code>: Uptime of the Gerrit process.</p>
+</li>
+<li>
+<p><code>proc/cpu/usage</code>: CPU time used by the Gerrit process.</p>
+</li>
+<li>
+<p><code>proc/num_open_fds</code>: Number of open file descriptors.</p>
+</li>
+<li>
+<p><code>proc/jvm/memory/heap_committed</code>: Amount of memory guaranteed for user objects.</p>
+</li>
+<li>
+<p><code>proc/jvm/memory/heap_used</code>: Amount of memory holding user objects.</p>
+</li>
+<li>
+<p><code>proc/jvm/memory/non_heap_committed</code>: Amount of memory guaranteed for classes,
+etc.</p>
+</li>
+<li>
+<p><code>proc/jvm/memory/non_heap_used</code>: Amount of memory holding classes, etc.</p>
+</li>
+<li>
+<p><code>proc/jvm/memory/object_pending_finalization_count</code>: Approximate number of
+objects needing finalization.</p>
+</li>
+<li>
+<p><code>proc/jvm/gc/count</code>: Number of GCs.</p>
+</li>
+<li>
+<p><code>proc/jvm/gc/time</code>: Approximate accumulated GC elapsed time.</p>
+</li>
+<li>
+<p><code>proc/jvm/thread/num_live</code>: Current live thread count.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_caches">Caches</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>caches/memory_cached</code>: Memory entries.</p>
+</li>
+<li>
+<p><code>caches/memory_hit_ratio</code>: Memory hit ratio.</p>
+</li>
+<li>
+<p><code>caches/memory_eviction_count</code>: Memory eviction count.</p>
+</li>
+<li>
+<p><code>caches/disk_cached</code>: Disk entries used by persistent cache.</p>
+</li>
+<li>
+<p><code>caches/disk_hit_ratio</code>: Disk hit ratio for persistent cache.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_http">HTTP</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>http/server/error_count</code>: Rate of REST API error responses.</p>
+</li>
+<li>
+<p><code>http/server/success_count</code>: Rate of REST API success responses.</p>
+</li>
+<li>
+<p><code>http/server/rest_api/count</code>: Rate of REST API calls by view.</p>
+</li>
+<li>
+<p><code>http/server/rest_api/error_count</code>: Rate of REST API calls by view.</p>
+</li>
+<li>
+<p><code>http/server/rest_api/server_latency</code>: REST API call latency by view.</p>
+</li>
+<li>
+<p><code>http/server/rest_api/response_bytes</code>: Size of REST API response on network
+(may be gzip compressed) by view.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_query">Query</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>query/query_latency</code>: Successful query latency, accumulated over the life
+of the process.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ssh_sessions">SSH sessions</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>sshd/sessions/connected</code>: Number of currently connected SSH sessions.</p>
+</li>
+<li>
+<p><code>sshd/sessions/created</code>: Rate of new SSH sessions.</p>
+</li>
+<li>
+<p><code>sshd/sessions/authentication_failures</code>: Rate of SSH authentication failures.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sql_connections">SQL connections</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>sql/connection_pool/connections</code>: SQL database connections.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_jgit">JGit</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>jgit/block_cache/cache_used</code>: Bytes of memory retained in JGit block cache.</p>
+</li>
+<li>
+<p><code>jgit/block_cache/open_files</code>: File handles held open by JGit block cache.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_git">Git</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>git/upload-pack/request_count</code>: Total number of git-upload-pack requests.</p>
+</li>
+<li>
+<p><code>git/upload-pack/phase_counting</code>: Time spent in the 'Counting&#8230;&#8203;' phase.</p>
+</li>
+<li>
+<p><code>git/upload-pack/phase_compressing</code>: Time spent in the 'Compressing&#8230;&#8203;' phase.</p>
+</li>
+<li>
+<p><code>git/upload-pack/phase_writing</code>: Time spent transferring bytes to client.</p>
+</li>
+<li>
+<p><code>git/upload-pack/pack_bytes</code>: Distribution of sizes of packs sent to clients.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_batchupdate">BatchUpdate</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>batch_update/execute_change_ops</code>: BatchUpdate change update latency,
+excluding reindexing</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_notedb">NoteDb</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>notedb/update_latency</code>: NoteDb update latency by table.</p>
+</li>
+<li>
+<p><code>notedb/stage_update_latency</code>: Latency for staging updates to NoteDb by table.</p>
+</li>
+<li>
+<p><code>notedb/read_latency</code>: NoteDb read latency by table.</p>
+</li>
+<li>
+<p><code>notedb/parse_latency</code>: NoteDb parse latency by table.</p>
+</li>
+<li>
+<p><code>notedb/auto_rebuild_latency</code>: NoteDb auto-rebuilding latency by table.</p>
+</li>
+<li>
+<p><code>notedb/auto_rebuild_failure_count</code>: NoteDb auto-rebuilding attempts that
+failed by table.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reviewer_suggestion">Reviewer Suggestion</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>reviewer_suggestion/query_accounts</code>: Latency for querying accounts for
+reviewer suggestion.</p>
+</li>
+<li>
+<p><code>reviewer_suggestion/recommend_accounts</code>: Latency for recommending accounts
+for reviewer suggestion.</p>
+</li>
+<li>
+<p><code>reviewer_suggestion/load_accounts</code>: Latency for loading accounts for
+reviewer suggestion.</p>
+</li>
+<li>
+<p><code>reviewer_suggestion/query_groups</code>: Latency for querying groups for reviewer
+suggestion.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_replication_plugin">Replication Plugin</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><code>plugins/replication/replication_latency</code>: Time spent pushing to remote
+destination.</p>
+</li>
+<li>
+<p><code>plugins/replication/replication_delay</code>: Time spent waiting before pushing to
+remote destination.</p>
+</li>
+<li>
+<p><code>plugins/replication/replication_retries</code>: Number of retries when pushing to
+remote destination.</p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>prohibited by Gerrit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>prohibited by Gerrit</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+</div>
+<div id="content">
+<div class="paragraph">
+<p>This is a general error message that is returned by Gerrit if a push
+is not allowed, e.g. because the pushing user has no sufficient
+privileges.</p>
+</div>
+<div class="paragraph">
+<p>In particular this error occurs:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>if you push a commit for code review to a branch for which you
+don&#8217;t have upload permissions (access right
+<a href="access-control.html#category_push_review">'Push'</a> on
+<code>refs/for/refs/heads/*</code>)</p>
+</li>
+<li>
+<p>if you bypass code review without
+<a href="access-control.html#category_push_direct">'Push'</a> access right
+on <code>refs/heads/*</code></p>
+</li>
+<li>
+<p>if you bypass code review pushing to a non-existing branch without
+<a href="access-control.html#category_create">'Create Reference'</a> access
+right on <code>refs/heads/*</code></p>
+</li>
+<li>
+<p>if you push an annotated tag without
+<a href="access-control.html#category_create_annotated">'Create Annotated Tag'</a>
+access right on <code>refs/tags/*</code></p>
+</li>
+<li>
+<p>if you push a signed tag without
+<a href="access-control.html#category_create_signed">'Create Signed Tag'</a>
+access right on <code>refs/tags/*</code></p>
+</li>
+<li>
+<p>if you push a lightweight tag without the access right <a href="access-control.html#category_create">'Create
+Reference'</a> for the reference name <code>refs/tags/*</code></p>
+</li>
+<li>
+<p>if you push a tag with somebody else as tagger and you don&#8217;t have the
+<a href="access-control.html#category_forge_committer">'Forge Committer'</a>
+access right for the reference name <code>refs/tags/*</code></p>
+</li>
+<li>
+<p>if you push to a project that is in state 'Read Only'</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>For new users it often happens that they accidentally try to bypass
+code review. The push then fails with the error message 'prohibited
+by Gerrit' because the project didn&#8217;t allow to bypass code review.
+Bypassing the code review is done by pushing directly to <code>refs/heads/*</code>
+(e.g. <code>refs/heads/master</code>) instead of pushing to <code>refs/for/*</code> (e.g.
+<code>refs/for/master</code>). Details about how to push commits for code review
+are explained <a href="user-upload.html#push_create">here</a>.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="error-messages.html">Gerrit Error Messages</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

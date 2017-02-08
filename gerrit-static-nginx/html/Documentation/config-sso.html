@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Single Sign-On Security</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Single Sign-On Security</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_openid">OpenID</a>
+<ul class="sectlevel2">
+<li><a href="#_database_schema">Database Schema</a></li>
+<li><a href="#_multiple_identities">Multiple Identities</a></li>
+</ul>
+</li>
+<li><a href="#_http_basic_digest_authentication">HTTP Basic/Digest Authentication</a>
+<ul class="sectlevel2">
+<li><a href="#_database_schema_2">Database Schema</a></li>
+</ul>
+</li>
+<li><a href="#_computer_associates_siteminder">Computer Associates Siteminder</a>
+<ul class="sectlevel2">
+<li><a href="#_database_schema_3">Database Schema</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit supports integration with some types of single sign-on
+security solutions, making it possible for end-users to setup
+and manage accounts, without administrator involvement.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_openid">OpenID</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By default a new Gerrit installation relies upon OpenID to perform
+user authentication services.  To enable OpenID, the auth.type
+setting should be <code>OpenID</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git config --file $site_path/etc/gerrit.config auth.type OpenID</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As this is the default setting there is nothing required from the
+site administrator to make use of the OpenID authentication services.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://openid.net/">openid.net</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If Jetty is being used, you may need to increase the header
+buffer size parameter, due to very long header lines.
+Add the following to <code>$JETTY_HOME/etc/jetty.xml</code> under
+<code>org.mortbay.jetty.nio.SelectChannelConnector</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;Set name="headerBufferSize"&gt;16384&lt;/Set&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to use permissions beyond those granted to the
+<code>Anonymous Users</code> and <code>Registered Users</code> groups, an account
+must only have OpenIDs which match at least one pattern from the
+<code>auth.trustedOpenID</code> list in <code>gerrit.config</code>.  Patterns may be
+either a
+<a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">standard
+Java regular expression (java.util.regex)</a> (must start with <code>^</code>
+and end with <code>$</code>) or be a simple prefix (any other string).</p>
+</div>
+<div class="paragraph">
+<p>Out of the box Gerrit is configured to trust two patterns, which
+will match any OpenID provider on the Internet:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>http://</code>&#8201;&#8212;&#8201;trust all OpenID providers using the HTTP protocol</p>
+</li>
+<li>
+<p><code>https://</code>&#8201;&#8212;&#8201;trust all OpenID providers using the HTTPS protocol</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To trust only Yahoo!:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git config --file $site_path/etc/gerrit.config auth.trustedOpenID https://me.yahoo.com</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_database_schema">Database Schema</h3>
+<div class="paragraph">
+<p>User identities obtained from OpenID providers are stored into the
+<code>account_external_ids</code> table.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_multiple_identities">Multiple Identities</h3>
+<div class="paragraph">
+<p>Users may link more than one OpenID identity to the same Gerrit account, making
+it easier for their browser to sign in to Gerrit if they are frequently switching
+between different unique OpenID accounts.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Users wishing to link an alternative identity should <strong>NOT</strong> log in separately
+with that identity. Doing so will result in a new account being created, and
+subsequent attempts to link that account with the existing account will fail.
+In cases where this happens, the administrator will need to manually merge the
+accounts.  See <a href="https://code.google.com/p/gerrit/wiki/SqlMergeUserAccounts">
+Merging Gerrit User Accounts</a> on the Gerrit Wiki for details.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Linking another identity is also useful for users whose primary OpenID provider
+shuts down. For example Google will
+<a href="https://developers.google.com/+/api/auth-migration">shut down their OpenID
+service on 20th April 2015</a>. Users must add an alternative identity, using another
+OpenID provider, before that shutdown date. User who fail to add an alternative
+identity before that date, and end up with their account only having a disabled
+Google identity, will need to create a separate account with an alternative
+provider and then ask the administrator to merge the accounts using the previously
+mentioned method.</p>
+</div>
+<div class="paragraph">
+<p>To link another identity to an existing account:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Login with the existing account</p>
+</li>
+<li>
+<p>Select menu Settings &#8594; Identities</p>
+</li>
+<li>
+<p>Click the 'Link Another Identity' button</p>
+</li>
+<li>
+<p>Select the OpenID provider for the other identity</p>
+</li>
+<li>
+<p>Authenticate with the other identity</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Login using the other identity can only be performed after the linking is
+successful.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_http_basic_digest_authentication">HTTP Basic/Digest Authentication</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When using HTTP authentication, Gerrit assumes that the servlet
+container or the frontend web server has performed all user
+authentication prior to handing the request off to Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>As a result of this assumption, Gerrit can assume that any and
+all requests have already been authenticated.  The "Sign In" and
+"Sign Out" links are therefore not displayed in the web UI.</p>
+</div>
+<div class="paragraph">
+<p>To enable this form of authentication:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git config --file $site_path/etc/gerrit.config auth.type HTTP
+  git config --file $site_path/etc/gerrit.config --unset auth.httpHeader
+  git config --file $site_path/etc/gerrit.config auth.emailFormat '{0}@example.com'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The auth.type must always be HTTP, indicating the user identity
+will be obtained from the HTTP authorization data.</p>
+</div>
+<div class="paragraph">
+<p>The auth.httpHeader must always be unset.  If set to any value
+(including <code>Authorization</code>) then Gerrit won&#8217;t correctly honor the
+standard <code>Authorization</code> HTTP header.</p>
+</div>
+<div class="paragraph">
+<p>The auth.emailFormat field ('optional') sets the preferred email
+address during first login.  Gerrit will replace <code>{0}</code> with the
+username, as obtained from the Authorization header.  A format such
+as shown in the example would be typical, to add the domain name
+of the organization.</p>
+</div>
+<div class="paragraph">
+<p>If Apache HTTPd is being used as the primary web server and the
+Apache server will be handling user authentication, a configuration
+such as the following is recommended to ensure Apache performs the
+authentication at the proper time:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;Location "/login/"&gt;
+    AuthType Basic
+    AuthName "Gerrit Code Review"
+    Require valid-user
+    ...
+  &lt;/Location&gt;</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_database_schema_2">Database Schema</h3>
+<div class="paragraph">
+<p>User identities are stored in the <code>account_external_ids</code> table.
+The user string obtained from the authorization header has the prefix
+"gerrit:" and is stored in the <code>external_id</code> field.  For example,
+if a username was "foo" then the external_id field would be populated
+with "gerrit:foo".</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_computer_associates_siteminder">Computer Associates Siteminder</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Siteminder is a commercial single sign on solution marketed by
+Computer Associates.  It is very common in larger enterprise
+environments.</p>
+</div>
+<div class="paragraph">
+<p>When using Siteminder, Gerrit assumes it has been installed in a
+servlet container which is running behind an Apache web server,
+and that the Siteminder authentication module has been configured
+within Apache to protect the entire Gerrit application.  In this
+configuration all users must authenticate with Siteminder before
+they can access any resource on Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>As a result of this assumption, Gerrit can assume that any and
+all requests have already been authenticated.  The "Sign In" and
+"Sign Out" links are therefore not displayed in the web UI.</p>
+</div>
+<div class="paragraph">
+<p>To enable this form of authentication:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git config --file $site_path/etc/gerrit.config auth.type HTTP
+  git config --file $site_path/etc/gerrit.config auth.httpHeader SM_USER
+  git config --file $site_path/etc/gerrit.config auth.emailFormat '{0}@example.com'</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The auth.type must always be HTTP, indicating the user identity
+will be obtained from the HTTP authorization data.</p>
+</div>
+<div class="paragraph">
+<p>The auth.httpHeader indicates in which HTTP header field the Siteminder
+product has stored the username.  Usually this is "SM_USER", but
+may differ in your environment.  Please refer to your organization&#8217;s
+single sign-on or security group to ensure the setting is correct.</p>
+</div>
+<div class="paragraph">
+<p>The auth.emailFormat field ('optional') sets the user&#8217;s preferred
+email address when they first login.  Gerrit will replace <code>{0}</code>
+with the username, as supplied by Siteminder.  A format such as
+shown in the example would be typical, to add the domain name of
+the organization.</p>
+</div>
+<div class="paragraph">
+<p>If Jetty is being used, you may need to increase the header
+buffer size parameter, due to very long header lines.
+Add the following to <code>$JETTY_HOME/etc/jetty.xml</code> under
+<code>org.mortbay.jetty.nio.SelectChannelConnector</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  &lt;Set name="headerBufferSize"&gt;16384&lt;/Set&gt;</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_database_schema_3">Database Schema</h3>
+<div class="paragraph">
+<p>User identities are stored in the <code>account_external_ids</code> table.
+The user string obtained from Siteminder (e.g. the value in the
+"SM_USER" HTTP header) has the prefix "gerrit:" and is stored in the
+<code>external_id</code> field.  For example, if a Siteminder username was "foo"
+then the external_id field would be populated with "gerrit:foo".</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

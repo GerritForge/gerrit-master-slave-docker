@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Review UI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Review UI</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#change-screen">Change Screen</a>
+<ul class="sectlevel2">
+<li><a href="#commit-message">Commit Message Block</a></li>
+<li><a href="#commit-info">Commit Info Block</a></li>
+<li><a href="#change-info">Change Info Block</a></li>
+<li><a href="#files">File List</a></li>
+<li><a href="#patch-sets">Patch Sets</a></li>
+<li><a href="#download">Download</a></li>
+<li><a href="#included-in">Included In</a></li>
+<li><a href="#star">Star Change</a></li>
+<li><a href="#related-changes">Related Changes</a></li>
+<li><a href="#reply">Reply</a></li>
+<li><a href="#history">History</a></li>
+<li><a href="#update-notification">Update Notification</a></li>
+<li><a href="#plugin-extensions">Plugin Extensions</a></li>
+</ul>
+</li>
+<li><a href="#side-by-side">Side-by-Side Diff Screen</a>
+<ul class="sectlevel2">
+<li><a href="#inline-comments">Inline Comments</a></li>
+<li><a href="#file-level-comments">File Level Comments</a></li>
+<li><a href="#search">Search</a></li>
+<li><a href="#key-navigation">Key Navigation</a></li>
+<li><a href="#diff-preferences">Diff Preferences</a></li>
+</ul>
+</li>
+<li><a href="#keyboard-shortcuts">Keyboard Shortcuts</a></li>
+<li><a href="#new-vs-old">New Review UI vs. Old Review UI</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Reviewing changes is an important task and the Gerrit Web UI provides
+many functionalities to make the review process comfortable and
+efficient. This is a guide through the review UI that explains the
+different functions and UI elements.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="change-screen">Change Screen</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The change screen shows the details of a single change and provides
+various actions on it.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen.png"><img src="images/user-review-ui-change-screen.png" alt="user review ui change screen" width="800"></a>
+</div>
+</div>
+<div class="sect2">
+<h3 id="commit-message">Commit Message Block</h3>
+<div class="paragraph">
+<p>The focus of the change screen is on the commit message since this is
+the most important information about a change. The numeric change ID
+and the change status are displayed right above the commit message.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-commit-message.png"><img src="images/user-review-ui-change-screen-commit-message.png" alt="user review ui change screen commit message" width="800"></a>
+</div>
+</div>
+<div id="permalink" class="paragraph">
+<p>The numeric change ID is a link to the change and clicking on it
+refreshes the change screen. By copying the link location you can get
+the permalink of the change.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-permalink.png"><img src="images/user-review-ui-change-screen-permalink.png" alt="user review ui change screen permalink" width="800"></a>
+</div>
+</div>
+<div id="change-status" class="paragraph">
+<p>The change status shows the state of the change:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="needs"></a><code>Needs &lt;label&gt;</code>:</p>
+<div class="paragraph">
+<p>The change is in review and an approval on the shown label is still
+required to make the change submittable.</p>
+</div>
+</li>
+<li>
+<p><a id="not"></a><code>Not &lt;label&gt;</code>:</p>
+<div class="paragraph">
+<p>The change is in review and a veto vote on the shown label is
+preventing the submit.</p>
+</div>
+</li>
+<li>
+<p><a id="not-current"></a><code>Not Current</code>:</p>
+<div class="paragraph">
+<p>The currently viewed patch set is outdated.</p>
+</div>
+<div class="paragraph">
+<p>Please note that some operations, like voting, are not available on
+outdated patch sets, but only on the current patch set.</p>
+</div>
+</li>
+<li>
+<p><a id="ready-to-submit"></a><code>Ready to Submit</code>:</p>
+<div class="paragraph">
+<p>The change has all necessary approvals and may be submitted.</p>
+</div>
+</li>
+<li>
+<p><a id="merged"></a><code>Merged</code>:</p>
+<div class="paragraph">
+<p>The change was successfully merged into the destination branch.</p>
+</div>
+</li>
+<li>
+<p><a id="abandoned"></a><code>Abandoned</code>:</p>
+<div class="paragraph">
+<p>The change was abandoned.</p>
+</div>
+</li>
+<li>
+<p><a id="draft"></a><code>Draft</code>:</p>
+<div class="paragraph">
+<p>The change is a draft that is only visible to the change owner, the
+reviewers that were explicitly added to the change, and users who have
+the <a href="access-control.html#category_view_drafts">View Drafts</a> global
+capability assigned.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="commit-info">Commit Info Block</h3>
+<div class="paragraph">
+<p>The commit info block shows information about the commit of the
+currently viewed patch set.</p>
+</div>
+<div class="paragraph">
+<p>It displays the author and the committer as links to a list of this
+person&#8217;s changes that have the same status as the currently viewed
+change.</p>
+</div>
+<div class="paragraph">
+<p>The commit ID, the parent commit(s) and the <a href="user-changeid.html">Change-Id</a> are
+displayed with a copy-to-clipboard icon that allows the ID to be copied
+into the clipboard.</p>
+</div>
+<div class="paragraph">
+<p>If a Git web browser, such as gitweb or Gitiles, is configured, there
+is also a link to the commit in the Git web browser.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-commit-info.png"><img src="images/user-review-ui-change-screen-commit-info.png" alt="user review ui change screen commit info" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>If a merge commit is viewed this is highlighted by an icon.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-commit-info-merge-commit.png"><img src="images/user-review-ui-change-screen-commit-info-merge-commit.png" alt="user review ui change screen commit info merge commit" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="change-info">Change Info Block</h3>
+<div class="paragraph">
+<p>The change info block contains detailed information about the change
+and offers actions on the change.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info.png"><img src="images/user-review-ui-change-screen-change-info.png" alt="user review ui change screen change info" width="800"></a>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="change-owner"></a>Change Owner:</p>
+<div class="paragraph">
+<p>The owner of the change is displayed as a link to a list of the owner&#8217;s
+changes that have the same status as the currently viewed change.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-owner.png"><img src="images/user-review-ui-change-screen-change-info-owner.png" alt="user review ui change screen change info owner" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="reviewers"></a>Reviewers:</p>
+<div class="paragraph">
+<p>The reviewers of the change are displayed as chip tokens.</p>
+</div>
+<div class="paragraph">
+<p>For each reviewer there is a tooltip that shows on which labels the
+reviewer is allowed to vote.</p>
+</div>
+<div class="paragraph">
+<p>New reviewers can be added by clicking on the <code>Add&#8230;&#8203;</code> button. Typing
+into the pop-up text field activates auto completion of user and group
+names.</p>
+</div>
+<div id="remove-reviewer" class="paragraph">
+<p>Reviewers can be removed from the change by clicking on the <code>x</code> icon
+in the reviewer&#8217;s chip token. Removing a reviewer also removes the
+current votes of the reviewer. The removal of votes is recorded as a
+message on the change.</p>
+</div>
+<div class="paragraph">
+<p>Removing reviewers is protected by permissions:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Users can always remove themselves.</p>
+</li>
+<li>
+<p>The change owner may remove any zero or positive score.</p>
+</li>
+<li>
+<p>Users with the <a href="access-control.html#category_remove_reviewer">
+Remove Reviewer</a> access right, the branch owner, the project owner
+and Gerrit administrators may remove anyone.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-reviewers.png"><img src="images/user-review-ui-change-screen-change-info-reviewers.png" alt="user review ui change screen change info reviewers" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="project-branch-topic"></a>Project / Branch / Topic:</p>
+<div class="paragraph">
+<p>The name of the project for which the change was done is displayed as a
+link to the <a href="user-dashboards.html#project-default-dashboard">default
+dashboard</a> of the project. If no default dashboard is defined, the link
+opens a list of open changes on the project.</p>
+</div>
+<div class="paragraph">
+<p>Clicking on the settings icon on the right side navigates to the
+project administration screen.</p>
+</div>
+<div class="paragraph">
+<p>The name of the destination branch is displayed as a link to a list
+with all changes on this branch that have the same status as the
+currently viewed change.</p>
+</div>
+<div class="paragraph">
+<p>If a topic was assigned to the change it is displayed below the branch.
+By clicking on the edit icon the topic can be set. This requires the
+<a href="access-control.html#category_edit_topic_name">Edit Topic Name</a>
+access right. To be able to set a topic on a closed change, the
+<code>Edit Topic Name</code> must be assigned with the <code>force</code> flag.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-project-branch-topic.png"><img src="images/user-review-ui-change-screen-change-info-project-branch-topic.png" alt="user review ui change screen change info project branch topic" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="submit-strategy"></a>Submit Strategy:</p>
+<div class="paragraph">
+<p>The <a href="project-setup.html#submit_type">submit strategy</a> that will be
+used to submit the change. The submit strategy is only displayed for
+open changes.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-submit-strategy.png"><img src="images/user-review-ui-change-screen-change-info-submit-strategy.png" alt="user review ui change screen change info submit strategy" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>If a change cannot be merged due to path conflicts this is highlighted
+by a bold red <code>Cannot Merge</code> label.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-cannot-merge.png"><img src="images/user-review-ui-change-screen-change-info-cannot-merge.png" alt="user review ui change screen change info cannot merge" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="update-time"></a>Time of Last Update:</p>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-last-update.png"><img src="images/user-review-ui-change-screen-change-info-last-update.png" alt="user review ui change screen change info last update" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="actions"></a>Actions:</p>
+<div class="paragraph">
+<p>Depending on the change state and the permissions of the user, different
+actions are available on the change:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="submit"></a><code>Submit</code>:</p>
+<div class="paragraph">
+<p>Submits the change and adds it to the merge queue. If possible the
+change is merged into the destination branch.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Submit</code> button is available if the change is submittable and
+the <a href="access-control.html#category_submit">Submit</a> access right is
+assigned.</p>
+</div>
+</li>
+<li>
+<p><a id="revert"></a><code>Revert</code>:</p>
+<div class="paragraph">
+<p>Reverts the change via creating a new one.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Revert</code> button is available if the change has been submitted.</p>
+</div>
+<div class="paragraph">
+<p>When the <code>Revert</code> button is pressed, a panel will appear to allow
+the user to enter a commit message for the reverting change.</p>
+</div>
+<div class="paragraph">
+<p>Once a revert change is created, the original author and any reviewers
+of the original change are added as reviewers and a message is posted
+to the original change linking to the revert.</p>
+</div>
+</li>
+<li>
+<p><a id="abandon"></a><code>Abandon</code>:</p>
+<div class="paragraph">
+<p>Abandons the change.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Abandon</code> button is only available if the change is open and the
+<a href="access-control.html#category_abandon">Abandon</a> access right is
+assigned.</p>
+</div>
+<div class="paragraph">
+<p>When a change is abandoned, a panel appears that allows one to type a
+comment message to explain why the change is being abandoned.</p>
+</div>
+</li>
+<li>
+<p><a id="restore"></a><code>Restore</code>:</p>
+<div class="paragraph">
+<p>Restores the change.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Restore</code> button is only available if the change is abandoned and
+the <a href="access-control.html#category_abandon">Abandon</a> and the
+<a href="access-control.html#category_push">Push</a> access right is
+assigned.</p>
+</div>
+<div class="paragraph">
+<p>When a change is restored, a panel appears that allows one to type a
+comment message to explain why the change is being restored.</p>
+</div>
+</li>
+<li>
+<p><a id="rebase"></a><code>Rebase</code>:</p>
+<div class="paragraph">
+<p>Rebases the change. The rebase is always done with content merge
+enabled. If the rebase is successful a new patch set with the rebased
+commit is created. If the rebase fails, there are conflicts that have
+to be resolved manually.</p>
+</div>
+<div class="paragraph">
+<p>If the change does not depend on another open change, it is rebased
+onto the tip of the destination branch.</p>
+</div>
+<div class="paragraph">
+<p>If the change depends on another open change, it is rebased onto the
+current patch set of that other change.</p>
+</div>
+<div class="paragraph">
+<p>It is possible to change parent revision of a change. The new parent
+revision can be another change towards the same target branch, or
+the tip of the target branch.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Rebase</code> button is only available if
+the <a href="access-control.html#category_rebase">Rebase</a> access right is
+assigned. Rebasing merge commits is not supported.</p>
+</div>
+</li>
+<li>
+<p><a id="cherry-pick"></a><code>Cherry-Pick</code>:</p>
+<div class="paragraph">
+<p>Allows to cherry-pick the change to another branch. The destination
+branch can be selected from a dialog. Cherry-picking a change creates a
+new open change on the selected destination branch.</p>
+</div>
+<div class="paragraph">
+<p>It is also possible to cherry-pick a change to the same branch. This is
+effectively the same as rebasing it to the current tip of the
+destination branch. This can be used to remove dependencies on other
+open changes.</p>
+</div>
+<div class="paragraph">
+<p>Users can only cherry-pick changes to branches for which they are
+allowed to upload changes for review.</p>
+</div>
+</li>
+<li>
+<p><a id="publish"></a><code>Publish</code>:</p>
+<div class="paragraph">
+<p>Publishes the currently viewed draft patch set. If this is the first
+patch set of a change that is published, the change will be published
+as well.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Publish</code> button is only available if a draft patch set is viewed
+and the user is the change owner or has the
+<a href="access-control.html#category_publish_drafts">Publish Drafts</a> access
+right assigned.</p>
+</div>
+</li>
+<li>
+<p><a id="delete"></a><code>Delete Change</code> / <code>Delete Revision</code>:</p>
+<div class="paragraph">
+<p>Deletes the draft change / the currently viewed draft patch set.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Delete Change</code> / <code>Delete Revision</code> buttons are only available if a
+draft patch set is viewed and the user is the change owner or has the
+<a href="access-control.html#category_delete_drafts">Delete Drafts</a> access
+right assigned.</p>
+</div>
+</li>
+<li>
+<p><a id="plugin-actions"></a>Further actions may be available if plugins are installed.</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-actions.png"><img src="images/user-review-ui-change-screen-change-info-actions.png" alt="user review ui change screen change info actions" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="labels"></a>Labels &amp; Votes:</p>
+<div class="paragraph">
+<p>Approving votes are colored green; veto votes are colored red.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-info-labels.png"><img src="images/user-review-ui-change-screen-change-info-labels.png" alt="user review ui change screen change info labels" width="800"></a>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="files">File List</h3>
+<div class="paragraph">
+<p>The file list shows the files that are modified in the currently viewed
+patch set.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list.png"><img src="images/user-review-ui-change-screen-file-list.png" alt="user review ui change screen file list" width="800"></a>
+</div>
+</div>
+<div id="magic-files" class="paragraph">
+<p>In addition to the modified files the file list contains magic files
+that are generated by Gerrit and which don&#8217;t exist in the repository.
+The magic files contain additional commit data that should be
+reviewable and allow users to comment on this data. The magic files are
+always listed first. The following magic files exist:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Commit Message</code>:</p>
+<div class="paragraph">
+<p>The commit message and headers with the parent commit(s), the author
+information and the committer information.</p>
+</div>
+</li>
+<li>
+<p><code>Merge List</code> (for merge commits only):</p>
+<div class="paragraph">
+<p>The list of commits that are being integrated into the destination
+branch by submitting the merge commit.</p>
+</div>
+</li>
+</ul>
+</div>
+<div id="change-screen-mark-reviewed" class="paragraph">
+<p>The checkboxes in front of the file names allow files to be marked as reviewed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list-mark-as-reviewed.png"><img src="images/user-review-ui-change-screen-file-list-mark-as-reviewed.png" alt="user review ui change screen file list mark as reviewed" width="800"></a>
+</div>
+</div>
+<div id="modification-type" class="paragraph">
+<p>The type of a file modification is indicated by the character in front
+of the file name:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>'no character' (Modified):</p>
+<div class="paragraph">
+<p>The file existed before this change and is modified.</p>
+</div>
+</li>
+<li>
+<p><code>A</code> (Added):</p>
+<div class="paragraph">
+<p>The file is newly added.</p>
+</div>
+</li>
+<li>
+<p><code>D</code> (Deleted):</p>
+<div class="paragraph">
+<p>The file is deleted.</p>
+</div>
+</li>
+<li>
+<p><code>R</code> (Renamed):</p>
+<div class="paragraph">
+<p>The file is renamed.</p>
+</div>
+</li>
+<li>
+<p><code>C</code> (Copied):</p>
+<div class="paragraph">
+<p>The file is new and is copied from an existing file.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list-modification-type.png"><img src="images/user-review-ui-change-screen-file-list-modification-type.png" alt="user review ui change screen file list modification type" width="800"></a>
+</div>
+</div>
+<div id="rename-or-copy" class="paragraph">
+<p>If a file is renamed or copied, the name of the original file is
+displayed in gray below the file name.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list-rename.png"><img src="images/user-review-ui-change-screen-file-list-rename.png" alt="user review ui change screen file list rename" width="800"></a>
+</div>
+</div>
+<div id="repeating-path-segments" class="paragraph">
+<p>Repeating path segments are grayed out.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list-repeating-paths.png"><img src="images/user-review-ui-change-screen-file-list-repeating-paths.png" alt="user review ui change screen file list repeating paths" width="800"></a>
+</div>
+</div>
+<div id="inline-comments-column" class="paragraph">
+<p>Inline comments on a file are shown in the <code>Comments</code> column.</p>
+</div>
+<div class="paragraph">
+<p>Draft comments, i.e. comments that have been written by the current
+user but not yet published, are highlighted in red.</p>
+</div>
+<div class="paragraph">
+<p>New comments from other users, that were published after the current
+user last reviewed this change, are highlighted in bold.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list-comments.png"><img src="images/user-review-ui-change-screen-file-list-comments.png" alt="user review ui change screen file list comments" width="800"></a>
+</div>
+</div>
+<div id="size" class="paragraph">
+<p>The size of the modifications in the files can be seen in the <code>Size</code> column. The
+footer row shows the total size of the change.</p>
+</div>
+<div class="paragraph">
+<p>The size information is useful to easily spot the files that contain
+the most modifications; these files are likely to be the most relevant
+files for this change. The total change size gives an estimate of how
+long a review of this change may take.</p>
+</div>
+<div class="paragraph">
+<p>When the "Show Change Sizes As Colored Bars" user preference is enabled, the
+<code>Size</code> column shows the sum of inserted and deleted lines as one number.  In
+addition, the change size is shown as a bar. The size of the bar indicates the
+amount of changed lines, and its coloring shows the proportion of insertions
+(green) to deletions (red).</p>
+</div>
+<div class="paragraph">
+<p>When the "Show Change Sizes As Colored Bars" user preference is disabled, the
+colored bar is not shown.  For added and renamed files, the <code>Size</code> column
+shows the number of inserted and deleted lines. For new files, the column only
+shows the total number of lines in the new file. No size is shown for binary
+files and deleted files.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list-size.png"><img src="images/user-review-ui-change-screen-file-list-size.png" alt="user review ui change screen file list size" width="800"></a>
+</div>
+</div>
+<div id="diff-against" class="paragraph">
+<p>In the header of the file list, the <code>Diff Against</code> selection can be
+changed. This selection allows one to choose if the currently viewed
+patch set should be compared against its base or against another patch
+set of this change. The file list is updated accordingly.</p>
+</div>
+<div id="open-all" class="paragraph">
+<p>The file list header also provides an <code>Open All</code> button that opens the
+diff views for all files in the file list.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-file-list-header.png"><img src="images/user-review-ui-change-screen-file-list-header.png" alt="user review ui change screen file list header" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="patch-sets">Patch Sets</h3>
+<div class="paragraph">
+<p>The change screen only presents one patch set at a time. Which patch
+set is currently viewed can be seen from the <code>Patch Sets</code> drop-down
+panel in the change header. It shows the number of the currently viewed
+patch set and the total number of patch sets, in the form: "current
+patch set/number of patch sets".</p>
+</div>
+<div class="paragraph">
+<p>If a non-current patch set is viewed this is indicated by the
+<a href="#not-current">Not Current</a> change state. Please note that some
+operations are only available on the current patch set.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-patch-sets.png"><img src="images/user-review-ui-change-screen-patch-sets.png" alt="user review ui change screen patch sets" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>Another indication is a highlighted drop-down label.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-not-current.png"><img src="images/user-review-ui-change-screen-not-current.png" alt="user review ui change screen not current" width="800"></a>
+</div>
+</div>
+<div id="patch-set-drop-down" class="paragraph">
+<p>The patch set drop-down list shows the list of patch sets and allows to
+switch between them. The patch sets are sorted in descending order so
+that the current patch set is always on top.</p>
+</div>
+<div class="paragraph">
+<p>Draft patch sets are marked with <code>DRAFT</code>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-patch-set-list.png"><img src="images/user-review-ui-change-screen-patch-set-list.png" alt="user review ui change screen patch set list" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="download">Download</h3>
+<div class="paragraph">
+<p>The <code>Download</code> drop-down panel in the change header offers commands and
+links for downloading the currently viewed patch set.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-download-commands.png"><img src="images/user-review-ui-change-screen-download-commands.png" alt="user review ui change screen download commands" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>The available download commands depend on the installed Gerrit plugins.
+The most popular plugin for download commands, the
+<a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/download-commands">
+download-commands</a> plugin, provides commands to checkout, pull and
+cherry-pick a patch set.</p>
+</div>
+<div class="paragraph">
+<p>Each command has a copy-to-clipboard icon that allows the command to be
+copied into the clipboard. This makes it easy to paste and execute the
+command on a Git command line.</p>
+</div>
+<div class="paragraph">
+<p>If several download schemes are configured on the server (e.g. SSH and
+HTTP) there is a drop-down list to switch between the download schemes.
+Gerrit automatically remembers the download scheme that was last chosen
+and selects this download scheme the next time the download commands
+drop-down panel is opened.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Patch-File</code> links provide the Git patch file for the currently
+viewed patch set for download. The patch file can be base64 encoded or
+zipped.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Archive</code> links allow one to download an archive with the contents
+of the currently viewed patch set. The archive is offered in several
+formats (e.g. tar and tbz2); which formats are available depends on the
+configuration of the server.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-download-commands-list.png"><img src="images/user-review-ui-change-screen-download-commands-list.png" alt="user review ui change screen download commands list" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="included-in">Included In</h3>
+<div class="paragraph">
+<p>For merged changes the <code>Included In</code> drop-down panel is available in
+the change header.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-included-in.png"><img src="images/user-review-ui-change-screen-included-in.png" alt="user review ui change screen included in" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>Included In</code> drop-down panel shows the branches and tags in which
+the change is included. E.g. if a change fixes a bug, this allows to
+quickly see in which released versions the bug-fix is contained
+(assuming that every release is tagged).</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-included-in-list.png"><img src="images/user-review-ui-change-screen-included-in-list.png" alt="user review ui change screen included in list" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="star">Star Change</h3>
+<div class="paragraph">
+<p>The star icon in the change header allows to mark the change as a
+favorite. Clicking on the star icon again, unstars the change.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-star.png"><img src="images/user-review-ui-change-screen-star.png" alt="user review ui change screen star" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>Starring a change turns on email notifications for this change.</p>
+</div>
+<div class="paragraph">
+<p>Starred changed are listed under <code>My</code> &gt; <code>Starred Changes</code>.
+and can be queried by the <a href="user-search.html#is">is:starred</a> search
+operator.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="related-changes">Related Changes</h3>
+<div class="paragraph">
+<p>If there are changes that are related to the currently viewed change
+they are displayed in the third column of the change screen.</p>
+</div>
+<div class="paragraph">
+<p>There are several lists of related changes and a tab control is used to
+display each list of related changes in its own tab.</p>
+</div>
+<div class="paragraph">
+<p>The following tabs may be displayed:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="related-changes-tab"></a><code>Related Changes</code>:</p>
+<div class="paragraph">
+<p>This tab page shows changes on which the current change depends
+(ancestors) and open changes that depend on the current change
+(descendants). For merge commits it also shows the closed changes that
+will be merged into the destination branch by submitting the merge
+commit.</p>
+</div>
+<div class="paragraph">
+<p>The changes are sorted in the same way as the output of 'git log'. This
+means the relationship between the changes can be inferred from the
+position of the changes in the list. Changes listed above the current
+change are descendants; changes below the current change are ancestors.</p>
+</div>
+<div class="paragraph">
+<p>For merged changes this tab is only shown if there are open
+descendants.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-related-changes.png"><img src="images/user-review-ui-change-screen-related-changes.png" alt="user review ui change screen related changes" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>Related changes may be decorated with an icon to signify dependencies
+on outdated patch sets, or commits that are not associated to changes
+under review:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="outdated"></a>Orange Dot:</p>
+<div class="paragraph">
+<p>The selected patch set of the change is outdated; it is not the current
+patch set of the change.</p>
+</div>
+<div class="paragraph">
+<p>If an ancestor change is marked with an orange dot it means that the
+currently viewed patch set depends on a outdated patch set of the
+ancestor change. This is because a new patch set for the ancestor
+change was uploaded in the meantime and as result the currently viewed
+patch set now needs to be rebased.</p>
+</div>
+<div class="paragraph">
+<p>If a descendant change is marked with an orange dot it means that an
+old patch set of the descendant change depends on the currently viewed
+patch set. It may be that the descendant was rebased in the meantime
+and with the new patch set this dependency was removed.</p>
+</div>
+</li>
+<li>
+<p><a id="indirect-descendant"></a>Green Tilde:</p>
+<div class="paragraph">
+<p>The selected patch set of the change is an indirect descendant of the
+currently viewed patch set; it has a dependency to another patch set of
+this change. E.g. this could mean that a new patch set was uploaded for
+this change and the descendant change now needs to be rebased. Please
+note that following the link to an indirect descendant change may
+result in a completely different related changes listing.</p>
+</div>
+</li>
+<li>
+<p><a id="closed-ancestor"></a>Black Dot:</p>
+<div class="paragraph">
+<p>Indicates a closed ancestor, e.g. the commit was directly pushed into
+the repository bypassing code review, or the ancestor change was
+reviewed and submitted on another branch. The latter may indicate that
+the user has accidentally pushed the commit to the wrong branch, e.g.
+the commit was done on <code>branch-a</code>, but was then pushed to
+<code>refs/for/branch-b</code>.
+A black dot is also present if the change was abandoned.</p>
+</div>
+</li>
+<li>
+<p><a id="closed-ancestor-abandoned"></a>Strikethrough Subject:</p>
+<div class="paragraph">
+<p>When the commit is abandoned, its subject line will be striked
+through.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-related-changes-indicators.png"><img src="images/user-review-ui-change-screen-related-changes-indicators.png" alt="user review ui change screen related changes indicators" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="conflicts-with"></a><code>Conflicts With</code>:</p>
+<div class="paragraph">
+<p>This tab page shows changes that conflict with the current change.
+Non-mergeable changes are filtered out; only conflicting changes that
+are mergeable are shown.</p>
+</div>
+<div class="paragraph">
+<p>If this change is merged, its conflicting changes will have merge
+conflicts and must be rebased. The rebase of the other changes with the
+conflict resolution must then be done manually.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-conflicts-with.png"><img src="images/user-review-ui-change-screen-conflicts-with.png" alt="user review ui change screen conflicts with" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="same-topic"></a><code>Same Topic</code>:</p>
+<div class="paragraph">
+<p>This tab page shows changes that have the same topic as the current
+change. Only open changes are included in the list.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-same-topic.png"><img src="images/user-review-ui-change-screen-same-topic.png" alt="user review ui change screen same topic" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="submitted-together"></a><code>Submitted Together</code>:</p>
+<div class="paragraph">
+<p>This tab page shows changes that will be submitted together with the
+currently viewed change, when clicking the submit button. It includes
+ancestors of the current patch set.</p>
+</div>
+<div class="paragraph">
+<p>This may include changes and its ancestors with the same topic if
+<code>change.submitWholeTopic</code> is enabled. Only open changes with the
+same topic are included in the list.</p>
+</div>
+</li>
+<li>
+<p><a id="cherry-picks"></a><code>Cherry-Picks</code>:</p>
+<div class="paragraph">
+<p>This tab page shows changes with the same <a href="user-changeid.html">
+Change-Id</a> for the current project.</p>
+</div>
+<div class="paragraph">
+<p>Abandoned changes are filtered out.</p>
+</div>
+<div class="paragraph">
+<p>For each change in this list the destination branch is shown as a
+prefix in front of the change subject.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-cherry-picks.png"><img src="images/user-review-ui-change-screen-cherry-picks.png" alt="user review ui change screen cherry picks" width="800"></a>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If there are no related changes for a tab, the tab is not displayed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reply">Reply</h3>
+<div class="paragraph">
+<p>The <code>Reply&#8230;&#8203;</code> button in the change header allows to reply to the
+currently viewed patch set; one can add a summary comment, publish
+inline draft comments, and vote on the labels.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-reply.png"><img src="images/user-review-ui-change-screen-reply.png" alt="user review ui change screen reply" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>Clicking on the <code>Reply&#8230;&#8203;</code> button opens a popup panel.</p>
+</div>
+<div id="summary-comment" class="paragraph">
+<p>A text box allows to type a summary comment for the currently viewed
+patch set. Some basic markdown-like syntax is supported which renders
+indented lines preformatted, lines starting with "- " or "* " as list
+items, and lines starting with "&gt; " as block quotes (also see replying to
+<a href="#reply-to-message">messages</a> and <a href="#reply-inline-comment">inline comments</a>).</p>
+</div>
+<div class="paragraph">
+<p>Note that you can set the text and tooltip of the button in
+<a href="config-gerrit.html#change.replyLabel">gerrit.config</a>.</p>
+</div>
+<div id="vote" class="paragraph">
+<p>If the current patch set is viewed, radio buttons are displayed for
+each label on which the user is allowed to vote. Voting on non-current
+patch sets is not possible.</p>
+</div>
+<div class="paragraph">
+<p>The inline draft comments that will be published are displayed in a
+separate section so that they can be reviewed before publishing. There
+are links to navigate to the inline comments which can be used if a
+comment needs to be edited.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Post</code> button publishes the comments and the votes.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-replying.png"><img src="images/user-review-ui-change-screen-replying.png" alt="user review ui change screen replying" width="800"></a>
+</div>
+</div>
+<div id="quick-approve" class="paragraph">
+<p>If a user can approve a label that is still required, a quick approve
+button appears in the change header that allows to add this missing
+approval by a single click. The quick approve button only appears if
+there is a single label that is still required and can be approved by
+the user.</p>
+</div>
+<div class="paragraph">
+<p>E.g. if a change requires approvals on the 'Code-Review' and the
+'Verified' labels, and there is already a '+1 Verified' vote, then
+if the user is allowed to vote the max score on 'Code-Review', a
+<code>Code-Review+2</code> quick approve button appears that approves the
+'Code-Review' label if clicked.</p>
+</div>
+<div class="paragraph">
+<p>Using the quick approve button also publishes all inline draft
+comments; a summary comment is only added if the reply popup panel is
+open when the quick approve button is clicked.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-quick-approve.png"><img src="images/user-review-ui-change-screen-quick-approve.png" alt="user review ui change screen quick approve" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="history">History</h3>
+<div class="paragraph">
+<p>The history of the change can be seen in the lower part of the screen.</p>
+</div>
+<div class="paragraph">
+<p>The history contains messages for all kinds of change updates, e.g. a
+message is added when a new patch set is uploaded or when a review was
+done.</p>
+</div>
+<div class="paragraph">
+<p>Messages with new comments from other users, that were published after
+the current user last reviewed this change, are automatically expanded.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-history.png"><img src="images/user-review-ui-change-screen-history.png" alt="user review ui change screen history" width="800"></a>
+</div>
+</div>
+<div id="reply-to-message" class="paragraph">
+<p>It is possible to directly reply to a change message by clicking on the
+reply icon in the right upper corner of a change message. This opens
+the reply popup panel and prefills the text box with the quoted comment.
+Then the reply can be written below the quoted comment or inserted
+inline. Lines starting with "&gt; " will be rendered as a block quote.
+Please note that for a correct rendering it is important to leave a blank
+line between a quoted block and the reply to it.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-reply-to-comment.png"><img src="images/user-review-ui-change-screen-reply-to-comment.png" alt="user review ui change screen reply to comment" width="800"></a>
+</div>
+</div>
+<div id="inline-comments-in-history" class="paragraph">
+<p>Inline comments are directly displayed in the change history and there
+are links to navigate to the inline comments.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-inline-comments.png"><img src="images/user-review-ui-change-screen-inline-comments.png" alt="user review ui change screen inline comments" width="800"></a>
+</div>
+</div>
+<div id="expand-all" class="paragraph">
+<p>The <code>Expand All</code> button expands all messages; the <code>Collapse All</code> button
+collapses all messages.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="update-notification">Update Notification</h3>
+<div class="paragraph">
+<p>The change screen automatically polls for updates to the currently
+viewed change. If there is an update the user is informed by a popup
+panel in the bottom right corner.</p>
+</div>
+<div class="paragraph">
+<p>The polling frequency depends on the server configuration; by default
+it is 30 seconds. Polling may also be completely disabled by the
+administrator.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-change-update.png"><img src="images/user-review-ui-change-screen-change-update.png" alt="user review ui change screen change update" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="plugin-extensions">Plugin Extensions</h3>
+<div class="paragraph">
+<p>Gerrit plugins may extend the change screen; they can add buttons for
+additional actions to the change info block and display arbitrary UI
+controls below the change info block.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-plugin-extensions.png"><img src="images/user-review-ui-change-screen-plugin-extensions.png" alt="user review ui change screen plugin extensions" width="800"></a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="side-by-side">Side-by-Side Diff Screen</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The side-by-side diff screen shows a single patch; the old file version
+is displayed on the left side of the screen; the new file version is
+displayed on the right side of the screen.</p>
+</div>
+<div class="paragraph">
+<p>This screen allows to review a patch and to comment on it.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen.png"><img src="images/user-review-ui-side-by-side-diff-screen.png" alt="user review ui side by side diff screen" width="800"></a>
+</div>
+</div>
+<div id="side-by-side-header" class="paragraph">
+<p>In the screen header the project name and the name of the viewed patch
+file are shown.</p>
+</div>
+<div class="paragraph">
+<p>If a Git web browser is configured on the server, the project name and
+the file path are displayed as links to the project and the folder in
+the Git web browser.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-project-and-file.png"><img src="images/user-review-ui-side-by-side-diff-screen-project-and-file.png" alt="user review ui side by side diff screen project and file" width="800"></a>
+</div>
+</div>
+<div id="side-by-side-mark-reviewed" class="paragraph">
+<p>The checkbox in front of the project name and the file name allows the
+patch to be marked as reviewed. The <a href="#mark-reviewed">Mark Reviewed</a>
+diff preference allows to control whether the files should be
+automatically marked as reviewed when they are viewed.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-reviewed.png"><img src="images/user-review-ui-side-by-side-diff-screen-reviewed.png" alt="user review ui side by side diff screen reviewed" width="800"></a>
+</div>
+</div>
+<div id="scrollbar" class="paragraph">
+<p>The scrollbar shows patch diffs and inline comments as annotations.
+This provides a good overview of the lines in the patch that are
+relevant for reviewing. By clicking on an annotation one can quickly
+navigate to the corresponding line in the patch.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-scrollbar.png"><img src="images/user-review-ui-side-by-side-diff-screen-scrollbar.png" alt="user review ui side by side diff screen scrollbar" width="800"></a>
+</div>
+</div>
+<div id="gaps" class="paragraph">
+<p>A gap between lines in the file content that is caused by aligning the
+left and right side or by displaying inline comments is shown as a
+vertical red bar in the line number column. This prevents a gap from
+being mistaken for blank lines in the file</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-red-bar.png"><img src="images/user-review-ui-side-by-side-diff-screen-red-bar.png" alt="user review ui side by side diff screen red bar" width="800"></a>
+</div>
+</div>
+<div id="patch-set-selection" class="paragraph">
+<p>In the header, on each side, the list of patch sets is shown. Clicking
+on a patch set changes the selection for the patch set comparison and
+the screen is refreshed to show the diff between the selected patch
+sets. The currently selected patch set is highlighted by a light blue
+background.</p>
+</div>
+<div class="paragraph">
+<p>On the left side <code>Base</code> can be selected to compare a patch set against
+its base. For merge commits <code>Auto Merge</code> is available instead which
+allows to compare the patch against the result of the auto merge. The
+auto merge version may contain Git conflict markers and is useful for
+reviewing how conflicts are resolved by a patch.</p>
+</div>
+<div class="paragraph">
+<p>Reviewers that are reviewing a patch for the first time look at its
+diff against its base; reviewers that have reviewed an old patch
+version before, may see what has changed since that version by
+comparing the old patch against the current patch.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-patch-sets.png"><img src="images/user-review-ui-side-by-side-diff-screen-patch-sets.png" alt="user review ui side by side diff screen patch sets" width="800"></a>
+</div>
+</div>
+<div id="download-file" class="paragraph">
+<p>The download icon next to the patch set list allows to download the
+patch. Unless the mime type of the file is configured as safe, the
+download file is a zip archive that contains the patch file.</p>
+</div>
+<div id="no-differences" class="paragraph">
+<p>If the compared patches are identical, this is highlighted by a red
+<code>No Differences</code> label in the screen header.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-no-differences.png"><img src="images/user-review-ui-side-by-side-diff-screen-no-differences.png" alt="user review ui side by side diff screen no differences" width="800"></a>
+</div>
+</div>
+<div id="side-by-side-rename" class="paragraph">
+<p>If a file was renamed, the old and new file paths are shown in the
+header together with a similarity index that shows how much of the file
+content is unmodified.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-rename.png"><img src="images/user-review-ui-side-by-side-diff-screen-rename.png" alt="user review ui side by side diff screen rename" width="800"></a>
+</div>
+</div>
+<div id="navigation" class="paragraph">
+<p>For navigating between the patches in a patch set there are navigation
+buttons on the right side of the screen header. The left arrow button
+navigates to the previous patch; the right arrow button navigates to
+the next patch. The arrow up button leads back to the change screen. In
+all cases the selection for the patch set comparison is kept.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-navigation.png"><img src="images/user-review-ui-side-by-side-diff-screen-navigation.png" alt="user review ui side by side diff screen navigation" width="800"></a>
+</div>
+</div>
+<div class="sect2">
+<h3 id="inline-comments">Inline Comments</h3>
+<div class="paragraph">
+<p>Inline comments are displayed directly in the patch file under the code
+that is commented. Inline comments can be placed on lines or on code
+blocks.</p>
+</div>
+<div class="paragraph">
+<p>If an inline comment relates to a code block, this code block is
+highlighted by a yellow background.</p>
+</div>
+<div class="paragraph">
+<p>Code blocks with comments may overlap. This means it is possible to
+attach several comments to the same code.</p>
+</div>
+<div id="line-links" class="paragraph">
+<p>The lines of the patch file are linkable. To link to a certain line in
+the patch file, '@&lt;line-number&gt;' must be appended to the patch link,
+e.g. <code><a href="http://host:8080/#/c/56857/2/Documentation/user-review-ui.txt@665" class="bare">http://host:8080/#/c/56857/2/Documentation/user-review-ui.txt@665</a></code>.
+To link to a line in the old file version, '@a&lt;line-number&gt;' must be
+appended to the patch link. These links can be used to directly link to
+certain inline comments.</p>
+</div>
+<div class="paragraph">
+<p>If the diff preference <a href="#expand-all-comments">Expand All Comments</a>
+is set to <code>Expand</code>, all inline comments will be automatically expanded.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-inline-comments.png"><img src="images/user-review-ui-side-by-side-diff-screen-inline-comments.png" alt="user review ui side by side diff screen inline comments" width="800"></a>
+</div>
+</div>
+<div id="comment" class="paragraph">
+<p>In the header of the comment box, the name of the comment author and
+the timestamp of the comment are shown. If avatars are configured on
+the server, the avatar image of the comment author is displayed in the
+top left corner. Below the actual comment there are buttons to reply to
+the comment.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-comment-box.png"><img src="images/user-review-ui-side-by-side-diff-screen-comment-box.png" alt="user review ui side by side diff screen comment box" width="800"></a>
+</div>
+</div>
+<div id="reply-inline-comment" class="paragraph">
+<p>Clicking on the <code>Reply</code> button opens an editor to type the reply.</p>
+</div>
+<div class="paragraph">
+<p>Quoting is supported, but only by manually copying &amp; pasting the old
+comment that should be quoted and prefixing every line by "&gt; ". Please
+note that for a correct rendering it is important to leave a blank line
+between a quoted block and the reply to it.</p>
+</div>
+<div class="paragraph">
+<p>Clicking on the <code>Save</code> button saves the comment as a draft. To make it
+visible to other users it must be published from the change screen by
+<a href="#reply">replying</a> to the change.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Cancel</code> button cancels the editing and discards any changes to the
+draft comment.</p>
+</div>
+<div class="paragraph">
+<p>Clicking on the <code>Discard</code> button deletes the inline draft comment.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-comment-reply.png"><img src="images/user-review-ui-side-by-side-diff-screen-comment-reply.png" alt="user review ui side by side diff screen comment reply" width="800"></a>
+</div>
+</div>
+<div id="draft-inline-comment" class="paragraph">
+<p>Draft comments are marked by the text "Draft" in the header in the
+place of the comment author.</p>
+</div>
+<div class="paragraph">
+<p>A draft comment can be edited by clicking on the <code>Edit</code> button, or
+deleted by clicking on the <code>Discard</code> button.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-comment-edit.png"><img src="images/user-review-ui-side-by-side-diff-screen-comment-edit.png" alt="user review ui side by side diff screen comment edit" width="800"></a>
+</div>
+</div>
+<div id="done" class="paragraph">
+<p>Clicking on the <code>Done</code> button is a quick way to reply with "Done" to a
+comment. This is used to mark a comment as addressed by a follow-up
+patch set.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-replied-done.png"><img src="images/user-review-ui-side-by-side-diff-screen-replied-done.png" alt="user review ui side by side diff screen replied done" width="800"></a>
+</div>
+</div>
+<div id="add-inline-comment" class="paragraph">
+<p>To add a new inline comment there are several possibilities:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>select a code block and press 'c'</p>
+</li>
+<li>
+<p>select a code block and click on the popup comment icon</p>
+</li>
+<li>
+<p>go to a line, by clicking on it or by <a href="#key-navigation">key
+navigation</a>, and press 'c'</p>
+</li>
+<li>
+<p>click on a line number</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>There are many ways to select code for commenting on it. The most
+frequently used methods are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>by mouse:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>click and drag with the mouse to select a block</p>
+</li>
+<li>
+<p>double-click on a word to select it</p>
+</li>
+<li>
+<p>double-click and drag with the mouse to select a code block word-wise</p>
+</li>
+<li>
+<p>triple-click on a line to select it</p>
+</li>
+<li>
+<p>triple-click and drag with the mouse to select a code block line-wise</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>by keys (the same keys that are used for visual selection in Vim):</p>
+<div class="ulist">
+<ul>
+<li>
+<p>press 'v' + arrow keys (or 'h', 'j', 'k', 'l') to select a block</p>
+</li>
+<li>
+<p>press 'V' + arrow keys (or 'j', 'k') to select a code block line-wise</p>
+</li>
+<li>
+<p>type 'bvw' to select a word</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-comment.png"><img src="images/user-review-ui-side-by-side-diff-screen-comment.png" alt="user review ui side by side diff screen comment" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>For typing the new comment, a new comment box is shown under the code
+that is commented.</p>
+</div>
+<div class="paragraph">
+<p>Clicking on the <code>Save</code> button saves the new comment as a draft. To make
+it visible to other users it must be published from the change screen
+by <a href="#reply">replying</a> to the change.</p>
+</div>
+<div class="paragraph">
+<p>Clicking on the <code>Discard</code> button deletes the new comment.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-commented.png"><img src="images/user-review-ui-side-by-side-diff-screen-commented.png" alt="user review ui side by side diff screen commented" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="file-level-comments">File Level Comments</h3>
+<div class="paragraph">
+<p>Comments that apply to a whole file can be added on file level.</p>
+</div>
+<div class="paragraph">
+<p>File level comments are added by clicking on the comment icon in the
+header above the file.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-file-level-comment.png"><img src="images/user-review-ui-side-by-side-diff-screen-file-level-comment.png" alt="user review ui side by side diff screen file level comment" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>Clicking on the comment icon opens a comment box for typing the file
+level comment.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-file-level-commented.png"><img src="images/user-review-ui-side-by-side-diff-screen-file-level-commented.png" alt="user review ui side by side diff screen file level commented" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="search">Search</h3>
+<div class="paragraph">
+<p>For searching within a patch file, a Vim-like search is supported.
+Typing <code>/</code> opens the search box. Typing in the search box immediately
+highlights matches in the patch file with a yellow background. Using
+JavaScript regular expressions in the search term is supported. The
+search is case insensitive. After confirming the search by <code>ENTER</code> one
+can navigate between the matches by <code>n</code> / <code>N</code> to go to the next /
+previous match. Skipped lines are automatically expanded if they
+contain a match and one navigates to it.</p>
+</div>
+<div class="paragraph">
+<p>For additional possibilities to search please check the
+<a href="http://www.vim.org/docs.php">Vim documentation</a>. There are other
+useful ways to search, e.g. while the cursor is on a word, pressing <code>*</code>
+or <code>#</code> searches for the next or previous occurrence of the word.</p>
+</div>
+<div class="paragraph">
+<p>Searching by <code>Ctrl-F</code> finds matches only in the visible area of the
+screen unless the <a href="#render">Render</a> diff preference is set to <code>Slow</code>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-search.png"><img src="images/user-review-ui-side-by-side-diff-screen-search.png" alt="user review ui side by side diff screen search" width="800"></a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="key-navigation">Key Navigation</h3>
+<div class="paragraph">
+<p>Vim-like commands can be used to navigate within a patch file:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>h</code> / <code>j</code> / <code>k</code> / <code>l</code> moves the cursor left / down / up / right</p>
+</li>
+<li>
+<p><code>0</code> / <code>$</code> moves the cursor to the start / end of the line</p>
+</li>
+<li>
+<p><code>gg</code> / <code>G</code> moves to cursor to the start / end of the file</p>
+</li>
+<li>
+<p><code>Ctrl-D</code> / <code>Ctrl-U</code> scolls downwards / upwards</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Please check the <a href="http://www.vim.org/docs.php">Vim documentation</a>
+for further information.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="diff-preferences">Diff Preferences</h3>
+<div class="paragraph">
+<p>There are several options to control how patch diffs should be
+rendered. Users can configure their preferences in the diff
+preferences. The diff preferences can be accessed by clicking on the
+settings icon in the screen header.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-preferences.png"><img src="images/user-review-ui-side-by-side-diff-screen-preferences.png" alt="user review ui side by side diff screen preferences" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>The diff preferences popup allows to change the diff preferences.
+By clicking on the <code>Save</code> button changes to the diff preferences are
+saved permanently. Clicking on the <code>Apply</code> button applies the new
+diff preferences to the current screen, but they are discarded when the
+screen is refreshed. The <code>Save</code> button is only available if the user is
+signed in.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-preferences-popup.png"><img src="images/user-review-ui-side-by-side-diff-screen-preferences-popup.png" alt="user review ui side by side diff screen preferences popup" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>The following diff preferences can be configured:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a id="theme"></a><code>Theme</code>:</p>
+<div class="paragraph">
+<p>Controls the theme that is used to render the file content.</p>
+</div>
+<div class="paragraph">
+<p>E.g. users could choose to work with a dark theme.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-dark-theme.png"><img src="images/user-review-ui-side-by-side-diff-screen-dark-theme.png" alt="user review ui side by side diff screen dark theme" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="ignore-whitespace"></a><code>Ignore Whitespace</code>:</p>
+<div class="paragraph">
+<p>Controls whether differences in whitespace should be ignored or not.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>None</code>:</p>
+<div class="paragraph">
+<p>All differences in whitespace are highlighted.</p>
+</div>
+</li>
+<li>
+<p><code>At Line End</code>:</p>
+<div class="paragraph">
+<p>Whitespace differences at the end of lines are ignored.</p>
+</div>
+</li>
+<li>
+<p><code>Leading, At Line End</code>:</p>
+<div class="paragraph">
+<p>Whitespace differences at the beginning and end of lines are ignored.</p>
+</div>
+</li>
+<li>
+<p><code>All</code>:</p>
+<div class="paragraph">
+<p>All differences in whitespace are ignored.</p>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><a id="tab-width"></a><code>Tab Width</code>:</p>
+<div class="paragraph">
+<p>Controls how many spaces should be displayed for a tab.</p>
+</div>
+</li>
+<li>
+<p><a id="columns"></a><code>Columns</code>:</p>
+<div class="paragraph">
+<p>Sets the preferred line length. At this position a vertical dashed line
+is displayed so that one can easily detect lines the exceed the
+preferred line length.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-column.png"><img src="images/user-review-ui-side-by-side-diff-screen-column.png" alt="user review ui side by side diff screen column" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="lines-of-context"></a><code>Lines Of Context</code>:</p>
+<div class="paragraph">
+<p>The number of context lines that should be displayed before and after
+any diff. If the <code>entire file</code> checkbox is selected, the full file is
+rendered.</p>
+</div>
+<div class="paragraph">
+<p>Skipped common lines can be expanded by clicking on the placeholder for
+the skipped lines.</p>
+</div>
+<div class="paragraph">
+<p>Clicking on "&#8230;&#8203; skipped &lt;n&gt; common lines &#8230;&#8203;" expands the complete
+block of skipped lines.</p>
+</div>
+<div class="paragraph">
+<p>If many lines are skipped there are additional links to expand the
+context by ten lines before and after the skipped block.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-expand-skipped-lines.png"><img src="images/user-review-ui-side-by-side-diff-screen-expand-skipped-lines.png" alt="user review ui side by side diff screen expand skipped lines" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="intraline-difference"></a><code>Intraline Difference</code>:</p>
+<div class="paragraph">
+<p>Controls whether intraline differences should be highlighted.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-intraline-difference.png"><img src="images/user-review-ui-side-by-side-diff-screen-intraline-difference.png" alt="user review ui side by side diff screen intraline difference" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="syntax-highlighting"></a><code>Syntax Highlighting</code>:</p>
+<div class="paragraph">
+<p>Controls whether syntax highlighting should be enabled.</p>
+</div>
+<div class="paragraph">
+<p>The language for the syntax highlighting is automatically detected from
+the file extension. The language can also be set manually by selecting
+it from the <code>Language</code> drop-down list.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-syntax-coloring.png"><img src="images/user-review-ui-side-by-side-diff-screen-syntax-coloring.png" alt="user review ui side by side diff screen syntax coloring" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p><a id="whitespace-errors"></a><code>Whitespace Errors</code>:</p>
+<div class="paragraph">
+<p>Controls whether whitespace errors are highlighted.</p>
+</div>
+</li>
+<li>
+<p><a id="show-tabs"></a><code>Show Tabs</code>:</p>
+<div class="paragraph">
+<p>Controls whether tabs are highlighted.</p>
+</div>
+</li>
+<li>
+<p><a id="line-numbers"></a><code>Line Numbers</code>:</p>
+<div class="paragraph">
+<p>Controls whether line numbers are shown.</p>
+</div>
+</li>
+<li>
+<p><a id="empty-pane"></a><code>Empty Pane</code>:</p>
+<div class="paragraph">
+<p>Controls whether empty panes are shown or not. The Left pane is empty when a
+file was added; the right pane is empty when a file was deleted.</p>
+</div>
+</li>
+<li>
+<p><a id="left-side"></a><code>Left Side</code>:</p>
+<div class="paragraph">
+<p>Controls whether the left side is shown. This preference is not
+persistent and is ignored by the <code>Save</code> button. Every time a
+patch diff is opened, this preference is reset to <code>Show</code>.</p>
+</div>
+</li>
+<li>
+<p><a id="top-menu"></a><code>Top Menu</code>:</p>
+<div class="paragraph">
+<p>Controls whether the top menu is shown.</p>
+</div>
+</li>
+<li>
+<p><a id="auto-hide-diff-table-header"></a><code>Auto Hide Diff Table Header</code>:</p>
+<div class="paragraph">
+<p>Controls whether the diff table header should be automatically hidden
+when scrolling down more than half of a page.</p>
+</div>
+</li>
+<li>
+<p><a id="mark-reviewed"></a><code>Mark Reviewed</code>:</p>
+<div class="paragraph">
+<p>Controls whether the files of the patch set should be automatically
+marked as reviewed when they are viewed.</p>
+</div>
+</li>
+<li>
+<p><a id="expand-all-comments"></a><code>Expand All Comments</code>:</p>
+<div class="paragraph">
+<p>Controls whether all comments should be automatically expanded.</p>
+</div>
+</li>
+<li>
+<p><a id="render"></a><code>Render</code>:</p>
+<div class="paragraph">
+<p>Controls how patch files that exceed the screen size are rendered.</p>
+</div>
+<div class="paragraph">
+<p>If <code>Fast</code> is selected file contents which are outside of the visible
+area are not attached to the browser&#8217;s DOM tree. This makes the
+rendering fast, but searching by <code>Ctrl+F</code> only finds content which is
+in the visible area.</p>
+</div>
+<div class="paragraph">
+<p>If <code>Slow</code> is selected all file contents are attached to the browser&#8217;s
+DOM tree, which makes the rendering slow for large files. The advantage
+of this setting is that <code>Ctrl+F</code> can be used to search in the complete
+file.</p>
+</div>
+<div class="paragraph">
+<p>Large files that exceed 4000 lines will not be fully rendered.</p>
+</div>
+</li>
+<li>
+<p><a id="line-wrapping"></a><code>Line Wrapping</code>:</p>
+<div class="paragraph">
+<p>Controls weather to enable line wrapping or not.</p>
+</div>
+<div class="paragraph">
+<p>If <code>false</code> is selected then line wrapping is disabled.
+This is the default option.</p>
+</div>
+<div class="paragraph">
+<p>If <code>true</code> is selected then line wrapping is enabled.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="keyboard-shortcuts">Keyboard Shortcuts</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Navigation within the review UI can be completely done by keys, and
+most actions can be controlled by keyboard shortcuts. Typing <code>?</code> opens
+a popup that shows a list of available keyboard shortcuts:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Change Screen</p>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-change-screen-keyboard-shortcuts.png"><img src="images/user-review-ui-change-screen-keyboard-shortcuts.png" alt="user review ui change screen keyboard shortcuts" width="800"></a>
+</div>
+</div>
+</li>
+<li>
+<p>Side-by-Side Diff Screen</p>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="images/user-review-ui-side-by-side-diff-screen-keyboard-shortcuts.png"><img src="images/user-review-ui-side-by-side-diff-screen-keyboard-shortcuts.png" alt="user review ui side by side diff screen keyboard shortcuts" width="800"></a>
+</div>
+</div>
+<div class="paragraph">
+<p>In addition, Vim-like commands can be used to <a href="#key-navigation">
+navigate</a> and <a href="#search">search</a> within a patch file.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="new-vs-old">New Review UI vs. Old Review UI</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are some important conceptual differences between the old and
+new review UIs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The old change screen directly shows all patch sets of the change.
+With the new change screen only a single patch set is displayed;
+users can switch between the patch sets by choosing another patch
+set from the <a href="#patch-sets">Patch Sets</a> drop down panel in the
+screen header.</p>
+</li>
+<li>
+<p>On the old side-by-side diff screen, new comments are inserted by
+double-clicking on a line. With the new side-by-side diff screen
+double-click is used to select a word for commenting on it; there
+are <a href="#add-inline-comment">several ways to insert new comments</a>,
+e.g. by selecting a code block and clicking on the popup comment
+icon.</p>
+</li>
+</ul>
+</div>
+<div id="limitations" class="paragraph">
+<p>Limitations of the new review UI:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The new side-by-side diff screen cannot render images.</p>
+</li>
+<li>
+<p>The new side-by-side diff screen isn&#8217;t able to highlight line
+endings.</p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,4326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - /projects/ REST API</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - /projects/ REST API</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#project-endpoints">Project Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#list-projects">List Projects</a></li>
+<li><a href="#get-project">Get Project</a></li>
+<li><a href="#create-project">Create Project</a></li>
+<li><a href="#get-project-description">Get Project Description</a></li>
+<li><a href="#set-project-description">Set Project Description</a></li>
+<li><a href="#delete-project-description">Delete Project Description</a></li>
+<li><a href="#get-project-parent">Get Project Parent</a></li>
+<li><a href="#set-project-parent">Set Project Parent</a></li>
+<li><a href="#get-head">Get HEAD</a></li>
+<li><a href="#set-head">Set HEAD</a></li>
+<li><a href="#get-repository-statistics">Get Repository Statistics</a></li>
+<li><a href="#get-config">Get Config</a></li>
+<li><a href="#set-config">Set Config</a></li>
+<li><a href="#run-gc">Run GC</a></li>
+<li><a href="#ban-commit">Ban Commit</a></li>
+<li><a href="#get-access">List Access Rights for Project</a></li>
+<li><a href="#set-access">Add, Update and Delete Access Rights for Project</a></li>
+</ul>
+</li>
+<li><a href="#branch-endpoints">Branch Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#list-branches">List Branches</a></li>
+<li><a href="#get-branch">Get Branch</a></li>
+<li><a href="#create-branch">Create Branch</a></li>
+<li><a href="#delete-branch">Delete Branch</a></li>
+<li><a href="#delete-branches">Delete Branches</a></li>
+<li><a href="#get-content">Get Content</a></li>
+<li><a href="#get-mergeable-info">Get Mergeable Information</a></li>
+<li><a href="#get-reflog">Get Reflog</a></li>
+</ul>
+</li>
+<li><a href="#child-project-endpoints">Child Project Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#list-child-projects">List Child Projects</a></li>
+<li><a href="#get-child-project">Get Child Project</a></li>
+</ul>
+</li>
+<li><a href="#tag-endpoints">Tag Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#create-tag">Create Tag</a></li>
+<li><a href="#list-tags">List Tags</a></li>
+<li><a href="#get-tag">Get Tag</a></li>
+<li><a href="#delete-tag">Delete Tag</a></li>
+<li><a href="#delete-tags">Delete Tags</a></li>
+</ul>
+</li>
+<li><a href="#commit-endpoints">Commit Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#get-commit">Get Commit</a></li>
+<li><a href="#get-content-from-commit">Get Content</a></li>
+</ul>
+</li>
+<li><a href="#dashboard-endpoints">Dashboard Endpoints</a>
+<ul class="sectlevel2">
+<li><a href="#list-dashboards">List Dashboards</a></li>
+<li><a href="#get-dashboard">Get Dashboard</a></li>
+<li><a href="#set-dashboard">Set Dashboard</a></li>
+<li><a href="#delete-dashboard">Delete Dashboard</a></li>
+</ul>
+</li>
+<li><a href="#ids">IDs</a>
+<ul class="sectlevel2">
+<li><a href="#branch-id">{branch-id}</a></li>
+<li><a href="#commit-id">{commit-id}</a></li>
+<li><a href="#tag-id">{tag-id}</a></li>
+<li><a href="#dashboard-id">{dashboard-id}</a></li>
+<li><a href="#project-name">{project-name}</a></li>
+</ul>
+</li>
+<li><a href="#json-entities">JSON Entities</a>
+<ul class="sectlevel2">
+<li><a href="#ban-input">BanInput</a></li>
+<li><a href="#ban-result-info">BanResultInfo</a></li>
+<li><a href="#branch-info">BranchInfo</a></li>
+<li><a href="#branch-input">BranchInput</a></li>
+<li><a href="#config-info">ConfigInfo</a></li>
+<li><a href="#config-input">ConfigInput</a></li>
+<li><a href="#config-parameter-info">ConfigParameterInfo</a></li>
+<li><a href="#dashboard-info">DashboardInfo</a></li>
+<li><a href="#dashboard-input">DashboardInput</a></li>
+<li><a href="#dashboard-section-info">DashboardSectionInfo</a></li>
+<li><a href="#delete-branches-input">DeleteBranchesInput</a></li>
+<li><a href="#delete-tags-input">DeleteTagsInput</a></li>
+<li><a href="#gc-input">GCInput</a></li>
+<li><a href="#head-input">HeadInput</a></li>
+<li><a href="#inherited-boolean-info">InheritedBooleanInfo</a></li>
+<li><a href="#max-object-size-limit-info">MaxObjectSizeLimitInfo</a></li>
+<li><a href="#project-access-input">ProjectAccessInput</a></li>
+<li><a href="#project-description-input">ProjectDescriptionInput</a></li>
+<li><a href="#project-info">ProjectInfo</a></li>
+<li><a href="#project-input">ProjectInput</a></li>
+<li><a href="#project-parent-input">ProjectParentInput</a></li>
+<li><a href="#reflog-entry-info">ReflogEntryInfo</a></li>
+<li><a href="#repository-statistics-info">RepositoryStatisticsInfo</a></li>
+<li><a href="#tag-info">TagInfo</a></li>
+<li><a href="#tag-input">TagInput</a></li>
+<li><a href="#theme-info">ThemeInfo</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page describes the project related REST endpoints.
+Please also take note of the general information on the
+<a href="rest-api.html">REST API</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project-endpoints">Project Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="list-projects">List Projects</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lists the projects accessible by the caller. This is the same as
+using the <a href="cmd-ls-projects.html">ls-projects</a> command over SSH,
+and accepts the same options as query parameters.</p>
+</div>
+<div class="paragraph">
+<p>As result a map is returned that maps the project names to
+<a href="#project-info">ProjectInfo</a> entries. The entries in the map are sorted
+by project name.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/?d HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "external/bison": {
+      "id": "external%2Fbison",
+      "description": "GNU parser generator"
+    },
+    "external/gcc": {
+      "id": "external%2Fgcc"
+    },
+    "external/openssl": {
+      "id": "external%2Fopenssl",
+      "description": "encryption\ncrypto routines"
+    },
+    "test": {
+      "id": "test",
+      "description": "\u003chtml\u003e is escaped"
+    }
+  }</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="project-options">Project Options</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Branch(b)</dt>
+<dd>
+<p>Limit the results to the projects having the specified branch and
+include the sha1 of the branch in the results.</p>
+<div class="paragraph">
+<p>Get projects that have a 'master' branch:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>GET /projects/?b=master HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "some-project": {
+      "id": "some-project",
+      "branches": {
+        "master": "c5ed9dfcbf002ca0e432d788dab6ca2387829ca7"
+      }
+    },
+    "some-other-project": {
+      "id": "some-other-project",
+      "branches": {
+        "master": "ef1c270142f9581ecf768f4193fc8f8a81102ec2"
+      }
+    },
+  }</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Description(d)</dt>
+<dd>
+<p>Include project description in the results.</p>
+<div class="paragraph">
+<p>Get all the projects with their description:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>GET /projects/?d HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "some-project": {
+      "id": "some-project",
+      "description": "Description of some project."
+    },
+    "some-other-project": {
+      "id": "some-other-project",
+       "description": "Description of some other project."
+      }
+    },
+  }</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Limit(n)</dt>
+<dd>
+<p>Limit the number of projects to be included in the results.</p>
+<div class="paragraph">
+<p>Query the first project in the project list:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/?n=1 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "some-project": {
+      "id": "some-project"
+    }
+  }</pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+<div id="suggest-projects" class="dlist">
+<dl>
+<dt class="hdlist1">Prefix(p)</dt>
+<dd>
+<p>Limit the results to those projects that start with the specified
+prefix.</p>
+<div class="paragraph">
+<p>List all projects that start with <code>platform/</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/?p=platform%2F HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "platform/drivers": {
+      "id": "platform%2Fdrivers"
+    },
+    "platform/tools": {
+      "id": "platform%2Ftools"
+    }
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>E.g. this feature can be used by suggestion client UI&#8217;s to limit results.</p>
+</div>
+</dd>
+<dt class="hdlist1">Regex(r)</dt>
+<dd>
+<p>Limit the results to those projects that match the specified regex.</p>
+<div class="paragraph">
+<p>Boundary matchers '^' and '$' are implicit. For example: the regex 'test.*' will
+match any projects that start with 'test' and regex '.*test' will match any
+project that end with 'test'.</p>
+</div>
+<div class="paragraph">
+<p>List all projects that match regex <code>test.*project</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/?r=test.*project HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "test/some-project": {
+      "id": "test%2Fsome-project"
+    },
+    "test/some-other-project": {
+      "id": "test%2Fsome-other-project"
+    }
+  }</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Skip(S)</dt>
+<dd>
+<p>Skip the given number of projects from the beginning of the list.</p>
+<div class="paragraph">
+<p>Query the second project in the project list:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/?n=1&amp;S=1 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "some-other-project": {
+      "id": "some-other-project"
+    }
+  }</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Substring(m)</dt>
+<dd>
+<p>Limit the results to those projects that match the specified substring.</p>
+<div class="paragraph">
+<p>List all projects that match substring <code>test/</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/?m=test%2F HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "test/some-project": {
+      "id": "test%2Fsome-project"
+    },
+    "some-path/test/some-other-project": {
+      "id": "some-path%2Ftest%2Fsome-other-project"
+    }
+  }</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Tree(t)</dt>
+<dd>
+<p>Get projects inheritance in a tree-like format. This option does
+not work together with the branch option.</p>
+<div class="paragraph">
+<p>Get all the projects with tree option:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>GET /projects/?t HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "All-Projects" {
+      "id": "All-Projects"
+    },
+    "child-project": {
+      "id": "child-project",
+      "parent":"parent-project"
+    },
+    "parent-project": {
+      "id": "parent-project",
+      "parent":"All-Projects"
+    }
+  }</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Type(type)</dt>
+<dd>
+<p>Get projects with specified type: ALL, CODE, PERMISSIONS.</p>
+<div class="paragraph">
+<p>Get all the projects of type 'PERMISSIONS':</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>GET /projects/?type=PERMISSIONS HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "All-Projects" {
+      "id": "All-Projects"
+    },
+    "some-parent-project": {
+      "id": "some-parent-project"
+    }
+  }</pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-project">Get Project</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/plugins%2Freplication HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#project-info">ProjectInfo</a> entity is returned that
+describes the project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "plugins%2Freplication",
+    "name": "plugins/replication",
+    "parent": "Public-Plugins",
+    "description": "Copies to other servers using the Git protocol",
+    "state": "ACTIVE"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create-project">Create Project</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Creates a new project.</p>
+</div>
+<div class="paragraph">
+<p>In the request body additional data for the project can be provided as
+<a href="#project-input">ProjectInput</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/MyProject HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "description": "This is a demo project.",
+    "submit_type": "CHERRY_PICK",
+    "owners": [
+      "MyProject-Owners"
+    ]
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response the <a href="#project-info">ProjectInfo</a> entity is returned that
+describes the created project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 201 Created
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "MyProject",
+    "name": "MyProject",
+    "parent": "All-Projects",
+    "description": "This is a demo project."
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-project-description">Get Project Description</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/description'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves the description of a project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/plugins%2Freplication/description HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  "Copies to other servers using the Git protocol"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the project does not have a description an empty string is returned.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-project-description">Set Project Description</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/description'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets the description of a project.</p>
+</div>
+<div class="paragraph">
+<p>The new project description must be provided in the request body inside
+a <a href="#project-description-input">ProjectDescriptionInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/plugins%2Freplication/description HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "description": "Plugin for Gerrit that handles the replication.",
+    "commit_message": "Update the project description"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response the new project description is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  "Plugin for Gerrit that handles the replication."</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the description was deleted the response is &#8220;204 No Content&#8221;.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-project-description">Delete Project Description</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'DELETE /projects/<a href="#project-name">{project-name}</a>/description'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Deletes the description of a project.</p>
+</div>
+<div class="paragraph">
+<p>The request body does not need to include a
+<a href="#project-description-input">ProjectDescriptionInput</a> entity if no
+commit message is specified.</p>
+</div>
+<div class="paragraph">
+<p>Please note that some proxies prohibit request bodies for DELETE
+requests. In this case, if you want to specify a commit message, use
+<a href="#set-project-description">PUT</a> to delete the description.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  DELETE /projects/plugins%2Freplication/description HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 204 No Content</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-project-parent">Get Project Parent</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/parent'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves the name of a project&#8217;s parent project. For the
+<code>All-Projects</code> root project an empty string is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/plugins%2Freplication/parent HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  "All-Projects"</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-project-parent">Set Project Parent</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/parent'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets the parent project for a project.</p>
+</div>
+<div class="paragraph">
+<p>The new name of the parent project must be provided in the request body
+inside a <a href="#project-parent-input">ProjectParentInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/plugins%2Freplication/parent HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "parent": "Public-Plugins",
+    "commit_message": "Update the project parent"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response the new parent project name is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  "Public-Plugins"</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-head">Get HEAD</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/HEAD'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves for a project the name of the branch to which <code>HEAD</code> points.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/plugins%2Freplication/HEAD HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  "refs/heads/master"</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-head">Set HEAD</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/HEAD'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets <code>HEAD</code> for a project.</p>
+</div>
+<div class="paragraph">
+<p>The new ref to which <code>HEAD</code> should point must be provided in the
+request body inside a <a href="#head-input">HeadInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/plugins%2Freplication/HEAD HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "ref": "refs/heads/stable"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response the new ref to which <code>HEAD</code> points is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  "refs/heads/stable"</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-repository-statistics">Get Repository Statistics</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/statistics.git'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Return statistics for the repository of a project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/plugins%2Freplication/statistics.git HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The repository statistics are returned as a
+<a href="#repository-statistics-info">RepositoryStatisticsInfo</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "number_of_loose_objects": 127,
+    "number_of_loose_refs": 15,
+    "number_of_pack_files": 15,
+    "number_of_packed_objects": 67,
+    "number_of_packed_refs": 0,
+    "size_of_loose_objects": 29466,
+    "size_of_packed_objects": 9646
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-config">Get Config</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/config'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Gets some configuration information about a project. Note that this
+config info is not simply the contents of <code>project.config</code>; it generally
+contains fields that may have been inherited from parent projects.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/myproject/config</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A <a href="#config-info">ConfigInfo</a> entity is returned that describes the
+project configuration. Some fields are only visible to users that have
+read access to <code>refs/meta/config</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "description": "demo project",
+    "use_contributor_agreements": {
+      "value": true,
+      "configured_value": "TRUE",
+      "inherited_value": false
+    },
+    "use_content_merge": {
+      "value": true,
+      "configured_value": "INHERIT",
+      "inherited_value": true
+    },
+    "use_signed_off_by": {
+      "value": false,
+      "configured_value": "INHERIT",
+      "inherited_value": false
+    },
+    "create_new_change_for_all_not_in_target": {
+      "value": false,
+      "configured_value": "INHERIT",
+      "inherited_value": false
+    },
+    "require_change_id": {
+      "value": false,
+      "configured_value": "FALSE",
+      "inherited_value": true
+    },
+    "max_object_size_limit": {
+      "value": "15m",
+      "configured_value": "15m",
+      "inherited_value": "20m"
+    },
+    "submit_type": "MERGE_IF_NECESSARY",
+    "state": "ACTIVE",
+    "commentlinks": {},
+    "plugin_config": {
+      "helloworld": {
+        "language": {
+          "display_name": "Preferred Language",
+          "type": "STRING",
+          "value": "en"
+        }
+      }
+    },
+    "actions": {
+      "cookbook~hello-project": {
+        "method": "POST",
+        "label": "Say hello",
+        "title": "Say hello in different languages",
+        "enabled": true
+      }
+    }
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-config">Set Config</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/config'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets the configuration of a project.</p>
+</div>
+<div class="paragraph">
+<p>The new configuration must be provided in the request body as a
+<a href="#config-input">ConfigInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/myproject/config HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "description": "demo project",
+    "use_contributor_agreements": "FALSE",
+    "use_content_merge": "INHERIT",
+    "use_signed_off_by": "INHERIT",
+    "create_new_change_for_all_not_in_target": "INHERIT",
+    "enable_signed_push": "INHERIT",
+    "require_signed_push": "INHERIT",
+    "reject_implicit_merges": "INHERIT",
+    "require_change_id": "TRUE",
+    "max_object_size_limit": "10m",
+    "submit_type": "REBASE_IF_NECESSARY",
+    "state": "ACTIVE"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response the new configuration is returned as a <a href="#config-info">
+ConfigInfo</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "use_contributor_agreements": {
+      "value": false,
+      "configured_value": "FALSE",
+      "inherited_value": false
+    },
+    "use_content_merge": {
+      "value": true,
+      "configured_value": "INHERIT",
+      "inherited_value": true
+    },
+    "use_signed_off_by": {
+      "value": false,
+      "configured_value": "INHERIT",
+      "inherited_value": false
+    },
+    "create_new_change_for_all_not_in_target": {
+      "value": true,
+      "configured_value": "INHERIT",
+      "inherited_value": false
+    },
+    "require_change_id": {
+      "value": true,
+      "configured_value": "TRUE",
+      "inherited_value": true
+    },
+    "enable_signed_push": {
+      "value": true,
+      "configured_value": "INHERIT",
+      "inherited_value": false
+    },
+    "require_signed_push": {
+      "value": false,
+      "configured_value": "INHERIT",
+      "inherited_value": false
+    },
+    "reject_implicit_merges": {
+      "value": false,
+      "configured_value": "INHERIT",
+      "inherited_value": false
+    },
+    "max_object_size_limit": {
+      "value": "10m",
+      "configured_value": "10m",
+      "inherited_value": "20m"
+    },
+    "submit_type": "REBASE_IF_NECESSARY",
+    "state": "ACTIVE",
+    "commentlinks": {}
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="run-gc">Run GC</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /projects/<a href="#project-name">{project-name}</a>/gc'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the Git garbage collection for the repository of a project.</p>
+</div>
+<div class="paragraph">
+<p>Options for the Git garbage collection can be specified in the
+request body as a <a href="#gc-input">GCInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /projects/plugins%2Freplication/gc HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "show_progress": true
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The response is the streamed output of the garbage collection.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: text/plain; charset=UTF-8
+
+  collecting garbage for "plugins/replication":
+  Pack refs:              100% (21/21)
+  Counting objects:       20
+  Finding sources:        100% (20/20)
+  Getting sizes:          100% (13/13)
+  Compressing objects:     83% (5/6)
+  Writing objects:        100% (20/20)
+  Selecting commits:      100% (7/7)
+  Building bitmaps:       100% (7/7)
+  Finding sources:        100% (41/41)
+  Getting sizes:          100% (25/25)
+  Compressing objects:     52% (12/23)
+  Writing objects:        100% (41/41)
+  Prune loose objects also found in pack files: 100% (36/36)
+  Prune loose, unreferenced objects: 100% (36/36)
+  done.</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_asynchronous_execution">Asynchronous Execution</h4>
+<div class="paragraph">
+<p>The option <code>async</code> allows to schedule a background task that asynchronously
+executes a Git garbage collection.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Location</code> header of the response refers to the <a href="rest-api-config.html#get-task">background task</a>
+which allows to inspect the progress of its execution. In case of asynchronous
+execution the <code>show_progress</code> option is ignored.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /projects/plugins%2Freplication/gc HTTP/1.0
+  Content-Type: application/json;charset=UTF-8
+
+  {
+    "async": true
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The response is empty.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 202 Accepted
+  Content-Disposition: attachment
+  Location: https:&lt;host&gt;/a/config/server/tasks/383a0602</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ban-commit">Ban Commit</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/ban'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Marks commits as banned for the project. If a commit is banned Gerrit
+rejects every push that includes this commit with
+<a href="error-contains-banned-commit.html">contains banned commit &#8230;&#8203;</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This REST endpoint only marks the commits as banned, but it does not
+remove the commits from the history of any central branch. This needs
+to be done manually.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The commits to be banned must be specified in the request body as a
+<a href="#ban-input">BanInput</a> entity.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be project owner.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/plugins%2Freplication/ban HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "commits": [
+      "a8a477efffbbf3b44169bb9a1d3a334cbbd9aa96",
+      "cf5b56541f84b8b57e16810b18daca9c3adc377b"
+    ],
+    "reason": "Violates IP"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#ban-result-info">BanResultInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "newly_banned": [
+      "a8a477efffbbf3b44169bb9a1d3a334cbbd9aa96",
+      "cf5b56541f84b8b57e16810b18daca9c3adc377b"
+    ]
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-access">List Access Rights for Project</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="rest-api-projects.html#project-name">{project-name}</a>/access'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lists the access rights for a single project.</p>
+</div>
+<div class="paragraph">
+<p>As result a <a href="#project-access-info">ProjectAccessInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/MyProject/access HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "revision": "61157ed63e14d261b6dca40650472a9b0bd88474",
+    "inherits_from": {
+      "id": "All-Projects",
+      "name": "All-Projects",
+      "description": "Access inherited by all other projects."
+    },
+    "local": {
+        "refs/*": {
+          "permissions": {
+            "read": {
+              "rules": {
+                "c2ce4749a32ceb82cd6adcce65b8216e12afb41c": {
+                  "action": "ALLOW",
+                  "force": false
+                },
+                "global:Anonymous-Users": {
+                  "action": "ALLOW",
+                  "force": false
+                }
+              }
+            }
+          }
+        }
+    },
+    "is_owner": true,
+    "owner_of": [
+      "refs/*"
+    ],
+    "can_upload": true,
+    "can_add": true,
+    "config_visible": true
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-access">Add, Update and Delete Access Rights for Project</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /projects/<a href="rest-api-projects.html#project-name">{project-name}</a>/access'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Sets access rights for the project using the diff schema provided by
+<a href="#project-access-input">ProjectAccessInput</a>. Deductions are used to
+remove access sections, permissions or permission rules. The backend will remove
+the entity with the finest granularity in the request, meaning that if an
+access section without permissions is posted, the access section will be
+removed; if an access section with a permission but no permission rules is
+posted, the permission will be removed; if an access section with a permission
+and a permission rule is posted, the permission rule will be removed.</p>
+</div>
+<div class="paragraph">
+<p>Additionally, access sections and permissions will be cleaned up after applying
+the deductions by removing items that have no child elements.</p>
+</div>
+<div class="paragraph">
+<p>After removals have been applied, additions will be applied.</p>
+</div>
+<div class="paragraph">
+<p>As result a <a href="#project-access-info">ProjectAccessInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /projects/MyProject/access HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "remove": [
+      "refs/*": {
+        "permissions": {
+          "read": {
+            "rules": {
+              "c2ce4749a32ceb82cd6adcce65b8216e12afb41c": {
+                "action": "ALLOW"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "revision": "61157ed63e14d261b6dca40650472a9b0bd88474",
+    "inherits_from": {
+      "id": "All-Projects",
+      "name": "All-Projects",
+      "description": "Access inherited by all other projects."
+    },
+    "local": {
+        "refs/*": {
+          "permissions": {
+            "read": {
+              "rules": {
+                "global:Anonymous-Users": {
+                  "action": "ALLOW",
+                  "force": false
+                }
+              }
+            }
+          }
+        }
+    },
+    "is_owner": true,
+    "owner_of": [
+      "refs/*"
+    ],
+    "can_upload": true,
+    "can_add": true,
+    "config_visible": true
+  }</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="branch-endpoints">Branch Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="list-branches">List Branches</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/branches/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>List the branches of a project.</p>
+</div>
+<div class="paragraph">
+<p>As result a list of <a href="#branch-info">BranchInfo</a> entries is
+returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/branches/ HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "HEAD",
+      "revision": "master"
+    },
+    {
+      "ref": "refs/meta/config",
+      "revision": "76016386a0d8ecc7b6be212424978bb45959d668"
+    },
+    {
+      "ref": "refs/heads/master",
+      "revision": "67ebf73496383c6777035e374d2d664009e2aa5c"
+    },
+    {
+      "ref": "refs/heads/stable",
+      "revision": "64ca533bd0eb5252d2fee83f63da67caae9b4674",
+      "can_delete": true
+    }
+  ]</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="branch-options">Branch Options</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Limit(n)</dt>
+<dd>
+<p>Limit the number of branches to be included in the results.</p>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/testproject/branches?n=1 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "HEAD",
+      "revision": "master",
+      "can_delete": false
+    }
+  ]</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Skip(s)</dt>
+<dd>
+<p>Skip the given number of branches from the beginning of the list.</p>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/testproject/branches?n=1&amp;s=0 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "HEAD",
+      "revision": "master",
+      "can_delete": false
+    }
+  ]</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Substring(m)</dt>
+<dd>
+<p>Limit the results to those projects that match the specified substring.</p>
+<div class="paragraph">
+<p>List all projects that match substring <code>test</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/testproject/branches?m=test HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "refs/heads/test1",
+      "revision": "9c9d08a438e55e52f33b608415e6dddd9b18550d",
+      "can_delete": true
+    }
+  ]</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Regex(r)</dt>
+<dd>
+<p>Limit the results to those branches that match the specified regex.
+Boundary matchers '^' and '$' are implicit. For example: the regex 't*' will
+match any branches that start with 'test' and regex '*t' will match any
+branches that end with 'test'.</p>
+<div class="paragraph">
+<p>List all branches that match regex <code>t.*1</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/testproject/branches?r=t.*1 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "refs/heads/test1",
+      "revision": "9c9d08a438e55e52f33b608415e6dddd9b18550d",
+      "can_delete": true
+    }
+  ]</pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-branch">Get Branch</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/branches/<a href="#branch-id">{branch-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a branch of a project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/branches/master HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#branch-info">BranchInfo</a> entity is returned that
+describes the branch.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "ref": "refs/heads/master",
+    "revision": "67ebf73496383c6777035e374d2d664009e2aa5c"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create-branch">Create Branch</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/branches/<a href="#branch-id">{branch-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Creates a new branch.</p>
+</div>
+<div class="paragraph">
+<p>In the request body additional data for the branch can be provided as
+<a href="#branch-input">BranchInput</a>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/MyProject/branches/stable HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "revision": "76016386a0d8ecc7b6be212424978bb45959d668"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#branch-info">BranchInfo</a> entity is returned that
+describes the created branch.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 201 Created
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "ref": "refs/heads/stable",
+    "revision": "76016386a0d8ecc7b6be212424978bb45959d668",
+    "can_delete": true
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-branch">Delete Branch</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'DELETE /projects/<a href="#project-name">{project-name}</a>/branches/<a href="#branch-id">{branch-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Deletes a branch.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  DELETE /projects/MyProject/branches/stable HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 204 No Content</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-branches">Delete Branches</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /projects/<a href="#project-name">{project-name}</a>/branches:delete'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Delete one or more branches.</p>
+</div>
+<div class="paragraph">
+<p>The branches to be deleted must be provided in the request body as a
+<a href="#delete-branches-input">DeleteBranchesInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /projects/MyProject/branches:delete HTTP/1.0
+  Content-Type: application/json;charset=UTF-8
+
+  {
+    "branches": [
+      "stable-1.0",
+      "stable-2.0"
+    ]
+  }</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 204 No Content</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If some branches could not be deleted, the response is &#8220;409 Conflict&#8221; and the
+error message is contained in the response body.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-content">Get Content</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/branches/<a href="#branch-id">{branch-id}</a>/files/<a href="rest-api-changes.html#file-id">{file-id}</a>/content'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Gets the content of a file from the HEAD revision of a certain branch.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/gerrit/branches/master/files/gerrit-server%2Fsrc%2Fmain%2Fjava%2Fcom%2Fgoogle%2Fgerrit%2Fserver%2Fproject%2FRefControl.java/content HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The content is returned as base64 encoded string.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: text/plain; charset=UTF-8
+
+  Ly8gQ29weXJpZ2h0IChDKSAyMDEwIFRoZSBBbmRyb2lkIE9wZW4gU291cmNlIFByb2plY...</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-mergeable-info">Get Mergeable Information</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/branches/<a href="#branch-id">{branch-id}</a>/mergeable'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Gets whether the source is mergeable with the target branch.</p>
+</div>
+<div class="paragraph">
+<p>The <code>source</code> query parameter is required, which can be anything that could be
+resolved to a commit, see examples of the <code>source</code> attribute in
+<a href="rest-api-changes.html#merge-input">MergeInput</a>.</p>
+</div>
+<div class="paragraph">
+<p>Also takes an optional parameter <code>strategy</code>, which can be <code>recursive</code>, <code>resolve</code>,
+<code>simple-two-way-in-core</code>, <code>ours</code> or <code>theirs</code>, default will use project settings.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/test/branches/master/mergeable?source=testbranch&amp;strategy=recursive HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="rest-api-changes.html#mergeable-info">MergeableInfo</a> entity is returned.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "submit_type": "MERGE_IF_NECESSARY",
+    "strategy": "recursive",
+    "mergeable": true,
+    "commit_merged": false,
+    "content_merged": false
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or when there were conflicts.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "submit_type": "MERGE_IF_NECESSARY",
+    "strategy": "recursive",
+    "mergeable": false,
+    "conflicts": [
+      "common.txt",
+      "shared.txt"
+    ]
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or when the 'testbranch' has been already merged.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "submit_type": "MERGE_IF_NECESSARY",
+    "strategy": "recursive",
+    "mergeable": true,
+    "commit_merged": true,
+    "content_merged": true
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or when only the content of 'testbranch' has been merged.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "submit_type": "MERGE_IF_NECESSARY",
+    "strategy": "recursive",
+    "mergeable": true,
+    "commit_merged": false,
+    "content_merged": true
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-reflog">Get Reflog</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/branches/<a href="#branch-id">{branch-id}</a>/reflog'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Gets the reflog of a certain branch.</p>
+</div>
+<div class="paragraph">
+<p>The caller must be project owner.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/gerrit/branches/master/reflog HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a list of <a href="#reflog-entry-info">ReflogEntryInfo</a> entities
+is returned that describe the reflog entries. The reflog entries are
+returned in reverse order.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "old_id": "976ced8f4fc0909d7e1584d18455299545881d60",
+      "new_id": "2eaa94bac536654eb592c941e33b91f925698d16",
+      "who": {
+        "name": "Jane Roe",
+        "email": "jane.roe@example.com",
+        "date": "2014-06-30 11:53:43.000000000",
+        "tz": 120
+      },
+      "comment": "merged: fast forward"
+    },
+    {
+      "old_id": "c271c6a7161b74f85560c5899c8c73ee89ca5e29",
+      "new_id": "976ced8f4fc0909d7e1584d18455299545881d60",
+      "who": {
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "date": "2013-10-02 10:45:26.000000000",
+        "tz": 120
+      },
+      "comment": "merged: fast forward"
+    },
+    {
+      "old_id": "0000000000000000000000000000000000000000",
+      "new_id": "c271c6a7161b74f85560c5899c8c73ee89ca5e29",
+      "who": {
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "date": "2013-09-30 19:08:44.000000000",
+        "tz": 120
+      },
+      "comment": ""
+    }
+  ]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The get reflog endpoint also accepts a limit integer in the <code>n</code>
+parameter. This limits the results to show the last <code>n</code> reflog entries.</p>
+</div>
+<div class="paragraph">
+<p>Query the last 25 reflog entries.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  GET /projects/gerrit/branches/master/reflog?n=25 HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The reflog can also be filtered by timestamp by specifying the <code>from</code>
+and <code>to</code> parameters. The timestamp for <code>from</code> and <code>to</code> must be given as
+UTC in the following format: <code>yyyyMMdd_HHmm</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  GET /projects/gerrit/branches/master/reflog?from=20130101_0000&amp;to=20140101_0000=25 HTTP/1.0</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="child-project-endpoints">Child Project Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="list-child-projects">List Child Projects</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/children/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>List the direct child projects of a project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/Public-Plugins/children/ HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As result a list of <a href="#project-info">ProjectInfo</a> entries is
+returned that describe the child projects.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "id": "plugins%2Freplication",
+      "name": "plugins/replication",
+      "parent": "Public-Plugins",
+      "description": "Copies to other servers using the Git protocol"
+    },
+    {
+      "id": "plugins%2Freviewnotes",
+      "name": "plugins/reviewnotes",
+      "parent": "Public-Plugins",
+      "description": "Annotates merged commits using notes on refs/notes/review."
+    },
+    {
+      "id": "plugins%2Fsingleusergroup",
+      "name": "plugins/singleusergroup",
+      "parent": "Public-Plugins",
+      "description": "GroupBackend enabling users to be directly added to access rules"
+    }
+  ]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To resolve the child projects of a project recursively the parameter
+<code>recursive</code> can be set.</p>
+</div>
+<div class="paragraph">
+<p>Child projects that are not visible to the calling user are ignored and
+are not resolved further.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/Public-Projects/children/?recursive HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "id": "gerrit",
+      "name": "gerrit",
+      "parent": "Public-Projects",
+      "description": "Gerrit Code Review"
+    },
+    {
+      "id": "plugins%2Freplication",
+      "name": "plugins/replication",
+      "parent": "Public-Plugins",
+      "description": "Copies to other servers using the Git protocol"
+    },
+    {
+      "id": "plugins%2Freviewnotes",
+      "name": "plugins/reviewnotes",
+      "parent": "Public-Plugins",
+      "description": "Annotates merged commits using notes on refs/notes/review."
+    },
+    {
+      "id": "plugins%2Fsingleusergroup",
+      "name": "plugins/singleusergroup",
+      "parent": "Public-Plugins",
+      "description": "GroupBackend enabling users to be directly added to access rules"
+    },
+    {
+      "id": "Public-Plugins",
+      "name": "Public-Plugins",
+      "parent": "Public-Projects",
+      "description": "Parent project for plugins/*"
+    }
+  ]</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-child-project">Get Child Project</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/children/<a href="#project-name">{project-name}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a child project. If a non-direct child project should be
+retrieved the parameter <code>recursive</code> must be set.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/Public-Plugins/children/plugins%2Freplication HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#project-info">ProjectInfo</a> entity is returned that
+describes the child project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "plugins%2Freplication",
+    "name": "plugins/replication",
+    "parent": "Public-Plugins",
+    "description": "Copies to other servers using the Git protocol"
+  }</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tag-endpoints">Tag Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="create-tag">Create Tag</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/tags/<a href="#tag-id">{tag-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a new tag on the project.</p>
+</div>
+<div class="paragraph">
+<p>In the request body additional data for the tag can be provided as
+<a href="#tag-input">TagInput</a>.</p>
+</div>
+<div class="paragraph">
+<p>If a message is provided in the input, the tag is created as an
+annotated tag with the current user as tagger. Signed tags are not
+supported.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/MyProject/tags/v1.0 HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "message": "annotation",
+    "revision": "c83117624b5b5d8a7f86093824e2f9c1ed309d63"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#tag-info">TagInfo</a> entity is returned that describes
+the created tag.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 201 Created
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+
+  "object": "d48d304adc4b6674e11dc2c018ea05fcbdda32fd",
+  "message": "annotation",
+  "tagger": {
+    "name": "David Pursehouse",
+    "email": "dpursehouse@collab.net",
+    "date": "2016-06-06 01:22:03.000000000",
+    "tz": 540
+  },
+  "ref": "refs/tags/v1.0",
+  "revision": "c83117624b5b5d8a7f86093824e2f9c1ed309d63"
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="list-tags">List Tags</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/tags/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>List the tags of a project.</p>
+</div>
+<div class="paragraph">
+<p>As result a list of <a href="#tag-info">TagInfo</a> entries is returned.</p>
+</div>
+<div class="paragraph">
+<p>Only includes tags under the <code>refs/tags/</code> namespace.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/tags/ HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "refs/tags/v1.0",
+      "revision": "49ce77fdcfd3398dc0dedbe016d1a425fd52d666",
+      "object": "1624f5af8ae89148d1a3730df8c290413e3dcf30",
+      "message": "Annotated tag",
+      "tagger": {
+        "name": "David Pursehouse",
+        "email": "david.pursehouse@sonymobile.com",
+        "date": "2014-10-06 07:35:03.000000000",
+        "tz": 540
+      }
+    },
+    {
+      "ref": "refs/tags/v2.0",
+      "revision": "1624f5af8ae89148d1a3730df8c290413e3dcf30"
+    },
+    {
+      "ref": "refs/tags/v3.0",
+      "revision": "c628685b3c5a3614571ecb5c8fceb85db9112313",
+      "object": "1624f5af8ae89148d1a3730df8c290413e3dcf30",
+      "message": "Signed tag\n-----BEGIN PGP SIGNATURE-----\nVersion: GnuPG v1.4.11 (GNU/Linux)\n\niQEcBAABAgAGBQJUMlqYAAoJEPI2qVPgglptp7MH/j+KFcittFbxfSnZjUl8n5IZ\nveZo7wE+syjD9sUbMH4EGv0WYeVjphNTyViBof+stGTNkB0VQzLWI8+uWmOeiJ4a\nzj0LsbDOxodOEMI5tifo02L7r4Lzj++EbqtKv8IUq2kzYoQ2xjhKfFiGjeYOn008\n9PGnhNblEHZgCHguGR6GsfN8bfA2XNl9B5Ysl5ybX1kAVs/TuLZR4oDMZ/pW2S75\nhuyNnSgcgq7vl2gLGefuPs9lxkg5Fj3GZr7XPZk4pt/x1oiH7yXxV4UzrUwg2CC1\nfHrBlNbQ4uJNY8TFcwof52Z0cagM5Qb/ZSLglHbqEDGA68HPqbwf5z2hQyU2/U4\u003d\n\u003dZtUX\n-----END PGP SIGNATURE-----",
+      "tagger": {
+        "name": "David Pursehouse",
+        "email": "david.pursehouse@sonymobile.com",
+        "date": "2014-10-06 09:02:16.000000000",
+        "tz": 540
+      }
+    }
+  ]</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="tag-options">Tag Options</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Limit(n)</dt>
+<dd>
+<p>Limit the number of tags to be included in the results.</p>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/tags?n=2 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "refs/tags/v1.0",
+      "revision": "49ce77fdcfd3398dc0dedbe016d1a425fd52d666",
+      "object": "1624f5af8ae89148d1a3730df8c290413e3dcf30",
+      "message": "Annotated tag",
+      "tagger": {
+        "name": "David Pursehouse",
+        "email": "david.pursehouse@sonymobile.com",
+        "date": "2014-10-06 07:35:03.000000000",
+        "tz": 540
+      }
+    },
+    {
+      "ref": "refs/tags/v2.0",
+      "revision": "1624f5af8ae89148d1a3730df8c290413e3dcf30"
+    }
+  ]</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">Skip(s)</dt>
+<dd>
+<p>Skip the given number of tags from the beginning of the list.</p>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/tags?n=2&amp;s=1 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "ref": "refs/tags/v2.0",
+      "revision": "1624f5af8ae89148d1a3730df8c290413e3dcf30"
+    },
+    {
+      "ref": "refs/tags/v3.0",
+      "revision": "c628685b3c5a3614571ecb5c8fceb85db9112313",
+      "object": "1624f5af8ae89148d1a3730df8c290413e3dcf30",
+      "message": "Signed tag\n-----BEGIN PGP SIGNATURE-----\nVersion: GnuPG v1.4.11 (GNU/Linux)\n\niQEcBAABAgAGBQJUMlqYAAoJEPI2qVPgglptp7MH/j+KFcittFbxfSnZjUl8n5IZ\nveZo7wE+syjD9sUbMH4EGv0WYeVjphNTyViBof+stGTNkB0VQzLWI8+uWmOeiJ4a\nzj0LsbDOxodOEMI5tifo02L7r4Lzj++EbqtKv8IUq2kzYoQ2xjhKfFiGjeYOn008\n9PGnhNblEHZgCHguGR6GsfN8bfA2XNl9B5Ysl5ybX1kAVs/TuLZR4oDMZ/pW2S75\nhuyNnSgcgq7vl2gLGefuPs9lxkg5Fj3GZr7XPZk4pt/x1oiH7yXxV4UzrUwg2CC1\nfHrBlNbQ4uJNY8TFcwof52Z0cagM5Qb/ZSLglHbqEDGA68HPqbwf5z2hQyU2/U4\u003d\n\u003dZtUX\n-----END PGP SIGNATURE-----",
+      "tagger": {
+        "name": "David Pursehouse",
+        "email": "david.pursehouse@sonymobile.com",
+        "date": "2014-10-06 09:02:16.000000000",
+        "tz": 540
+      }
+    }
+  ]</pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-tag">Get Tag</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/tags/<a href="#tag-id">{tag-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a tag of a project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/tags/v1.0 HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#tag-info">TagInfo</a> entity is returned that describes the tag.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "ref": "refs/tags/v1.0",
+    "revision": "49ce77fdcfd3398dc0dedbe016d1a425fd52d666",
+    "object": "1624f5af8ae89148d1a3730df8c290413e3dcf30",
+    "message": "Annotated tag",
+    "tagger": {
+      "name": "David Pursehouse",
+      "email": "david.pursehouse@sonymobile.com",
+      "date": "2014-10-06 07:35:03.000000000",
+      "tz": 540
+    }
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-tag">Delete Tag</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'DELETE /projects/<a href="#project-name">{project-name}</a>/tags/<a href="#tag-id">{tag-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Deletes a tag.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  DELETE /projects/MyProject/tags/v1.0 HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 204 No Content</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-tags">Delete Tags</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'POST /projects/<a href="#project-name">{project-name}</a>/tags:delete'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Delete one or more tags.</p>
+</div>
+<div class="paragraph">
+<p>The tags to be deleted must be provided in the request body as a
+<a href="#delete-tags-input">DeleteTagsInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  POST /projects/MyProject/tags:delete HTTP/1.0
+  Content-Type: application/json;charset=UTF-8
+
+  {
+    "tags": [
+      "v1.0",
+      "v2.0"
+    ]
+  }</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 204 No Content</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If some tags could not be deleted, the response is &#8220;409 Conflict&#8221; and the
+error message is contained in the response body.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="commit-endpoints">Commit Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="get-commit">Get Commit</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/commits/<a href="#commit-id">{commit-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a commit of a project.</p>
+</div>
+<div class="paragraph">
+<p>The commit must be visible to the caller.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/commits/a8a477efffbbf3b44169bb9a1d3a334cbbd9aa96 HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="rest-api-changes.html#commit-info">CommitInfo</a> entity
+is returned that describes the commit.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "commit": "184ebe53805e102605d11f6b143486d15c23a09c",
+    "parents": [
+      {
+        "commit": "1eee2c9d8f352483781e772f35dc586a69ff5646",
+        "subject": "Migrate contributor agreements to All-Projects."
+      }
+    ],
+    "author": {
+      "name": "Shawn O. Pearce",
+      "email": "sop@google.com",
+      "date": "2012-04-24 18:08:08.000000000",
+      "tz": -420
+    },
+    "committer": {
+      "name": "Shawn O. Pearce",
+      "email": "sop@google.com",
+      "date": "2012-04-24 18:08:08.000000000",
+      "tz": -420
+    },
+    "subject": "Use an EventBus to manage star icons",
+    "message": "Use an EventBus to manage star icons\n\nImage widgets that need to ..."
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-content-from-commit">Get Content</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/commits/<a href="#commit-id">{commit-id}</a>/files/<a href="rest-api-changes.html#file-id">{file-id}</a>/content'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Gets the content of a file from a certain commit.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/commits/a8a477efffbbf3b44169bb9a1d3a334cbbd9aa96/files/gerrit-server%2Fsrc%2Fmain%2Fjava%2Fcom%2Fgoogle%2Fgerrit%2Fserver%2Fproject%2FRefControl.java/content HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The content is returned as base64 encoded string.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: text/plain; charset=UTF-8
+
+  Ly8gQ29weXJpZ2h0IChDKSAyMDEwIFRoZSBBbmRyb2lkIE9wZW4gU291cmNlIFByb2plY...</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="dashboard-endpoints">Dashboard Endpoints</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="list-dashboards">List Dashboards</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/dashboards/'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>List custom dashboards for a project.</p>
+</div>
+<div class="paragraph">
+<p>As result a list of <a href="#dashboard-info">DashboardInfo</a> entries is
+returned.</p>
+</div>
+<div class="paragraph">
+<p>List all dashboards for the <code>work/my-project</code> project:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/dashboards/ HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "id": "main:closed",
+      "ref": "main",
+      "path": "closed",
+      "description": "Merged and abandoned changes in last 7 weeks",
+      "url": "/dashboard/?title\u003dClosed+changes\u0026Merged\u003dstatus:merged+age:7w\u0026Abandoned\u003dstatus:abandoned+age:7w",
+      "default": true,
+      "title": "Closed changes",
+      "sections": [
+        {
+          "name": "Merged",
+          "query": "status:merged age:7w"
+        },
+        {
+          "name": "Abandoned",
+          "query": "status:abandoned age:7w"
+        }
+      ]
+    }
+  ]</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Get all dashboards of the 'All-Projects' project</div>
+<div class="content">
+<a id="/projects/All-Projects/dashboards/" onmousedown="javascript:
+  var i = document.URL.lastIndexOf('/Documentation/');
+  var url = document.URL.substring(0, i) + '/projects/All-Projects/dashboards/';
+  document.getElementById('/projects/All-Projects/dashboards/').href = url;">
+    GET /projects/All-Projects/dashboards/ HTTP/1.0
+</a>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="get-dashboard">Get Dashboard</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'GET /projects/<a href="#project-name">{project-name}</a>/dashboards/<a href="#dashboard-id">{dashboard-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Retrieves a project dashboard. The dashboard can be defined on that
+project or be inherited from a parent project.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/dashboards/main:closed HTTP/1.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response a <a href="#dashboard-info">DashboardInfo</a> entity is returned
+that describes the dashboard.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "main:closed",
+    "ref": "main",
+    "path": "closed",
+    "description": "Merged and abandoned changes in last 7 weeks",
+    "url": "/dashboard/?title\u003dClosed+changes\u0026Merged\u003dstatus:merged+age:7w\u0026Abandoned\u003dstatus:abandoned+age:7w",
+    "default": true,
+    "title": "Closed changes",
+    "sections": [
+      {
+        "name": "Merged",
+        "query": "status:merged age:7w"
+      },
+      {
+        "name": "Abandoned",
+        "query": "status:abandoned age:7w"
+      }
+    ]
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To retrieve the default dashboard of a project use <code>default</code> as
+dashboard-id.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  GET /projects/work%2Fmy-project/dashboards/default HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "main:closed",
+    "ref": "main",
+    "path": "closed",
+    "description": "Merged and abandoned changes in last 7 weeks",
+    "url": "/dashboard/?title\u003dClosed+changes\u0026Merged\u003dstatus:merged+age:7w\u0026Abandoned\u003dstatus:abandoned+age:7w",
+    "default": true,
+    "title": "Closed changes",
+    "sections": [
+      {
+        "name": "Merged",
+        "query": "status:merged age:7w"
+      },
+      {
+        "name": "Abandoned",
+        "query": "status:abandoned age:7w"
+      }
+    ]
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="set-dashboard">Set Dashboard</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'PUT /projects/<a href="#project-name">{project-name}</a>/dashboards/<a href="#dashboard-id">{dashboard-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Updates/Creates a project dashboard.</p>
+</div>
+<div class="paragraph">
+<p>Currently only supported for the <code>default</code> dashboard.</p>
+</div>
+<div class="paragraph">
+<p>The creation/update information for the dashboard must be provided in
+the request body as a <a href="#dashboard-input">DashboardInput</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  PUT /projects/work%2Fmy-project/dashboards/default HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "id": "main:closed",
+    "commit_message": "Define the default dashboard"
+  }</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As response the new/updated dashboard is returned as a
+<a href="#dashboard-info">DashboardInfo</a> entity.</p>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "id": "main:closed",
+    "ref": "main",
+    "path": "closed",
+    "description": "Merged and abandoned changes in last 7 weeks",
+    "url": "/dashboard/?title\u003dClosed+changes\u0026Merged\u003dstatus:merged+age:7w\u0026Abandoned\u003dstatus:abandoned+age:7w",
+    "default": true,
+    "title": "Closed changes",
+    "sections": [
+      {
+        "name": "Merged",
+        "query": "status:merged age:7w"
+      },
+      {
+        "name": "Abandoned",
+        "query": "status:abandoned age:7w"
+      }
+    ]
+  }</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-dashboard">Delete Dashboard</h3>
+<div class="openblock">
+<div class="content">
+<div class="paragraph">
+<p>'DELETE /projects/<a href="#project-name">{project-name}</a>/dashboards/<a href="#dashboard-id">{dashboard-id}</a>'</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Deletes a project dashboard.</p>
+</div>
+<div class="paragraph">
+<p>Currently only supported for the <code>default</code> dashboard.</p>
+</div>
+<div class="paragraph">
+<p>The request body does not need to include a <a href="#dashboard-input">
+DashboardInput</a> entity if no commit message is specified.</p>
+</div>
+<div class="paragraph">
+<p>Please note that some proxies prohibit request bodies for DELETE
+requests.</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre>  DELETE /projects/work%2Fmy-project/dashboards/default HTTP/1.0</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Response</div>
+<div class="content">
+<pre>  HTTP/1.1 204 No Content</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ids">IDs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="branch-id">{branch-id}</h3>
+<div class="paragraph">
+<p>The name of a branch or <code>HEAD</code>. The prefix <code>refs/heads/</code> can be
+omitted.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="commit-id">{commit-id}</h3>
+<div class="paragraph">
+<p>Commit ID.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="tag-id">{tag-id}</h3>
+<div class="paragraph">
+<p>The name of a tag. The prefix <code>refs/tags/</code> can be omitted.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="dashboard-id">{dashboard-id}</h3>
+<div class="paragraph">
+<p>The ID of a dashboard in the format '&lt;ref&gt;:&lt;path&gt;'.</p>
+</div>
+<div class="paragraph">
+<p>A special dashboard ID is <code>default</code> which represents the default
+dashboard of a project.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="project-name">{project-name}</h3>
+<div class="paragraph">
+<p>The name of the project.</p>
+</div>
+<div class="paragraph">
+<p>If the name ends with <code>.git</code>, the suffix will be automatically removed.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="json-entities">JSON Entities</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="ban-input">BanInput</h3>
+<div class="paragraph">
+<p>The <code>BanInput</code> entity contains information for banning commits in a
+project.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commits</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of commits to be banned.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reason</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reason for banning the commits.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="ban-result-info">BanResultInfo</h3>
+<div class="paragraph">
+<p>The <code>BanResultInfo</code> entity describes the result of banning commits.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>newly_banned</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of newly banned commits.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>already_banned</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of commits that were already banned.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ignored</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">List of object IDs that were ignored.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="branch-info">BranchInfo</h3>
+<div class="paragraph">
+<p>The <code>BranchInfo</code> entity contains information about a branch.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ref</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ref of the branch.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>revision</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The revision to which the branch points.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>can_delete</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the calling user can delete this branch.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>web_links</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Links to the branch in external sites as a list of
+<a href="rest-api-changes.html#web-link-info">WebLinkInfo</a> entries.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="branch-input">BranchInput</h3>
+<div class="paragraph">
+<p>The <code>BranchInput</code> entity contains information for the creation of
+a new branch.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ref</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the branch. The prefix <code>refs/heads/</code> can be
+omitted.<br>
+If set, must match the branch ID in the URL.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>revision</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The base revision of the new branch.<br>
+If not set, <code>HEAD</code> will be used as base revision.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="config-info">ConfigInfo</h3>
+<div class="paragraph">
+<p>The <code>ConfigInfo</code> entity contains information about the effective project
+configuration.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The description of the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_contributor_agreements</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether
+authors must complete a contributor agreement on the site before
+pushing any commits or changes to this project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_content_merge</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether
+Gerrit will try to perform a 3-way merge of text file content when a
+file has been modified by both the destination branch and the change
+being submitted. This option only takes effect if submit type is not
+FAST_FORWARD_ONLY.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_signed_off_by</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether
+each change must contain a Signed-off-by line from either the author or
+the uploader in the commit message.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>create_new_change_for_all_not_in_target</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether
+a new change is created for every commit not in target branch.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>require_change_id</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether a
+valid <a href="user-changeid.html">Change-Id</a> footer in any commit uploaded
+for review is required. This does not apply to commits pushed directly
+to a branch or tag.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>enable_signed_push</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional, not set if signed push is disabled</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether
+signed push validation is enabled on the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>require_signed_push</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional, not set if signed push is disabled</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether
+signed push validation is required on the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reject_implicit_merges</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="#inherited-boolean-info">InheritedBooleanInfo</a> that tells whether
+implicit merges should be rejected on changes pushed to the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>max_object_size_limit</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#receive.maxObjectSizeLimit">max object size
+limit</a> of this project as a <a href="#max-object-size-limit-info">
+MaxObjectSizeLimitInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>submit_type</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The default submit type of the project, can be <code>MERGE_IF_NECESSARY</code>,
+<code>FAST_FORWARD_ONLY</code>, <code>REBASE_IF_NECESSARY</code>, <code>MERGE_ALWAYS</code> or
+<code>CHERRY_PICK</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>state</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The state of the project, can be <code>ACTIVE</code>, <code>READ_ONLY</code> or <code>HIDDEN</code>.<br>
+Not set if the project state is <code>ACTIVE</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commentlinks</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map with the comment link configurations of the project. The name of
+the comment link configuration is mapped to the comment link
+configuration, which has the same format as the
+<a href="config-gerrit.html#_a_id_commentlink_a_section_commentlink">
+commentlink section</a> of <code>gerrit.config</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>theme</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The theme that is configured for the project as a <a href="#theme-info">
+ThemeInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>plugin_config</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Plugin configuration as map which maps the plugin name to a map of
+parameter names to <a href="#config-parameter-info">ConfigParameterInfo</a>
+entities.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>actions</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Actions the caller might be able to perform on this project. The
+information is a map of view names to
+<a href="rest-api-changes.html#action-info">ActionInfo</a> entities.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="config-input">ConfigInput</h3>
+<div class="paragraph">
+<p>The <code>ConfigInput</code> entity describes a new project configuration.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The new description of the project.<br>
+If not set, the description is removed.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_contributor_agreements</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether authors must complete a contributor agreement on the site
+before pushing any commits or changes to this project.<br>
+Can be <code>TRUE</code>, <code>FALSE</code> or <code>INHERIT</code>.<br>
+If not set, this setting is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_content_merge</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether Gerrit will try to perform a 3-way merge of text file content
+when a file has been modified by both the destination branch and the
+change being submitted. This option only takes effect if submit type is
+not FAST_FORWARD_ONLY.<br>
+Can be <code>TRUE</code>, <code>FALSE</code> or <code>INHERIT</code>.<br>
+If not set, this setting is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_signed_off_by</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether each change must contain a Signed-off-by line from either the
+author or the uploader in the commit message.<br>
+Can be <code>TRUE</code>, <code>FALSE</code> or <code>INHERIT</code>.<br>
+If not set, this setting is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>create_new_change_for_all_not_in_target</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether a new change will be created for every commit not in target
+branch.<br>
+Can be <code>TRUE</code>, <code>FALSE</code> or <code>INHERIT</code>.<br>
+If not set, this setting is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>require_change_id</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether a valid <a href="user-changeid.html">Change-Id</a> footer in any commit
+uploaded for review is required. This does not apply to commits pushed
+directly to a branch or tag.<br>
+Can be <code>TRUE</code>, <code>FALSE</code> or <code>INHERIT</code>.<br>
+If not set, this setting is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reject_implicit_merges</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether a check for implicit merges will be performed when changes
+are pushed for review.<br>
+Can be <code>TRUE</code>, <code>FALSE</code> or <code>INHERIT</code>.<br>
+If not set, this setting is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>max_object_size_limit</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The <a href="config-gerrit.html#receive.maxObjectSizeLimit">max object size
+limit</a> of this project as a <a href="#max-object-size-limit-info">
+MaxObjectSizeLimitInfo</a> entity.<br>
+If set to <code>0</code>, the max object size limit is removed.<br>
+If not set, this setting is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>submit_type</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The default submit type of the project, can be <code>MERGE_IF_NECESSARY</code>,
+<code>FAST_FORWARD_ONLY</code>, <code>REBASE_IF_NECESSARY</code>, <code>MERGE_ALWAYS</code> or
+<code>CHERRY_PICK</code>.<br>
+If not set, the submit type is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>state</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The state of the project, can be <code>ACTIVE</code>, <code>READ_ONLY</code> or <code>HIDDEN</code>.<br>
+Not set if the project state is <code>ACTIVE</code>.<br>
+If not set, the project state is not updated.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>plugin_config_values</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Plugin configuration values as map which maps the plugin name to a map
+of parameter names to values.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="config-parameter-info">ConfigParameterInfo</h3>
+<div class="paragraph">
+<p>The <code>ConfigParameterInfo</code> entity describes a project configuration
+parameter.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>display_name</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The display name of the configuration parameter.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The description of the configuration parameter.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>warning</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Warning message for the configuration parameter.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>type</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The type of the configuration parameter. Can be <code>STRING</code>, <code>INT</code>,
+<code>LONG</code>, <code>BOOLEAN</code>, <code>LIST</code> or <code>ARRAY</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>value</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The value of the configuration parameter as string. If the parameter
+is inheritable this is the effective value which is deduced from
+<code>configured_value</code> and <code>inherited_value</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>values</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The list of values. Only set if the <code>type</code> is <code>ARRAY</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>editable</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the value is editable.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>permitted_values</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The list of permitted values. Only set if the <code>type</code> is <code>LIST</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>inheritable</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the configuration parameter can be inherited.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configured_value</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The value of the configuration parameter that is configured on this
+project, only set if <code>inheritable</code> is true.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>inherited_value</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The inherited value of the configuration parameter, only set if
+<code>inheritable</code> is true.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>permitted_values</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The list of permitted values, only set if the <code>type</code> is <code>LIST</code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="dashboard-info">DashboardInfo</h3>
+<div class="paragraph">
+<p>The <code>DashboardInfo</code> entity contains information about a project
+dashboard.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ID of the dashboard. The ID has the format '&lt;ref&gt;:&lt;path&gt;',
+where ref and path are URL encoded.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>project</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the project for which this dashboard is returned.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>defining_project</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the project in which this dashboard is defined.
+This is different from <code>project</code> if the dashboard is inherited from a
+parent project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ref</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the ref in which the dashboard is defined, without the
+<code>refs/meta/dashboards/</code> prefix, which is common for all dashboard refs.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>path</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The path of the file in which the dashboard is defined.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The description of the dashboard.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>foreach</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Subquery that applies to all sections in the dashboard.<br>
+Tokens such as <code>${project}</code> are not resolved.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>url</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL under which the dashboard can be opened in the Gerrit Web UI.<br>
+The URL is relative to the canonical web URL.<br>
+Tokens in the queries such as <code>${project}</code> are resolved.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>default</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if <code>false</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether this is the default dashboard of the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The title of the dashboard.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>sections</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The list of <a href="#dashboard-section-info">sections</a> in the dashboard.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="dashboard-input">DashboardInput</h3>
+<div class="paragraph">
+<p>The <code>DashboardInput</code> entity contains information to create/update a
+project dashboard.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">URL encoded ID of a dashboard to which this dashboard should link to.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_message</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Message that should be used to commit the change of the dashboard.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="dashboard-section-info">DashboardSectionInfo</h3>
+<div class="paragraph">
+<p>The <code>DashboardSectionInfo</code> entity contains information about a section
+in a dashboard.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The title of the section.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>query</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The query of the section.<br>
+Tokens such as <code>${project}</code> are not resolved.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="delete-branches-input">DeleteBranchesInput</h3>
+<div class="paragraph">
+<p>The <code>DeleteBranchesInput</code> entity contains information about branches that should
+be deleted.</p>
+</div>
+<table class="tableblock frame-all grid-all" style="width: 50%;">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>branches</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of branch names that identify the branches that should be
+deleted.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="delete-tags-input">DeleteTagsInput</h3>
+<div class="paragraph">
+<p>The <code>DeleteTagsInput</code> entity contains information about tags that should
+be deleted.</p>
+</div>
+<table class="tableblock frame-all grid-all" style="width: 50%;">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tags</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of tag names that identify the tags that should be
+deleted.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="gc-input">GCInput</h3>
+<div class="paragraph">
+<p>The <code>GCInput</code> entity contains information to run the Git garbage
+collection.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>show_progress</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether progress information should be shown.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>aggressive</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether an aggressive garbage collection should be done.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>async</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the garbage collection should run asynchronously.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="head-input">HeadInput</h3>
+<div class="paragraph">
+<p>The <code>HeadInput</code> entity contains information for setting <code>HEAD</code> for a
+project.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ref</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ref to which <code>HEAD</code> should be set, the <code>refs/heads</code> prefix can be
+omitted.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="inherited-boolean-info">InheritedBooleanInfo</h3>
+<div class="paragraph">
+<p>A boolean value that can also be inherited.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>value</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The effective boolean value.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configured_value</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The configured value, can be <code>TRUE</code>, <code>FALSE</code> or <code>INHERITED</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>inherited_value</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The boolean value inherited from the parent.<br>
+Not set if there is no parent.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="max-object-size-limit-info">MaxObjectSizeLimitInfo</h3>
+<div class="paragraph">
+<p>The <code>MaxObjectSizeLimitInfo</code> entity contains information about the
+<a href="config-gerrit.html#receive.maxObjectSizeLimit">max object size
+limit</a> of a project.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>value</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The effective value of the max object size limit as a formatted string.<br>
+Not set if there is no limit for the object size.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configured_value</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The max object size limit that is configured on the project as a
+formatted string.<br>
+Not set if there is no limit for the object size configured on project
+level.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>inherited_value</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The max object size limit that is inherited as a formatted string.<br>
+Not set if there is no global limit for the object size.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="project-access-input">ProjectAccessInput</h3>
+<div class="paragraph">
+<p>The <code>ProjectAccessInput</code> describes changes that should be applied to a project
+access config.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>remove</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of deductions to be applied to the project access as
+<a href="rest-api-access.html#project-access-info">ProjectAccessInfo</a> entities.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>add</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of additions to be applied to the project access as
+<a href="rest-api-access.html#project-access-info">ProjectAccessInfo</a> entities.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A commit message for this change.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>parent</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A new parent for the project to inherit from. Changing the parent project
+requires administrative privileges.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="project-description-input">ProjectDescriptionInput</h3>
+<div class="paragraph">
+<p>The <code>ProjectDescriptionInput</code> entity contains information for setting a
+project description.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The project description.<br>
+The project description will be deleted if not set.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_message</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Message that should be used to commit the change of the project
+description in the <code>project.config</code> file to the <code>refs/meta/config</code>
+branch.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="project-info">ProjectInfo</h3>
+<div class="paragraph">
+<p>The <code>ProjectInfo</code> entity contains information about a project.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL encoded project name.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">not set if returned in a map where the project name is used as map key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>parent</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the parent project.<br>
+<code>?-&lt;n&gt;</code> if the parent project is not visible (<code>&lt;n&gt;</code> is a number which
+is increased for each non-visible project).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The description of the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>state</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ACTIVE</code>, <code>READ_ONLY</code> or <code>HIDDEN</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>branches</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Map of branch names to HEAD revisions.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>web_links</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Links to the project in external sites as a list of
+<a href="rest-api-changes.html#web-link-info">WebLinkInfo</a> entries.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="project-input">ProjectInput</h3>
+<div class="paragraph">
+<p>The <code>ProjectInput</code> entity contains information for the creation of
+a new project.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the project (not encoded).<br>
+If set, must match the project name in the URL.<br>
+If name ends with <code>.git</code> the suffix will be automatically removed.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>parent</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the parent project.<br>
+If not set, the <code>All-Projects</code> project will be the parent project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The description of the project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>permissions_only</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether a permission-only project should be created.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>create_empty_commit</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>false</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether an empty initial commit should be created.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>submit_type</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The submit type that should be set for the project
+(<code>MERGE_IF_NECESSARY</code>, <code>REBASE_IF_NECESSARY</code>, <code>FAST_FORWARD_ONLY</code>,
+<code>MERGE_ALWAYS</code>, <code>CHERRY_PICK</code>).<br>
+If not set, <code>MERGE_IF_NECESSARY</code> is set as submit type unless
+<a href="config-gerrit.html#repository.name.defaultSubmitType">
+repository.&lt;name&gt;.defaultSubmitType</a> is set to a different value.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>branches</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of branches that should be initially created.<br>
+For the branch names the <code>refs/heads/</code> prefix can be omitted.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>owners</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of groups that should be assigned as project owner.<br>
+Each group in the list must be specified as
+<a href="rest-api-groups.html#group-id">group-id</a>.<br>
+If not set, the <a href="config-gerrit.html#repository.name.ownerGroup">
+groups that are configured as default owners</a> are set as project
+owners.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_contributor_agreements</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>INHERIT</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether contributor agreements should be used for the project  (<code>TRUE</code>,
+<code>FALSE</code>, <code>INHERIT</code>).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_signed_off_by</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>INHERIT</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the usage of 'Signed-Off-By' footers is required for the
+project (<code>TRUE</code>, <code>FALSE</code>, <code>INHERIT</code>).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>create_new_change_for_all_not_in_target</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>INHERIT</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether a new change is created for every commit not in target branch
+for the project (<code>TRUE</code>, <code>FALSE</code>, <code>INHERIT</code>).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>use_content_merge</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>INHERIT</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether content merge should be enabled for the project (<code>TRUE</code>,
+<code>FALSE</code>, <code>INHERIT</code>).<br>
+<code>FALSE</code>, if the <code>submit_type</code> is <code>FAST_FORWARD_ONLY</code>.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>require_change_id</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>INHERIT</code> if not set</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the usage of Change-Ids is required for the project (<code>TRUE</code>,
+<code>FALSE</code>, <code>INHERIT</code>).</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>max_object_size_limit</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Max allowed Git object size for this project.
+Common unit suffixes of 'k', 'm', or 'g' are supported.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>plugin_config_values</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Plugin configuration values as map which maps the plugin name to a map
+of parameter names to values.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="project-parent-input">ProjectParentInput</h3>
+<div class="paragraph">
+<p>The <code>ProjectParentInput</code> entity contains information for setting a
+project parent.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>parent</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the parent project.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>commit_message</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Message that should be used to commit the change of the project parent
+in the <code>project.config</code> file to the <code>refs/meta/config</code> branch.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="reflog-entry-info">ReflogEntryInfo</h3>
+<div class="paragraph">
+<p>The <code>ReflogEntryInfo</code> entity describes an entry in a reflog.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>old_id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The old commit ID.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>new_id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The new commit ID.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>who</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The user performing the change as a
+<a href="rest-api-changes.html#git-person-info">GitPersonInfo</a> entity.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>comment</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Comment of the reflog entry.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="repository-statistics-info">RepositoryStatisticsInfo</h3>
+<div class="paragraph">
+<p>The <code>RepositoryStatisticsInfo</code> entity contains information about
+statistics of a Git repository.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 85.7143%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number_of_loose_objects</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of loose objects.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number_of_loose_refs</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of loose refs.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number_of_pack_files</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of pack files.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number_of_packed_objects</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of packed objects.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>number_of_packed_refs</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number of packed refs.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>size_of_loose_objects</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Size of loose objects in bytes.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>size_of_packed_objects</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Size of packed objects in bytes.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="tag-info">TagInfo</h3>
+<div class="paragraph">
+<p>The <code>TagInfo</code> entity contains information about a tag.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ref</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ref of the tag.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>revision</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">For lightweight tags, the revision of the commit to which the tag
+points. For annotated tags, the revision of the tag object.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>object</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">Only set for annotated tags.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The revision of the object to which the
+tag points.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">Only set for annotated tags.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The tag message. For signed tags, includes
+the signature.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tagger</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">Only set for annotated tags, if present in the tag.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The tagger as a
+<a href="rest-api-changes.html#git-person-info">GitPersonInfo</a> entity.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="tag-input">TagInput</h3>
+<div class="paragraph">
+<p>The <code>TagInput</code> entity contains information for creating a tag.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>ref</code></p></td>
+<td class="tableblock halign-center valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the tag. The leading <code>refs/tags/</code> is optional.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>revision</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The revision to which the tag should point. If not
+specified, the project&#8217;s <code>HEAD</code> will be used.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The tag message. When set, the tag will be created
+as an annotated tag.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="theme-info">ThemeInfo</h3>
+<div class="paragraph">
+<p>The <code>ThemeInfo</code> entity describes a theme.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 28.5714%;">
+<col style="width: 57.1429%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field Name</th>
+<th class="tableblock halign-center valign-top"></th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>css</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The path to the <code>GerritSite.css</code> file.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>header</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The path to the <code>GerritSiteHeader.html</code> file.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>footer</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">optional</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The path to the <code>GerritSiteFooter.html</code> file.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="content">
+<pre>++++
+&lt;hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+"&gt;
+++++
+
+Part of link:index.html[Gerrit Code Review]
+
+
+
+++++
+&lt;script type="text/javascript"&gt;
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i &lt; divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null &amp;&amp; !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i &lt; anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i &lt; e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null &amp;&amp; a instanceof Element
+              &amp;&amp; a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                &amp;&amp; document.elementFromPoint(evt.clientX, evt.clientY) != a
+                &amp;&amp; document.elementFromPoint(evt.clientX, evt.clientY) != span
+                &amp;&amp; document.elementFromPoint(evt.clientX, evt.clientY) != link
+                &amp;&amp; element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+&lt;/script&gt;
+
+++++</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

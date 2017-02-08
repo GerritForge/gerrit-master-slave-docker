@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Plugins</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Plugins</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#installation">Plugin Installation</a></li>
+<li><a href="#development">Plugin Development</a></li>
+<li><a href="#core-plugins">Core Plugins</a>
+<ul class="sectlevel2">
+<li><a href="#commit-message-length-validator">commit-message-length-validator</a></li>
+<li><a href="#cookbook-plugin">cookbook-plugin</a></li>
+<li><a href="#download-commands">download-commands</a></li>
+<li><a href="#hooks">hooks</a></li>
+<li><a href="#replication">replication</a></li>
+<li><a href="#reviewnotes">reviewnotes</a></li>
+<li><a href="#review-strategy">review-strategy</a></li>
+<li><a href="#singleusergroup">singleusergroup</a></li>
+</ul>
+</li>
+<li><a href="#other-plugins">Other Plugins</a>
+<ul class="sectlevel2">
+<li><a href="#admin-console">admin-console</a></li>
+<li><a href="#avatars-external">avatars-external</a></li>
+<li><a href="#avatars-gravatar">avatars-gravatar</a></li>
+<li><a href="#branch-network">branch-network</a></li>
+<li><a href="#changemessage">changemessage</a></li>
+<li><a href="#delete-project">delete-project</a></li>
+<li><a href="#egit">egit</a></li>
+<li><a href="#emoticons">emoticons</a></li>
+<li><a href="#force-draft">force-draft</a></li>
+<li><a href="#gitblit">gitblit</a></li>
+<li><a href="#github">github</a></li>
+<li><a href="#gitiles">gitiles</a></li>
+<li><a href="#imagare">imagare</a></li>
+<li><a href="#importer">importer</a></li>
+<li><a href="#its-plugins">Issue Tracker System Plugins</a></li>
+<li><a href="#javamelody">javamelody</a></li>
+<li><a href="#labelui">labelui</a></li>
+<li><a href="#menuextender">menuextender</a></li>
+<li><a href="#metrics-reporter-elasticsearch">metrics-reporter-elasticsearch</a></li>
+<li><a href="#metrics-reporter-graphite">metrics-reporter-graphite</a></li>
+<li><a href="#metrics-reporter-jmx">metrics-reporter-jmx</a></li>
+<li><a href="#motd">motd</a></li>
+<li><a href="#oauth-authentication-provider">OAuth authentication provider</a></li>
+<li><a href="#owners">owners</a></li>
+<li><a href="#project-download-commands">project-download-commands</a></li>
+<li><a href="#quota">quota</a></li>
+<li><a href="#ref-protection">ref-protection</a></li>
+<li><a href="#reparent">reparent</a></li>
+<li><a href="#reviewers">reviewers</a></li>
+<li><a href="#reviewers-by-blame">reviewers-by-blame</a></li>
+<li><a href="#groovy-provider">scripting/groovy-provider</a></li>
+<li><a href="#scala-provider">scripting/scala-provider</a></li>
+<li><a href="#scripts">scripts</a></li>
+<li><a href="#server-config">server-config</a></li>
+<li><a href="#serviceuser">serviceuser</a></li>
+<li><a href="#uploadvalidator">uploadvalidator</a></li>
+<li><a href="#verify-status">verify-status</a></li>
+<li><a href="#websession-flatfile">websession-flatfile</a></li>
+<li><a href="#wip">wip</a></li>
+<li><a href="#x-docs">x-docs</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Gerrit server functionality can be extended by installing plugins.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installation">Plugin Installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Plugin installation is as easy as dropping the plugin jar into the
+<code>$site_path/plugins/</code> folder. It may take
+<a href="config-gerrit.html#plugins.checkFrequency">a few minutes</a> until
+the server picks up new and updated plugins.</p>
+</div>
+<div class="paragraph">
+<p>Plugins can also be installed via
+<a href="rest-api-plugins.html#install-plugin">REST</a> and
+<a href="cmd-plugin-install.html">SSH</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="development">Plugin Development</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>How to develop plugins is described in the <a href="dev-plugins.html">
+Plugin Development Guide</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you want to share your plugin under the <a href="licenses.html#Apache2_0">
+Apache License 2.0</a> you can host your plugin development on the
+<a href="https://gerrit-review.googlesource.com">gerrit-review</a> Gerrit
+Server. You can request the creation of a new Project by email
+to the <a href="https://groups.google.com/forum/#!forum/repo-discuss">Gerrit
+mailing list</a>. You would be assigned as project owner of the new plugin
+project so that you can submit changes on your own. It is the
+responsibility of the project owner to maintain the plugin, e.g. to
+make sure that it works with new Gerrit versions and to create stable
+branches for old releases.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="core-plugins">Core Plugins</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Core plugins are packaged within the Gerrit war file and can easily be
+installed during the <a href="pgm-init.html">Gerrit initialization</a>.</p>
+</div>
+<div class="paragraph">
+<p>The core plugins are developed and maintained by the Gerrit maintainers
+and the Gerrit community.</p>
+</div>
+<div class="sect2">
+<h3 id="commit-message-length-validator">commit-message-length-validator</h3>
+<div class="paragraph">
+<p>This plugin checks the length of a commit’s commit message subject and
+message body, and reports warnings or errors to the git client if the
+lengths are exceeded.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/commit-message-length-validator">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/commit-message-length-validator/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/commit-message-length-validator/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="cookbook-plugin">cookbook-plugin</h3>
+<div class="paragraph">
+<p>Sample plugin to demonstrate features of Gerrit&#8217;s plugin API.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/cookbook-plugin">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/cookbook-plugin/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="download-commands">download-commands</h3>
+<div class="paragraph">
+<p>This plugin defines commands for downloading changes in different
+download schemes (for downloading via different network protocols).</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/download-commands">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/download-commands/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/download-commands/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="hooks">hooks</h3>
+<div class="paragraph">
+<p>This plugin runs server-side hooks on events.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/hooks">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/hooks/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/hooks/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="replication">replication</h3>
+<div class="paragraph">
+<p>This plugin can automatically push any changes Gerrit Code Review makes
+to its managed Git repositories to another system. Usually this would
+be configured to provide mirroring of changes, for warm-standby
+backups, or a load-balanced public mirror farm.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/replication">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/replication/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/replication/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reviewnotes">reviewnotes</h3>
+<div class="paragraph">
+<p>Stores review information for Gerrit changes in the <code>refs/notes/review</code>
+branch.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/reviewnotes">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/reviewnotes/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="review-strategy">review-strategy</h3>
+<div class="paragraph">
+<p>This plugin allows users to configure different review strategies.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/review-strategy">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/review-strategy/+/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="singleusergroup">singleusergroup</h3>
+<div class="paragraph">
+<p>This plugin provides a group per user. This is useful to assign access
+rights directly to a single user, since in Gerrit access rights can
+only be assigned to groups.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="other-plugins">Other Plugins</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Besides core plugins there are many other Gerrit plugins available.
+These plugins are developed and maintained by different parties.
+The Gerrit Project doesn&#8217;t guarantee proper functionality of any of
+these plugins.</p>
+</div>
+<div class="paragraph">
+<p>The Gerrit Project doesn&#8217;t provide binaries for these plugins, but
+there is one public service that offers the download of pre-built
+plugin jars:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://gerrit-ci.gerritforge.com">CI Server from GerritForge</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The following list gives an overview of available plugins, but the
+list may not be complete. You may discover more plugins on
+<a href="https://gerrit-review.googlesource.com/#/admin/projects/?filter=plugins%252F">
+gerrit-review</a>.</p>
+</div>
+<div class="sect2">
+<h3 id="admin-console">admin-console</h3>
+<div class="paragraph">
+<p>Plugin to provide administrator-only functionality, intended to
+simplify common administrative tasks. Currently providing user-level
+information. Also providing access control information by project or
+project/account.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/admin-console">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/admin-console/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="avatars-external">avatars-external</h3>
+<div class="paragraph">
+<p>This plugin allows to use an external url to load the avatar images
+from.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/avatars-external">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/avatars-external/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/avatars-external/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="avatars-gravatar">avatars-gravatar</h3>
+<div class="paragraph">
+<p>Plugin to display user icons from Gravatar.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/avatars-gravatar">
+Project</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="branch-network">branch-network</h3>
+<div class="paragraph">
+<p>This plugin allows the rendering of Git repository branch network in a
+graphical HTML5 Canvas. It is mainly intended to be used as a
+"project link" in a gitweb configuration or by other Gerrit GWT UI
+plugins to be plugged elsewhere in Gerrit.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/branch-network">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/branch-network/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/branch-network/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="changemessage">changemessage</h3>
+<div class="paragraph">
+<p>This plugin allows to display a static info message on the change screen.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/changemessage">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/changemessage/+doc/master/src/main/resources/Documentation/about.md">
+Plugin Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/changemessage/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="delete-project">delete-project</h3>
+<div class="paragraph">
+<p>Provides the ability to delete a project.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/delete-project">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/delete-project/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="egit">egit</h3>
+<div class="paragraph">
+<p>This plugin provides extensions for easier usage with EGit.</p>
+</div>
+<div class="paragraph">
+<p>The plugin adds a download command for EGit that allows to copy only
+the change ref into the clipboard. The change ref is needed for
+downloading a Gerrit change from within EGit.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/egit">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/egit/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="emoticons">emoticons</h3>
+<div class="paragraph">
+<p>This plugin allows users to see emoticons in comments as images.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/emoticons">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/emoticons/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/emoticons/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="force-draft">force-draft</h3>
+<div class="paragraph">
+<p>Provides an ssh command to force a change or patch set to draft status.
+This is useful for administrators to be able to easily completely
+delete a change or patch set from the server.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/force-draft">
+Project</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="gitblit">gitblit</h3>
+<div class="paragraph">
+<p>GitBlit code-viewer plugin with SSO and Security Access Control.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/gitblit">
+Project</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="github">github</h3>
+<div class="paragraph">
+<p>Plugin to integrate with GitHub: replication, pull-request to Change-Sets</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/github">
+Project</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="gitiles">gitiles</h3>
+<div class="paragraph">
+<p>Plugin running Gitiles alongside a Gerrit server.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/gitiles">
+Project</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="imagare">imagare</h3>
+<div class="paragraph">
+<p>The imagare plugin allows Gerrit users to upload and share images.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/imagare">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/imagare/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/imagare/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="importer">importer</h3>
+<div class="paragraph">
+<p>The importer plugin allows to import projects from one Gerrit server
+into another Gerrit server.</p>
+</div>
+<div class="paragraph">
+<p>Projects can be imported while both source and target Gerrit server
+are online. There is no downtime required.</p>
+</div>
+<div class="paragraph">
+<p>The git repository and all changes of the project, including approvals
+and review comments, are imported. Historic timestamps are preserved.</p>
+</div>
+<div class="paragraph">
+<p>Project imports can be resumed. This means a project team can continue
+to work in the source system while the import to the target system is
+done. By resuming the import the project in the target system can be
+updated with the missing delta.</p>
+</div>
+<div class="paragraph">
+<p>The importer plugin can also be used to copy a project within one Gerrit
+server, and in combination with the <a href="#delete-project">delete-project</a>
+plugin it can be used to rename a project.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/importer">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/importer/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="its-plugins">Issue Tracker System Plugins</h3>
+<div class="paragraph">
+<p>Plugins to integrate with issue tracker systems (ITS), that (based
+on events in Gerrit) allows to take actions in the ITS. For example,
+they can add comments to bugs, or change status of bugs.</p>
+</div>
+<div class="paragraph">
+<p>All its-plugins have a common base implementation which is stored in
+the <code>its-base</code> project. <code>its-base</code> is not a plugin, but just a
+framework for the ITS plugins which is packaged within each ITS plugin.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-base">
+its-base Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/its-base/+doc/master/src/main/resources/Documentation/about.md">
+its-base Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/its-base/+doc/master/src/main/resources/Documentation/config.md">
+its-base Configuration</a></p>
+</div>
+<div class="sect3">
+<h4 id="its-bugzilla">its-bugzilla</h4>
+<div class="paragraph">
+<p>Plugin to integrate with Bugzilla.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-bugzilla">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/its-bugzilla/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="its-jira">its-jira</h4>
+<div class="paragraph">
+<p>Plugin to integrate with Jira.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-jira">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/its-jira/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="its-rtc">its-rtc</h4>
+<div class="paragraph">
+<p>Plugin to integrate with IBM Rational Team Concert (RTC).</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-rtc">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/its-rtc/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="its-storyboard">its-storyboard</h4>
+<div class="paragraph">
+<p>Plugin to integrate with Storyboard task tracking system.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/its-storyboard">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/its-storyboard/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="javamelody">javamelody</h3>
+<div class="paragraph">
+<p>This plugin allows to monitor the Gerrit server.</p>
+</div>
+<div class="paragraph">
+<p>This plugin integrates JavaMelody in Gerrit in order to retrieve live
+instrumentation data from Gerrit.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/javamelody">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/javamelody/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/javamelody/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="labelui">labelui</h3>
+<div class="paragraph">
+<p>The labelui plugin adds a user preference that allows users to choose a
+table control to render the labels/approvals on the change screen
+(similar to how labels/approvals were rendered on the old change
+screen).</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/labelui">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/labelui/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="menuextender">menuextender</h3>
+<div class="paragraph">
+<p>The menuextender plugin allows Gerrit administrators to configure
+additional menu entries from the WebUI.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/menuextender">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/menuextender/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/menuextender/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="metrics-reporter-elasticsearch">metrics-reporter-elasticsearch</h3>
+<div class="paragraph">
+<p>This plugin reports Gerrit metrics to Elasticsearch.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/metrics-reporter-elasticsearch">
+Project</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="metrics-reporter-graphite">metrics-reporter-graphite</h3>
+<div class="paragraph">
+<p>This plugin reports Gerrit metrics to Graphite.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/metrics-reporter-graphite">
+Project</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="metrics-reporter-jmx">metrics-reporter-jmx</h3>
+<div class="paragraph">
+<p>This plugin reports Gerrit metrics to JMX.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/metrics-reporter-jmx">
+Project</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="motd">motd</h3>
+<div class="paragraph">
+<p>This plugin can output messages to clients when pulling/fetching/cloning
+code from Gerrit Code Review. If the client (and transport mechanism)
+can support sending the message to the client, it will be displayed to
+the user (usually prefixed by “remote: ”), but will be silently
+discarded otherwise.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/motd">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/motd/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/motd/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="oauth-authentication-provider">OAuth authentication provider</h3>
+<div class="paragraph">
+<p>This plugin enables Gerrit to use OAuth2 protocol for authentication.
+Two different OAuth providers are supported:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>GitHub</p>
+</li>
+<li>
+<p>Google</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/davido/gerrit-oauth-provider">Project</a> |
+<a href="https://github.com/davido/gerrit-oauth-provider/wiki/Getting-Started">Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="owners">owners</h3>
+<div class="paragraph">
+<p>This plugin provides a Prolog predicate <code>add_owner_approval/3</code> that
+appends <code>label('Owner-Approval', need(_))</code> to a provided list.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/owners">Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/owners/+/refs/heads/master/README.md">Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="project-download-commands">project-download-commands</h3>
+<div class="paragraph">
+<p>This plugin adds support for project specific download commands.</p>
+</div>
+<div class="paragraph">
+<p>Project specific download commands that are defined on a parent project
+are inherited by the child projects. Child projects can overwrite the
+inherited download command or remove it by assigning no value to it.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/project-download-commands">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/project-download-commands/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/project-download-commands/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="quota">quota</h3>
+<div class="paragraph">
+<p>This plugin allows to enforce quotas in Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>To protect a Gerrit installation it makes sense to limit the resources
+that a project or group can consume. To do this a Gerrit administrator
+can use this plugin to define quotas on project namespaces.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/quota">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/quota/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a>
+<a href="https://gerrit.googlesource.com/plugins/quota/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ref-protection">ref-protection</h3>
+<div class="paragraph">
+<p>A plugin that protects against commits being lost.</p>
+</div>
+<div class="paragraph">
+<p>Backups of deleted or non-fast-forward updated refs are created under the
+<code>refs/backups/</code> namespace.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/ref-protection">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/ref-protection/+/refs/heads/stable-2.11/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reparent">reparent</h3>
+<div class="paragraph">
+<p>A plugin that provides project reparenting as a self-service for project owners.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/reparent">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/reparent/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/reparent/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reviewers">reviewers</h3>
+<div class="paragraph">
+<p>A plugin that allows adding default reviewers to a change.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/reviewers">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/reviewers/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/reviewers/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reviewers-by-blame">reviewers-by-blame</h3>
+<div class="paragraph">
+<p>A plugin that allows automatically adding reviewers to a change from
+the git blame computation on the changed files. It will add the users
+that authored most of the lines touched by the change, since these
+users should be familiar with the code and can mostly review the
+change.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/reviewers-by-blame">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/reviewers-by-blame/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/reviewers-by-blame/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="groovy-provider">scripting/groovy-provider</h3>
+<div class="paragraph">
+<p>This plugin provides a Groovy runtime environment for Gerrit plugins in Groovy.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/scripting/groovy-provider">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/scripting/groovy-provider/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="scala-provider">scripting/scala-provider</h3>
+<div class="paragraph">
+<p>This plugin provides a Scala runtime environment for Gerrit plugins in Scala.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/scripting/scala-provider">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/scripting/scala-provider/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="scripts">scripts</h3>
+<div class="paragraph">
+<p>Repository containing a collection of Gerrit scripting plugins that are intended
+to provide simple and useful extensions.</p>
+</div>
+<div class="paragraph">
+<p>Groovy and Scala scripts require the installation of the corresponding
+scripting/*-provider plugin in order to be loaded into Gerrit.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/scripts">Project</a>
+<a href="https://gerrit.googlesource.com/plugins/scripts/+doc/master/README.md">Documentation</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="server-config">server-config</h3>
+<div class="paragraph">
+<p>This plugin enables access (download and upload) to the server config
+files.  It may be used to change Gerrit config files (like
+<code>etc/gerrit.config</code>) in cases where direct access to the file system
+where Gerrit&#8217;s config files are stored is difficult or impossible to
+get.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/server-config">
+Project</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="serviceuser">serviceuser</h3>
+<div class="paragraph">
+<p>This plugin allows to create service users in Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>A service user is a user that is used by another service to communicate
+with Gerrit. E.g. a service user is needed to run the Gerrit Trigger
+Plugin in Jenkins. A service user is not able to login into the Gerrit
+WebUI and it cannot push commits or tags.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/serviceuser">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/serviceuser/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/serviceuser/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="uploadvalidator">uploadvalidator</h3>
+<div class="paragraph">
+<p>This plugin allows to configure upload validations per project.</p>
+</div>
+<div class="paragraph">
+<p>Project owners can configure blocked file extensions, required footers
+and a maximum allowed path length. Pushes of commits that violate these
+settings are rejected by Gerrit.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/uploadvalidator">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/uploadvalidator/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/uploadvalidator/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="verify-status">verify-status</h3>
+<div class="paragraph">
+<p>This plugin adds a separate channel for Gerrit to store test metadata and
+view them on the Gerrit UI.  The metadata can be stored in the Gerrit database
+or in a completely separate datastore.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/verify-status">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/verify-status/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/verify-status/+doc/master/src/main/resources/Documentation/database.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="websession-flatfile">websession-flatfile</h3>
+<div class="paragraph">
+<p>This plugin replaces the built-in Gerrit H2 based websession cache with
+a flatfile based implementation. This implementation is shareable
+among multiple Gerrit servers, making it useful for multi-master
+Gerrit installations.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/websession-flatfile">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/websession-flatfile/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/websession-flatfile/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="wip">wip</h3>
+<div class="paragraph">
+<p>This plugin adds a new button that allows a change owner to set a
+change to Work In Progress, and a button to change from WIP back to a
+"Ready For Review" state.</p>
+</div>
+<div class="paragraph">
+<p>Any change in the WIP state will not show up in anyone&#8217;s Review
+Requests. Pushing a new patchset will reset the change to Review In
+Progress.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/wip">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/wip/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/wip/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="x-docs">x-docs</h3>
+<div class="paragraph">
+<p>This plugin serves project documentation as HTML pages.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gerrit-review.googlesource.com/#/admin/projects/plugins/x-docs">
+Project</a> |
+<a href="https://gerrit.googlesource.com/plugins/x-docs/+doc/master/src/main/resources/Documentation/about.md">
+Documentation</a> |
+<a href="https://gerrit.googlesource.com/plugins/x-docs/+doc/master/src/main/resources/Documentation/config.md">
+Configuration</a></p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

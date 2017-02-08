@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Initial Login</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#usersetup">Initial Login</a>
+<ul class="sectlevel2">
+<li><a href="#_ssh_key_generation">SSH key generation</a></li>
+<li><a href="#_registering_your_key_in_gerrit">Registering your key in Gerrit</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="usersetup">Initial Login</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s time to exit the gerrit2 account as you now have Gerrit running on your
+host and setup your first workspace.</p>
+</div>
+<div class="paragraph">
+<p>Start a shell with the credentials of the account you will perform
+development under.</p>
+</div>
+<div class="paragraph">
+<p>Check whether there are any ssh keys already. You&#8217;re looking for two files,
+id_rsa and id_rsa.pub.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ls .ssh
+  authorized_keys  config  id_rsa  id_rsa.pub  known_hosts
+  user@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you have the files, you may skip the key generating step.</p>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t see the files in your listing, your will have to generate rsa
+keys for your ssh sessions:</p>
+</div>
+<div class="sect2">
+<h3 id="_ssh_key_generation">SSH key generation</h3>
+<div class="paragraph">
+<p><strong>Please don&#8217;t generate new keys if you already have a valid keypair!</strong>
+<strong>They will be overwritten!</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ssh-keygen -t rsa
+  Generating public/private rsa key pair.
+  Enter file in which to save the key (/home/user/.ssh/id_rsa):
+  Created directory '/home/user/.ssh'.
+  Enter passphrase (empty for no passphrase):
+  Enter same passphrase again:
+  Your identification has been saved in /home/user/.ssh/id_rsa.
+  Your public key has been saved in /home/user/.ssh/id_rsa.pub.
+  The key fingerprint is:
+  00:11:22:00:11:22:00:11:44:00:11:22:00:11:22:99 user@host
+  The key's randomart image is:
+  +--[ RSA 2048]----+
+  |     ..+.*=+oo.*E|
+  |      u.OoB.. . +|
+  |       ..*.      |
+  |       o         |
+  |      . S ..     |
+  |                 |
+  |                 |
+  |          ..     |
+  |                 |
+  +-----------------+
+  user@host:~$</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_registering_your_key_in_gerrit">Registering your key in Gerrit</h3>
+<div class="paragraph">
+<p>Open a browser and enter the canonical url of your Gerrit server.  You can
+find the url in the settings file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config gerrit.canonicalWebUrl
+  http://localhost:8080/
+  gerrit2@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Register a new account in Gerrit through the web interface with the
+email address of your choice.</p>
+</div>
+<div class="paragraph">
+<p>The default authentication type is OpenID.  If your Gerrit server is behind a
+proxy, and you are using an external OpenID provider, you will need to add the
+proxy settings in the configuration file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config --add http.proxy http://proxy:8080
+  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config --add http.proxyUsername username
+  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config --add http.proxyPassword password</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Refer to the Gerrit configuration guide for more detailed information about
+<a href="config-gerrit.html#auth">authentication</a> and
+<a href="config-gerrit.html#http.proxy">proxy</a> settings.</p>
+</div>
+<div class="paragraph">
+<p>The first user to sign-in and register an account will be
+automatically placed into the fully privileged Administrators group,
+permitting server management over the web and over SSH.  Subsequent
+users will be automatically registered as unprivileged users.</p>
+</div>
+<div class="paragraph">
+<p>Once signed in as your user, you find a little wizard to get you started.
+The wizard helps you fill out:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Real name (visible name in Gerrit)</p>
+</li>
+<li>
+<p>Register your email (it must be confirmed later)</p>
+</li>
+<li>
+<p>Select a username with which to communicate with Gerrit over ssh+git. Note
+that once saved, the username cannot be changed.</p>
+</li>
+<li>
+<p>The server will ask you for an RSA public key.
+That&#8217;s the key we generated above, and it&#8217;s time to make sure that Gerrit knows
+about our new key and can identify us by it.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ cat .ssh/id_rsa.pub
+  ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA1bidOd8LAp7Vp95M1b9z+LGO96OEWzdAgBPfZPq05jUh
+  jw0mIdUuvg5lhwswnNsvmnFhGbsUoXZui6jdXj7xPUWOD8feX2NNEjTAEeX7DXOhnozNAkk/Z98WUV2B
+  xUBqhRi8vhVmaCM8E+JkHzAc+7/HVYBTuPUS7lYPby5w95gs3zVxrX8d1++IXg/u/F/47zUxhdaELMw2
+  deD8XLhrNPx2FQ83FxrjnVvEKQJyD2OoqxbC2KcUGYJ/3fhiupn/YpnZsl5+6mfQuZRJEoZ/FH2n4DEH
+  wzgBBBagBr0ZZCEkl74s4KFZp6JJw/ZSjMRXsXXXWvwcTpaUEDii708HGw== John Doe@MACHINE
+  user@host:~$</pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Please take note of the extra line-breaks introduced in the key above
+for formatting purposes. Please be sure to copy and paste your key without
+line-breaks.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Copy the string starting with ssh-rsa to your clipboard and then paste it
+into the box for RSA keys. Make <strong>absolutely sure</strong> no extra spaces or line feeds
+are entered in the middle of the RSA string.</p>
+</div>
+<div class="paragraph">
+<p>Verify that the ssh connection works for you.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ssh user@localhost -p 29418
+  The authenticity of host '[localhost]:29418 ([127.0.0.1]:29418)' can't be established.
+  RSA key fingerprint is db:07:3d:c2:94:25:b5:8d:ac:bc:b5:9e:2f:95:5f:4a.
+  Are you sure you want to continue connecting (yes/no)? yes
+  Warning: Permanently added '[localhost]:29418' (RSA) to the list of known hosts.
+
+  ****    Welcome to Gerrit Code Review    ****
+
+  Hi user, you have successfully connected over SSH.
+
+  Unfortunately, interactive shells are disabled.
+  To clone a hosted Git repository, use:
+
+  git clone ssh://user@localhost:29418/REPOSITORY_NAME.git
+
+  user@host:~$</pre>
+</div>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

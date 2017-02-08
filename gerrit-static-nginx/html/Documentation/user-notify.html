@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Email Notifications</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Email Notifications</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#user">User Level Settings</a></li>
+<li><a href="#project">Project Level Settings</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit can automatically notify users by email when new changes are
+uploaded for review, after comments have been posted on a change,
+or after the change has been submitted to a branch.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="user">User Level Settings</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Individual users can configure email subscriptions by editing
+watched projects through Settings &gt; Watched Projects with the web UI.</p>
+</div>
+<div class="paragraph">
+<p>Specific projects may be watched, or the special project
+<code>All-Projects</code> can be watched to watch all projects that
+are visible to the user.</p>
+</div>
+<div class="paragraph">
+<p><a href="user-search.html">Change search expressions</a> can be used to filter
+change notifications to specific subsets, for example <code>branch:master</code>
+to only see changes proposed for the master branch. If a filter would
+match at the <code>All-Projects</code> level as well as a specific project, the
+more specific project&#8217;s notification settings are used.</p>
+</div>
+<div class="paragraph">
+<p>Notification mails for new changes and new patch sets are not sent to
+the change owner.</p>
+</div>
+<div class="paragraph">
+<p>Notification mails for comments added on changes are not sent to the user
+who added the comment unless the user has enabled the 'CC Me On Comments I
+Write' option in the user preferences.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="project">Project Level Settings</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Project owners and site administrators can configure project level
+notifications, enabling Gerrit Code Review to automatically send
+emails to team mailing lists, or groups of users. Project settings
+are stored inside of the <code>refs/meta/config</code> branch of each Git
+repository, and are placed inside of the <code>project.config</code> file.</p>
+</div>
+<div class="paragraph">
+<p>To edit the project level notify settings, ensure the project owner
+has Push permission already granted for the <code>refs/meta/config</code>
+branch. Consult <a href="access-control.html">access controls</a> for
+details on how access permissions work.</p>
+</div>
+<div class="paragraph">
+<p>Initialize a temporary Git repository to edit the configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  mkdir cfg_dir
+  cd cfg_dir
+  git init</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Download the existing configuration from Gerrit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git fetch ssh://localhost:29418/project refs/meta/config
+  git checkout FETCH_HEAD</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Enable notifications to an email address by adding to
+<code>project.config</code>, this can be done using the <code>git config</code> command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git config -f project.config --add notify.team.email team-address@example.com
+  git config -f project.config --add notify.team.email paranoid-manager@example.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Examining the project.config file with any text editor should show
+a new notify section describing the email addresses to deliver to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [notify "team"]
+  	email = team-address@example.com
+  	email = paranoid-manager@example.com</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each notify section within a single project.config file must have a
+unique name. The section name itself does not matter and may later
+appear in the web UI. Naming a section after the email address or
+group it delivers to is typical. Multiple sections can be specified
+if different filters are needed.</p>
+</div>
+<div class="paragraph">
+<p>Commit the configuration change, and push it back:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git commit -a -m "Notify team-address@example.com of changes"
+  git push ssh://localhost:29418/project HEAD:refs/meta/config</pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a id="notify.name.email"></a>notify.&lt;name&gt;.email</dt>
+<dd>
+<div class="paragraph">
+<p>List of email addresses to send matching notifications to. Each
+email address should be placed on its own line.</p>
+</div>
+<div class="paragraph">
+<p>Internal groups within Gerrit Code Review can also be named using
+<code>group NAME</code> syntax. If this format is used the group&#8217;s UUID must
+also appear in the corresponding <code>groups</code> file. Gerrit will expand
+the group membership and BCC all current users.</p>
+</div>
+</dd>
+<dt class="hdlist1"><a id="notify.name.type"></a>notify.&lt;name&gt;.type</dt>
+<dd>
+<div class="paragraph">
+<p>Types of notifications to send. If not specified, all notifications
+are sent.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>new_changes</code>: Only newly created changes.</p>
+</li>
+<li>
+<p><code>new_patchsets</code>: Only newly created patch sets.</p>
+</li>
+<li>
+<p><code>all_comments</code>: Only comments on existing changes.</p>
+</li>
+<li>
+<p><code>submitted_changes</code>: Only changes that have been submitted.</p>
+</li>
+<li>
+<p><code>abandoned_changes</code>: Only changes that have been abandoned.</p>
+</li>
+<li>
+<p><code>all</code>: All notifications.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Like email, this variable may be a list of options.</p>
+</div>
+</dd>
+<dt class="hdlist1"><a id="notify.name.header"></a>notify.&lt;name&gt;.header</dt>
+<dd>
+<div class="paragraph">
+<p>Email header used to list the destination. If not set BCC is used.
+Only one value may be specified. To use different headers for each
+address list them in different notify blocks.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>to</code>: The standard To field is used; addresses are visible to all.</p>
+</li>
+<li>
+<p><code>cc</code>: The standard CC field is used; addresses are visible to all.</p>
+</li>
+<li>
+<p><code>bcc</code>: SMTP RCPT TO is used to hide the address.</p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1"><a id="notify.name.filter"></a>notify.&lt;name&gt;.filter</dt>
+<dd>
+<div class="paragraph">
+<p><a href="user-search.html">Change search expression</a> to match changes that
+should be sent to the emails named in this section. Within a Git-style
+configuration file double quotes around complex operator values may
+need to be escaped, e.g. <code>filter = branch:\"^(maint|stable)-.*\"</code>.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>When sending email to a bare email address in a notify block, Gerrit
+Code Review ignores read access controls and assumes the administrator
+has set the filtering options correctly. Project owners can implement
+security filtering by adding the <code>visibleto:groupname</code> predicate to
+the filter expression, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [notify "Developers"]
+  	email = team-address@example.com
+  	filter = visibleto:Developers</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When sending email to an internal group, the internal group&#8217;s read
+access is automatically checked by Gerrit and therefore does not
+need to use the <code>visibleto:</code> operator in the filter.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Searching Changes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Searching Changes</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_default_searches">Default Searches</a></li>
+<li><a href="#_basic_change_search">Basic Change Search</a></li>
+<li><a href="#search-operators">Search Operators</a></li>
+<li><a href="#_argument_quoting">Argument Quoting</a></li>
+<li><a href="#_boolean_operators">Boolean Operators</a>
+<ul class="sectlevel2">
+<li><a href="#_negation">Negation</a></li>
+<li><a href="#_and">AND</a></li>
+<li><a href="#_or">OR</a></li>
+</ul>
+</li>
+<li><a href="#labels">Labels</a></li>
+<li><a href="#_magical_operators">Magical Operators</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_default_searches">Default Searches</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most basic searches can be viewed by clicking on a link along the top
+menu bar.  The link will prefill the search box with a common search
+query, execute it, and present the results.  If exactly one change
+matches the search, the change will be presented instead of a list.</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Default Query</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All &gt; Open</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">status:open '(or is:open)'</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All &gt; Merged</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">status:merged</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">All &gt; Abandoned</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">status:abandoned</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">My &gt; Drafts</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">owner:self is:draft</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">My &gt; Watched Changes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">status:open is:watched</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">My &gt; Starred Changes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">is:starred</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">My &gt; Draft Comments</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">has:draft</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Open changes in Foo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">status:open project:Foo</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_basic_change_search">Basic Change Search</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Similar to many popular search engines on the web, just enter some
+text and let Gerrit figure out the meaning:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Legacy numerical id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">15183</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Full or abbreviated Change-Id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Ic0ff33</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Full or abbreviated commit SHA-1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">d81b32ef</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Email address</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="mailto:user@example.com">user@example.com</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Approval requirement</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Code-Review&gt;=+2, Verified=1</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect1">
+<h2 id="search-operators">Search Operators</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Operators act as restrictions on the search.  As more operators
+are added to the same query string, they further restrict the
+returned results. Search can also be performed by typing only a
+text with no operator, which will match against a variety of fields.</p>
+</div>
+<div id="age" class="dlist">
+<dl>
+<dt class="hdlist1">age:'AGE'</dt>
+<dd>
+<div class="paragraph">
+<p>Amount of time that has expired since the change was last updated
+with a review comment or new patch set.  The age must be specified
+to include a unit suffix, for example <code>age:2d</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>s, sec, second, seconds</p>
+</li>
+<li>
+<p>m, min, minute, minutes</p>
+</li>
+<li>
+<p>h, hr, hour, hours</p>
+</li>
+<li>
+<p>d, day, days</p>
+</li>
+<li>
+<p>w, week, weeks (<code>1 week</code> is treated as <code>7 days</code>)</p>
+</li>
+<li>
+<p>mon, month, months (<code>1 month</code> is treated as <code>30 days</code>)</p>
+</li>
+<li>
+<p>y, year, years (<code>1 year</code> is treated as <code>365 days</code>)</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div id="before_until" class="dlist">
+<dl>
+<dt class="hdlist1">before:'TIME'/until:'TIME'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes modified before the given 'TIME', inclusive. Must be in the
+format <code>2006-01-02[ 15:04:05[.890][ -0700]]</code>; omitting the time defaults
+to 00:00:00 and omitting the timezone defaults to UTC.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="after_since" class="dlist">
+<dl>
+<dt class="hdlist1">after:'TIME'/since:'TIME'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes modified after the given 'TIME', inclusive. Must be in the
+format <code>2006-01-02[ 15:04:05[.890][ -0700]]</code>; omitting the time defaults
+to 00:00:00 and omitting the timezone defaults to UTC.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="change" class="dlist">
+<dl>
+<dt class="hdlist1">change:'ID'</dt>
+<dd>
+<div class="paragraph">
+<p>Either a legacy numerical 'ID' such as 15183, or a newer style
+Change-Id that was scraped out of the commit message.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="conflicts" class="dlist">
+<dl>
+<dt class="hdlist1">conflicts:'ID'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes that conflict with change 'ID'. Change 'ID' can be specified
+as a legacy numerical 'ID' such as 15183, or a newer style Change-Id
+that was scraped out of the commit message.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="destination" class="dlist">
+<dl>
+<dt class="hdlist1">destination:'NAME'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes which match the current user&#8217;s destination named 'NAME'.
+(see <a href="user-named-destinations.html">Named Destinations</a>).</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="owner" class="dlist">
+<dl>
+<dt class="hdlist1">owner:'USER', o:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes originally submitted by 'USER'. The special case of
+<code>owner:self</code> will find changes owned by the caller.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="ownerin" class="dlist">
+<dl>
+<dt class="hdlist1">ownerin:'GROUP'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes originally submitted by a user in 'GROUP'.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="query" class="dlist">
+<dl>
+<dt class="hdlist1">query:'NAME'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes which match the current user&#8217;s query named 'NAME'
+(see <a href="user-named-queries.html">Named Queries</a>).</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="reviewer" class="dlist">
+<dl>
+<dt class="hdlist1">reviewer:'USER', r:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes that have been, or need to be, reviewed by 'USER'. The
+special case of <code>reviewer:self</code> will find changes where the caller
+has been added as a reviewer.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="reviewerin" class="dlist">
+<dl>
+<dt class="hdlist1">reviewerin:'GROUP'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes that have been, or need to be, reviewed by a user in 'GROUP'.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="commit" class="dlist">
+<dl>
+<dt class="hdlist1">commit:'SHA1'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes where 'SHA1' is one of the patch sets of the change.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="project" class="dlist">
+<dl>
+<dt class="hdlist1">project:'PROJECT', p:'PROJECT'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes occurring in 'PROJECT'. If 'PROJECT' starts with <code>^</code> it
+matches project names by regular expression.  The
+<a href="http://www.brics.dk/automaton/">dk.brics.automaton
+library</a> is used for evaluation of such patterns.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="projects" class="dlist">
+<dl>
+<dt class="hdlist1">projects:'PREFIX'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes occurring in projects starting with 'PREFIX'.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="parentproject" class="dlist">
+<dl>
+<dt class="hdlist1">parentproject:'PROJECT'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes occurring in 'PROJECT' or in one of the child projects of
+'PROJECT'.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="branch" class="dlist">
+<dl>
+<dt class="hdlist1">branch:'BRANCH'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes for 'BRANCH'.  The branch name is either the short name shown
+in the web interface or the full name of the destination branch with
+the traditional 'refs/heads/' prefix.</p>
+</div>
+<div class="paragraph">
+<p>If 'BRANCH' starts with <code>^</code> it matches branch names by regular
+expression patterns.  The
+<a href="http://www.brics.dk/automaton/">dk.brics.automaton
+library</a> is used for evaluation of such patterns.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="intopic" class="dlist">
+<dl>
+<dt class="hdlist1">intopic:'TOPIC'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes whose designated topic contains 'TOPIC', using a full-text search.</p>
+</div>
+<div class="paragraph">
+<p>If 'TOPIC' starts with <code>^</code> it matches topic names by regular
+expression patterns.  The
+<a href="http://www.brics.dk/automaton/">dk.brics.automaton
+library</a> is used for evaluation of such patterns.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="topic" class="dlist">
+<dl>
+<dt class="hdlist1">topic:'TOPIC'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes whose designated topic matches 'TOPIC' exactly.  This is
+often combined with 'branch:' and 'project:' operators to select
+all related changes in a series.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="ref" class="dlist">
+<dl>
+<dt class="hdlist1">ref:'REF'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes where the destination branch is exactly the given 'REF'
+name.  Since 'REF' is absolute from the top of the repository it
+must start with 'refs/'.</p>
+</div>
+<div class="paragraph">
+<p>If 'REF' starts with <code>^</code> it matches reference names by regular
+expression patterns.  The
+<a href="http://www.brics.dk/automaton/">dk.brics.automaton
+library</a> is used for evaluation of such patterns.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="tr" class="dlist">
+<dl>
+<dt class="hdlist1">tr:'ID', bug:'ID'</dt>
+<dd>
+<div class="paragraph">
+<p>Search for changes whose commit message contains 'ID' and matches
+one or more of the
+<a href="config-gerrit.html#trackingid">trackingid sections</a>
+in the server&#8217;s configuration file.  This is typically used to
+search for changes that fix a bug or defect by the issue tracking
+system&#8217;s issue identifier.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="label" class="dlist">
+<dl>
+<dt class="hdlist1">label:'VALUE'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes where the approval score 'VALUE' has been set during
+a review.  See <a href="#labels">labels</a> below for more detail on the format
+of the argument.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="message" class="dlist">
+<dl>
+<dt class="hdlist1">message:'MESSAGE'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes that match 'MESSAGE' arbitrary string in the commit message body.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="comment" class="dlist">
+<dl>
+<dt class="hdlist1">comment:'TEXT'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes that match 'TEXT' string in any comment left by a reviewer.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="path" class="dlist">
+<dl>
+<dt class="hdlist1">path:'PATH'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches any change touching file at 'PATH'. By default exact path
+matching is used, but regular expressions can be enabled by starting
+with <code>^</code>.  For example, to match all XML files use <code>file:^.*\.xml$</code>.
+The <a href="http://www.brics.dk/automaton/">dk.brics.automaton library</a>
+is used for the evaluation of such patterns.</p>
+</div>
+<div class="paragraph">
+<p>The <code>^</code> required at the beginning of the regular expression not only
+denotes a regular expression, but it also has the usual meaning of
+anchoring the match to the start of the string.  To match all Java
+files, use <code>file:^.*\.java</code>.</p>
+</div>
+<div class="paragraph">
+<p>The entire regular expression pattern, including the <code>^</code> character,
+should be double quoted when using more complex construction (like
+ones using a bracket expression). For example, to match all XML
+files named like 'name1.xml', 'name2.xml', and 'name3.xml' use
+<code>file:"^name[1-3].xml"</code>.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="file" class="dlist">
+<dl>
+<dt class="hdlist1">file:'NAME', f:'NAME'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches any change touching a file containing the path component
+'NAME'.  For example a <code>file:src</code> will match changes that modify
+files named <code>gerrit-server/src/main/java/Foo.java</code>. Name matching
+is exact match, <code>file:Foo.java</code> finds any change touching a file
+named exactly <code>Foo.java</code> and does not match <code>AbstractFoo.java</code>.</p>
+</div>
+<div class="paragraph">
+<p>Regular expression matching can be enabled by starting the string
+with <code>^</code>. In this mode <code>file:</code> is an alias of <code>path:</code> (see above).</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="star" class="dlist">
+<dl>
+<dt class="hdlist1">star:'LABEL'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches any change that was starred by the current user with the label
+'LABEL'.</p>
+</div>
+<div class="paragraph">
+<p>E.g. if changes that are not interesting are marked with an <code>ignore</code>
+star, they could be filtered out by '-star:ignore'.</p>
+</div>
+<div class="paragraph">
+<p>'star:star' is the same as 'has:star' and 'is:starred'.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="has" class="dlist">
+<dl>
+<dt class="hdlist1">has:draft</dt>
+<dd>
+<div class="paragraph">
+<p>True if there is a draft comment saved by the current user.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="has-star" class="dlist">
+<dl>
+<dt class="hdlist1">has:star</dt>
+<dd>
+<div class="paragraph">
+<p>Same as 'is:starred' and 'star:star', true if the change has been
+starred by the current user with the default label.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="has-stars" class="dlist">
+<dl>
+<dt class="hdlist1">has:stars</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change has been starred by the current user with any label.</p>
+</div>
+</dd>
+<dt class="hdlist1">has:edit</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change has inline edit created by the current user.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="is-starred" class="dlist">
+<dl>
+<dt class="hdlist1">is:starred</dt>
+<dd>
+<div class="paragraph">
+<p>Same as 'has:star', true if the change has been starred by the
+current user with the default label.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:watched</dt>
+<dd>
+<div class="paragraph">
+<p>True if this change matches one of the current user&#8217;s watch filters,
+and thus is likely to notify the user when it updates.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:reviewed</dt>
+<dd>
+<div class="paragraph">
+<p>True if any user has commented on the change more recently than the
+last update (comment or patch set) from the change owner.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:owner</dt>
+<dd>
+<div class="paragraph">
+<p>True on any change where the current user is the change owner.
+Same as <code>owner:self</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:reviewer</dt>
+<dd>
+<div class="paragraph">
+<p>True on any change where the current user is a reviewer.
+Same as <code>reviewer:self</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:open, is:pending</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change is open.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:draft</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change is a draft.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:closed</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change is either merged or abandoned.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:merged, is:abandoned</dt>
+<dd>
+<div class="paragraph">
+<p>Same as <a href="#status">status:'STATE'</a>.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:submittable</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change is submittable according to the submit rules for
+the project, for example if all necessary labels have been voted on.</p>
+</div>
+<div class="paragraph">
+<p>This operator only takes into account one change at a time, not any
+related changes, and does not guarantee that the submit button will
+appear for matching changes. To check whether a submit button appears,
+use the
+<a href="rest-api-changes.html#get-revision-actions">Get Revision Actions</a>
+API.</p>
+</div>
+<div class="paragraph">
+<p>Equivalent to <a href="#submittable">submittable:ok</a>.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="mergeable" class="dlist">
+<dl>
+<dt class="hdlist1">is:mergeable</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change has no merge conflicts and could be merged into its
+destination branch.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="status" class="dlist">
+<dl>
+<dt class="hdlist1">status:open, status:pending</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change state is 'review in progress'.</p>
+</div>
+</dd>
+<dt class="hdlist1">status:reviewed</dt>
+<dd>
+<div class="paragraph">
+<p>Same as 'is:reviewed', matches if any user has commented on the change
+more recently than the last update (comment or patch set) from the
+change owner.</p>
+</div>
+</dd>
+<dt class="hdlist1">status:closed</dt>
+<dd>
+<div class="paragraph">
+<p>True if the change is either 'merged' or 'abandoned'.</p>
+</div>
+</dd>
+<dt class="hdlist1">status:merged</dt>
+<dd>
+<div class="paragraph">
+<p>Change has been merged into the branch.</p>
+</div>
+</dd>
+<dt class="hdlist1">status:abandoned</dt>
+<dd>
+<div class="paragraph">
+<p>Change has been abandoned.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="size" class="dlist">
+<dl>
+<dt class="hdlist1">added:'RELATION''LINES', deleted:'RELATION''LINES', delta/size:'RELATION''LINES'</dt>
+<dd>
+<div class="paragraph">
+<p>True if the number of lines added/deleted/changed satisfies the given relation
+for the given number of lines.</p>
+</div>
+<div class="paragraph">
+<p>For example, added:&gt;50 will be true for any change which adds at least 50
+lines.</p>
+</div>
+<div class="paragraph">
+<p>Valid relations are &gt;=, &gt;, &#8656;, &lt;, or no relation, which will match if the
+number of lines is exactly equal.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="commentby" class="dlist">
+<dl>
+<dt class="hdlist1">commentby:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes containing a top-level or inline comment by 'USER'. The special
+case of <code>commentby:self</code> will find changes where the caller has
+commented.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="from" class="dlist">
+<dl>
+<dt class="hdlist1">from:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes containing a top-level or inline comment by 'USER', or owned by
+'USER'. Equivalent to <code>(owner:USER OR commentby:USER)</code>.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="reviewedby" class="dlist">
+<dl>
+<dt class="hdlist1">reviewedby:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes where 'USER' has commented on the change more recently than the
+last update (comment or patch set) from the change owner.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="author" class="dlist">
+<dl>
+<dt class="hdlist1">author:'AUTHOR'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes where 'AUTHOR' is the author of the current patch set. 'AUTHOR' may be
+the author&#8217;s exact email address, or part of the name or email address.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="committer" class="dlist">
+<dl>
+<dt class="hdlist1">committer:'COMMITTER'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes where 'COMMITTER' is the committer of the current patch set.
+'COMMITTER' may be the committer&#8217;s exact email address, or part of the name or
+email address.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="submittable" class="dlist">
+<dl>
+<dt class="hdlist1">submittable:'SUBMIT_STATUS'</dt>
+<dd>
+<div class="paragraph">
+<p>Changes having the given submit record status after applying submit
+rules. Valid statuses are in the <code>status</code> field of
+<a href="rest-api-changes.html#submit-record">SubmitRecord</a>. This operator
+only applies to the top-level status; individual label statuses can be
+searched <a href="#labels">by label</a>.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_argument_quoting">Argument Quoting</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Operator values that are not bare words (roughly A-Z, a-z, 0-9, @,
+hyphen, dot and underscore) must be quoted for the query parser.</p>
+</div>
+<div class="paragraph">
+<p>Quoting is accepted as either double quotes
+(e.g.  <code>message:"the value"</code>) or as matched
+curly braces (e.g. <code>message:{the value}</code>).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_boolean_operators">Boolean Operators</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unless otherwise specified, operators are joined using the <code>AND</code>
+boolean operator, thereby restricting the search results.</p>
+</div>
+<div class="paragraph">
+<p>Parentheses can be used to force a particular precedence on complex
+operator expressions, otherwise OR has higher precedence than AND.</p>
+</div>
+<div class="sect2">
+<h3 id="_negation">Negation</h3>
+<div class="paragraph">
+<p>Any operator can be negated by prefixing it with <code>-</code>, for example
+<code>-is:starred</code> is the exact opposite of <code>is:starred</code> and will
+therefore return changes that are <strong>not</strong> starred by the current user.</p>
+</div>
+<div class="paragraph">
+<p>The operator <code>NOT</code> (in all caps) is a synonym.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_and">AND</h3>
+<div class="paragraph">
+<p>The boolean operator <code>AND</code> (in all caps) can be used to join two
+other operators together.  This results in a restriction of the
+results, returning only changes that match both operators.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_or">OR</h3>
+<div class="paragraph">
+<p>The boolean operator <code>OR</code> (in all caps) can be used to find changes
+that match either operator.  This increases the number of results
+that are returned, as more changes are considered.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="labels">Labels</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Label operators can be used to match approval scores given during
+a code review.  The specific set of supported labels depends on
+the server configuration, however the <code>Code-Review</code> label is provided
+out of the box.</p>
+</div>
+<div class="paragraph">
+<p>A label name is any of the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The label name.  Example: <code>label:Code-Review</code>.</p>
+</li>
+<li>
+<p>The label name followed by a ',' followed by a reviewer id or a
+group id.  To make it clear whether a user or group is being looked
+for, precede the value by a user or group argument identifier
+('user=' or 'group=').  If an LDAP group is being referenced make
+sure to use 'ldap/&lt;groupname&gt;'.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A label name must be followed by either a score with optional operator,
+or a label status. The easiest way to explain this is by example.</p>
+</div>
+<div class="paragraph">
+<p>+
+First, some examples of scores with operators:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>label:Code-Review=2</code></dt>
+<dt class="hdlist1"><code>label:Code-Review=+2</code></dt>
+<dt class="hdlist1"><code>label:Code-Review+2</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes where there is at least one +2 score for Code-Review.
+The + prefix is optional for positive score values.  If the + is used,
+the = operator is optional.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review=-2</code></dt>
+<dt class="hdlist1"><code>label:Code-Review-2</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes where there is at least one -2 score for Code-Review.
+Because the negative sign is required, the = operator is optional.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review=1</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes where there is at least one +1 score for Code-Review.
+Scores of +2 are not matched, even though they are higher.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review&gt;=1</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes with either a +1, +2, or any higher score.</p>
+</div>
+<div class="paragraph">
+<p>Instead of a numeric vote, you can provide a label status corresponding
+to one of the fields in the
+<a href="rest-api-changes.html#submit-record">SubmitRecord</a> REST API entity.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Non-Author-Code-Review=need</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes where the submit rules indicate that a label named
+<code>Non-Author-Code-Review</code> is needed. (See the
+<a href="prolog-cookbook.html#NonAuthorCodeReview">Prolog Cookbook</a> for how
+this label can be configured.)</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review=+2,aname</code></dt>
+<dt class="hdlist1"><code>label:Code-Review=ok,aname</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes with a +2 code review where the reviewer or group is aname.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review=2,user=jsmith</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes with a +2 code review where the reviewer is jsmith.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review=+2,user=owner</code></dt>
+<dt class="hdlist1"><code>label:Code-Review=ok,user=owner</code></dt>
+<dt class="hdlist1"><code>label:Code-Review=+2,owner</code></dt>
+<dt class="hdlist1"><code>label:Code-Review=ok,owner</code></dt>
+<dd>
+<div class="paragraph">
+<p>The special "owner" parameter corresponds to the change owner.  Matches
+all changes that have a +2 vote from the change owner.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review=+1,group=ldap/linux.workflow</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes with a +1 code review where the reviewer is in the
+ldap/linux.workflow group.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>label:Code-Review&#8656;-1</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes with either a -1, -2, or any lower score.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>is:open label:Code-Review+2 label:Verified+1 NOT label:Verified-1 NOT label:Code-Review-2</code></dt>
+<dt class="hdlist1"><code>is:open label:Code-Review=ok label:Verified=ok</code></dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes that are ready to be submitted according to one common
+label configuration. (For a more general check, use
+<a href="#submittable">submittable:ok</a>.)</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>is:open (label:Verified-1 OR label:Code-Review-2)</code></dt>
+<dt class="hdlist1"><code>is:open (label:Verified=reject OR label:Code-Review:reject)</code></dt>
+<dd>
+<div class="paragraph">
+<p>Changes that are blocked from submission due to a blocking score.</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_magical_operators">Magical Operators</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most of these operators exist to support features of Gerrit Code
+Review, and are not meant to be accessed by the average end-user.
+However, they are recognized by the query parser, and may prove
+useful in limited contexts to administrators or power-users.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">visibleto:'USER-or-GROUP'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes that are visible to 'USER' or to anyone who is a
+member of 'GROUP'.  Here group names may be specified as either
+an internal group name, or if LDAP is being used, an external LDAP
+group name.  The value may be wrapped in double quotes to include
+spaces or other special characters.  For example, to match an LDAP
+group: <code>visibleto:"CN=Developers, DC=example, DC=com"</code>.</p>
+</div>
+<div class="paragraph">
+<p>This operator may be useful to test access control rules, however a
+change can only be matched if both the current user and the supplied
+user or group can see it.  This is due to the implicit 'is:visible'
+clause that is always added by the server.</p>
+</div>
+</dd>
+<dt class="hdlist1">is:visible</dt>
+<dd>
+<div class="paragraph">
+<p>Magical internal flag to prove the current user has access to read
+the change.  This flag is always added to any query.</p>
+</div>
+</dd>
+<dt class="hdlist1">starredby:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes that have been starred by 'USER' with the default label.
+The special case <code>starredby:self</code> applies to the caller.</p>
+</div>
+</dd>
+<dt class="hdlist1">watchedby:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes that 'USER' has configured watch filters for.
+The special case <code>watchedby:self</code> applies to the caller.</p>
+</div>
+</dd>
+<dt class="hdlist1">draftby:'USER'</dt>
+<dd>
+<div class="paragraph">
+<p>Matches changes that 'USER' has left unpublished draft comments on.
+Since the drafts are unpublished, it is not possible to see the
+draft text, or even how many drafts there are. The special case
+of <code>draftby:self</code> will find changes where the caller has created
+a draft comment.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="limit" class="dlist">
+<dl>
+<dt class="hdlist1">limit:'CNT'</dt>
+<dd>
+<div class="paragraph">
+<p>Limit the returned results to no more than 'CNT' records.  This is
+automatically set to the page size configured in the current user&#8217;s
+preferences.  Including it in a web query may lead to unpredictable
+results with regards to pagination.</p>
+</div>
+</dd>
+</dl>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

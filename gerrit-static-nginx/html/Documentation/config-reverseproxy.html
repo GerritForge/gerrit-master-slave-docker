@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Reverse Proxy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Reverse Proxy</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#_gerrit_configuration">Gerrit Configuration</a></li>
+<li><a href="#_apache_2_configuration">Apache 2 Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_ssl">SSL</a></li>
+<li><a href="#_troubleshooting">Troubleshooting</a></li>
+</ul>
+</li>
+<li><a href="#_nginx_configuration">Nginx Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_ssl_2">SSL</a></li>
+<li><a href="#_troubleshooting_2">Troubleshooting</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit can be configured to run behind a third-party web server.
+This allows the other web server to bind to the privileged port 80
+(or 443 for SSL), as well as offloads the SSL processing overhead
+from Java to optimized native C code.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gerrit_configuration">Gerrit Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ensure <code>'$site_path'/etc/gerrit.config</code> has the property
+<a href="config-gerrit.html#httpd.listenUrl">httpd.listenUrl</a> configured
+to use 'proxy-http://' or 'proxy-https://' and a free port number.
+This may have already been configured if proxy support was enabled
+during 'init'.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [httpd]
+  	listenUrl = proxy-http://127.0.0.1:8081/r/</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_apache_2_configuration">Apache 2 Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run Gerrit behind an Apache server using 'mod_proxy', enable the
+necessary Apache2 modules:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  a2enmod proxy_http
+  a2enmod ssl          ; # optional, needed for HTTPS / SSL</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Configure an Apache VirtualHost to proxy to the Gerrit daemon,
+setting the 'ProxyPass' line to use the 'http://' URL configured
+above.  Ensure the path of ProxyPass and httpd.listenUrl match,
+or links will redirect to incorrect locations.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	&lt;VirtualHost *&gt;
+	  ServerName review.example.com
+
+	  ProxyRequests Off
+	  ProxyVia Off
+	  ProxyPreserveHost On
+
+	  &lt;Proxy *&gt;
+	    Order deny,allow
+	    Allow from all
+	    # Use following line instead of the previous two on Apache &gt;= 2.4
+	    # Require all granted
+	  &lt;/Proxy&gt;
+
+	  AllowEncodedSlashes On
+	  ProxyPass /r/ http://127.0.0.1:8081/r/ nocanon
+	&lt;/VirtualHost&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The two options 'AllowEncodedSlashes On' and 'ProxyPass .. nocanon' are required
+since Gerrit 2.6.</p>
+</div>
+<div class="sect2">
+<h3 id="_ssl">SSL</h3>
+<div class="paragraph">
+<p>To enable Apache to perform the SSL processing, use 'proxy-https://'
+in httpd.listenUrl within Gerrit&#8217;s configuration file, and enable
+the SSL engine in the Apache VirtualHost block:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	&lt;VirtualHost *:443&gt;
+	  SSLEngine on
+	  SSLCertificateFile    conf/server.crt
+	  SSLCertificateKeyFile conf/server.key
+
+	  ... same as above ...
+	&lt;/VirtualHost&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See the Apache 'mod_ssl' documentation for more details on how to
+configure SSL within the server, like controlling how strong of an
+encryption algorithm is required.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting">Troubleshooting</h3>
+<div class="paragraph">
+<p>If you are encountering 'Page Not Found' errors when opening the change
+screen, your Apache proxy is very likely decoding the passed URL.
+Make sure to either use 'AllowEncodedSlashes On' together with
+'ProxyPass .. nocanon' or alternatively a 'mod_rewrite' configuration with
+'AllowEncodedSlashes NoDecode' set.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nginx_configuration">Nginx Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run Gerrit behind an Nginx server, use a server statement such
+as this one:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	server {
+	  listen 80;
+	  server_name review.example.com;
+
+	  location ^~ /r/ {
+	    proxy_pass        http://127.0.0.1:8081;
+	    proxy_set_header  X-Forwarded-For $remote_addr;
+	    proxy_set_header  Host $host;
+	  }
+	}</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ssl_2">SSL</h3>
+<div class="paragraph">
+<p>To enable Nginx to perform the SSL processing, use 'proxy-https://'
+in httpd.listenUrl within Gerrit&#8217;s configuration file, and enable
+the SSL engine in the Nginx server statement:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	server {
+	  listen 443;
+	  server_name review.example.com;
+
+	  ssl  on;
+	  ssl_certificate      conf/server.crt;
+	  ssl_certificate_key  conf/server.key;
+
+	  ... same as above ...
+	}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See the Nginx 'http ssl module' documentation for more details on
+how to configure SSL within the server, like controlling how strong
+of an encryption algorithm is required.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_troubleshooting_2">Troubleshooting</h3>
+<div class="paragraph">
+<p>If you are encountering 'Page Not Found' errors when opening the change
+screen, your Nginx proxy is very likely decoding the passed URL.
+Make sure to use a 'proxy_pass' URL without any path (esp. no trailing
+'/' after the 'host:port').</p>
+</div>
+<div class="paragraph">
+<p>If you are using Apache httpd server with mod_jk and AJP connector, add
+the following option to your httpd.conf directly or included from another
+file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>JkOptions +ForwardURICompatUnparsed</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

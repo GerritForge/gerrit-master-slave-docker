@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Contributor Agreements</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Contributor Agreements</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+</div>
+<div id="content">
+<div class="paragraph">
+<p>Users can be required to sign one or more contributor agreements before
+being able to submit a change in a project.</p>
+</div>
+<div class="paragraph">
+<p>Contributor agreements are global and can be configured by modifying
+the <code>project.config</code> file on the <code>All-Projects</code> project. Push permission
+needs to be granted for the <code>refs/meta/config</code> branch to be able to push
+back the <code>project.config</code> file. Consult
+<a href="access-control.html">access controls</a> for details on how access
+permissions work.</p>
+</div>
+<div class="paragraph">
+<p>To retrieve the <code>project.config</code> file, initialize a temporary Git
+repository to edit the configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  mkdir cfg_dir
+  cd cfg_dir
+  git init</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Download the existing configuration from Gerrit:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git fetch ssh://localhost:29418/All-Projects refs/meta/config
+  git checkout FETCH_HEAD</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Contributor agreements are defined as contributor-agreement sections in
+<code>project.config</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  [contributor-agreement "Individual"]
+    description = If you are going to be contributing code on your own, this is the one you want. You can sign this one online.
+    agreementUrl = static/cla_individual.html
+    autoVerify = group CLA Accepted - Individual
+    accepted = group CLA Accepted - Individual</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each <code>contributor-agreement</code> section within the <code>project.config</code> file must
+have a unique name. The section name will appear in the web UI.</p>
+</div>
+<div class="paragraph">
+<p>If not already present, add the group(s) used in the <code>autoVerify</code> and
+<code>accepted</code> variables in the <code>groups</code> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    # UUID                                  	Group Name
+    #
+    3dedb32915ecdbef5fced9f0a2587d164cd614d4	CLA Accepted - Individual</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit the configuration change, and push it back:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  git commit -a -m "Add Individual contributor agreement"
+  git push ssh://localhost:29418/All-Projects HEAD:refs/meta/config</pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a id="contributor-agreement.name.description"></a>contributor-agreement.&lt;name&gt;.description</dt>
+<dd>
+<div class="paragraph">
+<p>Short text describing the contributor agreement. This text will appear
+when the user selects an agreement.</p>
+</div>
+</dd>
+<dt class="hdlist1"><a id="contributor-agreement.name.agreementUrl"></a>contributor-agreement.&lt;name&gt;.agreementUrl</dt>
+<dd>
+<div class="paragraph">
+<p>An absolute URL or a relative path to an HTML file containing the text
+of the contributor agreement. The URL must use the http or https
+scheme. The path is relative to the <code>gerrit.basePath</code> variable in
+<code>gerrit.config</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><a id="contributor-agreement.name.autoVerify"></a>contributor-agreement.&lt;name&gt;.autoVerify</dt>
+<dd>
+<div class="paragraph">
+<p>If present, the user can sign the contributor agreement online. The
+value is the group to which the user will be added after signing the
+agreement. The group&#8217;s UUID must also appear in the <code>groups</code> file.</p>
+</div>
+</dd>
+<dt class="hdlist1"><a id="contributor-agreement.name.accepted"></a>contributor-agreement.&lt;name&gt;.accepted</dt>
+<dd>
+<div class="paragraph">
+<p>List of groups that will be considered when verifying that a
+contributor agreement has been accepted. The groups' UUID must also
+appear in the <code>groups</code> file.</p>
+</div>
+</dd>
+</dl>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

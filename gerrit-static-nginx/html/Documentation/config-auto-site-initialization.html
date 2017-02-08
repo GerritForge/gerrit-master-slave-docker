@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Automatic Site Initialization on Startup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Automatic Site Initialization on Startup</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#_gerrit_configuration">Gerrit Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_example_1">Example 1</a></li>
+<li><a href="#_example_2">Example 2</a></li>
+<li><a href="#_example_3">Example 3</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Gerrit supports automatic site initialization on server startup
+when Gerrit runs in a servlet container. Both creation of a new site
+and upgrade of an existing site are supported. By default, all packaged
+plugins will be installed when Gerrit is deployed in a servlet container
+and the location of the Gerrit distribution can be determined at
+runtime. It is also possible to install only a subset of packaged
+plugins or not install any plugins.</p>
+</div>
+<div class="paragraph">
+<p>This feature may be useful for such setups where Gerrit administrators
+don&#8217;t have direct access to the database and the file system of the
+server where Gerrit should be deployed and, therefore, cannot perform
+the init from their local machine prior to deploying Gerrit on such a
+server. It may also make deployment and testing in a local servlet
+container faster to set up as the init step could be skipped.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gerrit_configuration">Gerrit Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The site initialization will be performed only if the <code>gerrit.init</code>
+system property exists. The value of the property is not used; only the
+existence of the property matters.</p>
+</div>
+<div class="paragraph">
+<p>If the <code>gerrit.site_path</code> system property is defined then the init is
+run for that site. The database connectivity, in that case, is defined
+in the <code>etc/gerrit.config</code>.</p>
+</div>
+<div class="paragraph">
+<p>If <code>gerrit.site_path</code> is not defined then Gerrit will try to find an
+existing site by looking into the <code>system_config</code> table in the database
+defined via the <code>jdbc/ReviewDb</code> JNDI property. If the <code>system_config</code>
+table exists then the <code>site_path</code> from that table is used for the
+initialization. The database connectivity is defined by the
+<code>jdbc/ReviewDb</code> JNDI property.</p>
+</div>
+<div class="paragraph">
+<p>Finally, if neither the <code>gerrit.site_path</code> property nor the
+<code>system_config</code> table exists, the <code>gerrit.init_path</code> system property,
+if defined, will be used to determine the site path. The database
+connectivity, also for this case, is defined by the <code>jdbc/ReviewDb</code>
+JNDI property.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Defining the <code>jdbc/ReviewDb</code> JNDI property for an H2 database under the
+path defined by either <code>gerrit.site_path</code> or <code>gerrit.init_path</code> will
+cause an incomplete auto initialization and Gerrit will fail to start.
+Opening a connection to such a database will create a subfolder under the
+site path folder (in order to create the H2 database) and Gerrit will
+no longer consider that site path to be new and, because of that,
+skip some required initialization steps (for example, Lucene index
+creation). In order to auto initialize Gerrit with an embedded H2
+database use the <code>gerrit.site_path</code> to define the location of the review
+site and don&#8217;t define a JNDI resource with a URL under that path.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If the <code>gerrit.install_plugins</code> property is not defined then all packaged
+plugins will be installed. If it is defined then it is parsed as a
+comma-separated list of plugin names to install. If the value is an
+empty string then no plugin will be installed.</p>
+</div>
+<div class="sect2">
+<h3 id="_example_1">Example 1</h3>
+<div class="paragraph">
+<p>Prepare Tomcat so that a site is initialized at a given path using
+the H2 database (if the site doesn&#8217;t exist yet) or using whatever
+database is defined in <code>etc/gerrit.config</code> of that site:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ export CATALINA_OPTS='-Dgerrit.init -Dgerrit.site_path=/path/to/site'
+  $ catalina.sh start</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example_2">Example 2</h3>
+<div class="paragraph">
+<p>Prepare Tomcat so that an existing site with the path defined in the
+<code>system_config</code> table is initialized (upgraded) on Gerrit startup. The
+assumption is that the <code>jdbc/ReviewDb</code> JNDI property is defined in
+Tomcat:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ export CATALINA_OPTS='-Dgerrit.init'
+  $ catalina.sh start</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_example_3">Example 3</h3>
+<div class="paragraph">
+<p>Assuming the database schema doesn&#8217;t exist in the database defined
+via the <code>jdbc/ReviewDb</code> JNDI property, initialize a new site using that
+database and a given path:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ export CATALINA_OPTS='-Dgerrit.init -Dgerrit.init_path=/path/to/site'
+  $ catalina.sh start</pre>
+</div>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

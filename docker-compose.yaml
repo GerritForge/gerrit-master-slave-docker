@@ -10,8 +10,8 @@ services:
     networks:
       - gerrit-net
 
-  gerrit-master:
-    image: gerrit-master
+  gerrit-master-nginx:
+    build: gerrit-master-nginx
     ports:
       - "18080:8080"
       - "29418:29418"
@@ -21,16 +21,35 @@ services:
       - postgres
 
   gerrit-slave-nginx:
-    image: gerrit-slave-nginx
+    build: gerrit-slave-nginx
     ports:
       - "18081:8080"
     networks:
       - gerrit-net
 
   gerrit-slave-httpd:
-    image: gerrit-slave-httpd
+    build: gerrit-slave-httpd
     ports:
       - "18082:8080"
+    networks:
+      - gerrit-net
+
+  gerrit-haproxy:
+    build: gerrit-haproxy
+    ports:
+      - "80:80"
+    networks:
+      - gerrit-net
+    depends_on:
+      - gerrit-master-nginx
+      - gerrit-slave-nginx
+      - gerrit-slave-httpd
+      - gerrit-static-nginx
+
+  gerrit-static-nginx:
+    build: gerrit-static-nginx
+    ports:
+      - "18083:80"
     networks:
       - gerrit-net
 

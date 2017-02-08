@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Building with Bazel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Building with Bazel</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#installation">Installation</a></li>
+<li><a href="#build">Building on the Command Line</a>
+<ul class="sectlevel2">
+<li><a href="#_gerrit_development_war_file">Gerrit Development WAR File</a></li>
+<li><a href="#release">Gerrit Release WAR File</a></li>
+<li><a href="#_headless_mode">Headless Mode</a></li>
+<li><a href="#_extension_and_plugin_api_jar_files">Extension and Plugin API JAR Files</a></li>
+<li><a href="#_plugins">Plugins</a></li>
+</ul>
+</li>
+<li><a href="#IDEs">Using an IDE.</a>
+<ul class="sectlevel2">
+<li><a href="#_intellij">IntelliJ</a></li>
+<li><a href="#_eclipse">Eclipse</a></li>
+<li><a href="#documentation">Documentation</a></li>
+</ul>
+</li>
+<li><a href="#tests">Running Unit Tests</a></li>
+<li><a href="#_dependencies">Dependencies</a></li>
+<li><a href="#_building_against_unpublished_maven_jars">Building against unpublished Maven JARs</a></li>
+<li><a href="#_building_against_artifacts_from_custom_maven_repositories">Building against artifacts from custom Maven repositories</a>
+<ul class="sectlevel2">
+<li><a href="#clean-cache">Cleaning The download cache</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Bazel build is experimental. Major missing parts:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Custom plugins</p>
+</li>
+<li>
+<p>Test suites for SSH, acceptance, etc.</p>
+</li>
+<li>
+<p>tag tests as slow, flaky, etc.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Nice to have:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>JGit build from local tree.</p>
+</li>
+<li>
+<p>coverage</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installation">Installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You need to use Java 8 and Node.js for building gerrit.</p>
+</div>
+<div class="paragraph">
+<p>You can install Bazel from the bazel.io:
+<a href="https://www.bazel.io/versions/master/docs/install.html" class="bare">https://www.bazel.io/versions/master/docs/install.html</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="build">Building on the Command Line</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_gerrit_development_war_file">Gerrit Development WAR File</h3>
+<div class="paragraph">
+<p>To build the Gerrit web application that includes the GWT UI and the
+PolyGerrit UI:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build gerrit</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+PolyGerrit UI may require additional tools (such as npm). Please read
+the polygerrit-ui/README.md for more info.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The output executable WAR will be placed in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-bin/gerrit.war</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="release">Gerrit Release WAR File</h3>
+<div class="paragraph">
+<p>To build the Gerrit web application that includes the GWT UI, the
+PolyGerrit UI and documentation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build release</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output executable WAR will be placed in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-bin/release.war</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_headless_mode">Headless Mode</h3>
+<div class="paragraph">
+<p>To build Gerrit in headless mode, i.e. without the GWT Web UI:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build headless</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output executable WAR will be placed in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-bin/headless.war</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_extension_and_plugin_api_jar_files">Extension and Plugin API JAR Files</h3>
+<div class="paragraph">
+<p>To build the extension, plugin and GWT API JAR files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build api</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output archive that contains Java binaries, Java sources and
+Java docs will be placed in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-genfiles/api.zip</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Install {extension,plugin,gwt}-api to the local maven repository:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  tools/maven/api.sh install</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Install gerrit.war to the local maven repository:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  tools/maven/api.sh war_install</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_plugins">Plugins</h3>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build plugins:core</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output JAR files for individual plugins will be placed in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-genfiles/plugins/&lt;name&gt;/&lt;name&gt;.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The JAR files will also be packaged in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-genfiles/plugins/core.zip</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To build a specific plugin:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build plugins/&lt;name&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output JAR file will be be placed in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-genfiles/plugins/&lt;name&gt;/&lt;name&gt;.jar</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that when building an individual plugin, the <code>core.zip</code> package
+is not regenerated.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="IDEs">Using an IDE.</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_intellij">IntelliJ</h3>
+<div class="paragraph">
+<p>The Gerrit build works with Bazel&#8217;s <a href="https://ij.bazel.io">IntelliJ plugin</a>.
+Please follow the instructions on <a href="dev-intellij.html">IntelliJ Setup</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_eclipse">Eclipse</h3>
+<div class="sect3">
+<h4 id="_generating_the_eclipse_project">Generating the Eclipse Project</h4>
+<div class="paragraph">
+<p>Create the Eclipse project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  tools/eclipse/project.py</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and then follow the <a href="dev-eclipse.html#setup">setup instructions</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_refreshing_the_classpath">Refreshing the Classpath</h4>
+<div class="paragraph">
+<p>If an updated classpath is needed, the Eclipse project can be
+refreshed and missing dependency JARs can be downloaded by running
+<code>project.py</code> again. For IntelliJ, you need to click the <code>Sync Project
+with BUILD Files</code> button of <a href="https://ij.bazel.io">IntelliJ plugin</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="documentation">Documentation</h3>
+<div class="paragraph">
+<p>To build only the documentation for testing or static hosting:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build Documentation:searchfree</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The html files will be bundled into <code>searchfree.zip</code> in this location:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-bin/Documentation/searchfree.zip</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To build the executable WAR with the documentation included:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel build withdocs</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The WAR file will be placed in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel-bin/withdocs.war</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tests">Running Unit Tests</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre>  bazel test --build_tests_only //...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Debugging tests:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel test --test_output=streamed --test_filter=com.gerrit.TestClass.testMethod  testTarget</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Debug test example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel test --test_output=streamed --test_filter=com.google.gerrit.acceptance.api.change.ChangeIT.getAmbiguous //gerrit-acceptance-tests/src/test/java/com/google/gerrit/acceptance/api/change:api_change</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To run a specific test group, e.g. the rest-account test group:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel test //gerrit-acceptance-tests/src/test/java/com/google/gerrit/acceptance/rest/account:rest_account</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To run the tests against NoteDb backend:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel test --test_env=GERRIT_NOTEDB=READ_WRITE //...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To run only tests that do not use SSH:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel test --test_env=GERRIT_USE_SSH=NO //...</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dependencies">Dependencies</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Dependency JARs are normally downloaded as needed, but you can
+download everything upfront.  This is useful to enable
+subsequent builds to run without network access:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  bazel fetch //...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When downloading from behind a proxy (which is common in some corporate
+environments), it might be necessary to explicitly specify the proxy that
+is then used by <code>curl</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  export http_proxy=http://&lt;proxy_user_id&gt;:&lt;proxy_password&gt;@&lt;proxy_server&gt;:&lt;proxy_port&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Redirection to local mirrors of Maven Central and the Gerrit storage
+bucket is supported by defining specific properties in
+<code>local.properties</code>, a file that is not tracked by Git:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  echo download.GERRIT = http://nexus.my-company.com/ &gt;&gt;local.properties
+  echo download.MAVEN_CENTRAL = http://nexus.my-company.com/ &gt;&gt;local.properties</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>local.properties</code> file may be placed in the root of the gerrit repository
+being built, or in <code>~/.gerritcodereview/</code>.  The file in the root of the gerrit
+repository has precedence.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_against_unpublished_maven_jars">Building against unpublished Maven JARs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To build against unpublished Maven JARs, like gwtorm or PrologCafe, the custom
+JARs must be installed in the local Maven repository (<code>mvn clean install</code>) and
+<code>maven_jar()</code> must be updated to point to the <code>MAVEN_LOCAL</code> Maven repository for
+that artifact:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-python" data-lang="python"> maven_jar(
+   name = 'gwtorm',
+   artifact = 'gwtorm:gwtorm:42',
+   repository = MAVEN_LOCAL,
+ )</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_against_artifacts_from_custom_maven_repositories">Building against artifacts from custom Maven repositories</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To build against custom Maven repositories, two modes of operations are
+supported: with rewrite in local.properties and without.</p>
+</div>
+<div class="paragraph">
+<p>Without rewrite the URL of custom Maven repository can be directly passed
+to the maven_jar() function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-python" data-lang="python">  GERRIT_FORGE = 'http://gerritforge.com/snapshot'
+
+  maven_jar(
+    name = 'gitblit',
+    artifact = 'com.gitblit:gitblit:1.4.0',
+    sha1 = '1b130dbf5578ace37507430a4a523f6594bf34fa',
+    repository = GERRIT_FORGE,
+ )</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the custom URL has to be rewritten, then the same logic as with Gerrit
+known Maven repository is used: Repo name must be defined that matches an entry
+in local.properties file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  download.GERRIT_FORGE = http://my.company.mirror/gerrit-forge</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And corresponding WORKSPACE excerpt:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code class="language-python" data-lang="python">  GERRIT_FORGE = 'GERRIT_FORGE:'
+
+  maven_jar(
+    name = 'gitblit',
+    artifact = 'com.gitblit:gitblit:1.4.0',
+    sha1 = '1b130dbf5578ace37507430a4a523f6594bf34fa',
+    repository = GERRIT_FORGE,
+ )</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="clean-cache">Cleaning The download cache</h3>
+<div class="paragraph">
+<p>The cache for the Gerrit Code Review project is located in
+<code>~/.gerritcodereview/buck-cache/locally-built-artifacts</code>.</p>
+</div>
+<div class="paragraph">
+<p>If you really do need to clean the cache manually, then:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> rm -rf ~/.gerritcodereview/buck-cache/locally-built-artifacts</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that the root <code>buck-cache</code> folder should not be deleted as it also contains
+the <code>downloaded-artifacts</code> directory, which holds the artifacts that got
+downloaded (not built locally).</p>
+</div>
+<div class="paragraph">
+<p>[NOTE] When building with Bazel the artifacts are still cached in
+<code>~/.gerritcodereview/buck-cache/</code>. This allows Bazel to make use of
+libraries that were previously downloaded by Buck.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

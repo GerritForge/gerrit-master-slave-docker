@@ -1,4 +1,4 @@
-FROM gerritforge/gerrit-ubuntu15.04:2.13.1
+FROM gerritforge/gerrit-ubuntu15.04:2.13.5
 
 USER root
 

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Quick get started guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Quick get started guide</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#user">Create a user to host the Gerrit service</a></li>
+<li><a href="#download">Download Gerrit</a></li>
+<li><a href="#initialization">Initialize the Site</a></li>
+<li><a href="#usersetup">Initial Login</a>
+<ul class="sectlevel2">
+<li><a href="#_ssh_key_generation">SSH key generation</a></li>
+<li><a href="#_registering_your_key_in_gerrit">Registering your key in Gerrit</a></li>
+</ul>
+</li>
+<li><a href="#_project_creation">Project creation</a>
+<ul class="sectlevel2">
+<li><a href="#_new_project_from_scratch">New project from scratch</a></li>
+<li><a href="#_already_existing_project">Already existing project</a></li>
+</ul>
+</li>
+<li><a href="#_my_first_change">My first change</a></li>
+<li><a href="#_quick_installation_complete">Quick Installation Complete</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This guide was made with the impatient in mind, ready to try out Gerrit on their
+own server but not prepared to make the full installation procedure yet.</p>
+</div>
+<div class="paragraph">
+<p>Explanation is sparse and you should not use a server installed this way in a
+live setup, this is made with proof of concept activities in mind.</p>
+</div>
+<div class="paragraph">
+<p>It is presumed you install it on a Unix based server such as any of the Linux
+flavors or BSD.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s also presumed that you have access to an OpenID enabled email address.
+Examples of OpenID enable email providers are Gmail, Yahoo! Mail and Hotmail.
+It&#8217;s also possible to register a custom email address with OpenID, but that is
+outside the scope of this quick installation guide. For testing purposes one of
+the above providers should be fine. Please note that network access to the
+OpenID provider you choose is necessary for both you and your Gerrit instance.
+OpenID provider you choose is necessary for both you and your Gerrit instance.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="requirements">Requirements</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Most distributions come with Java today. Do you already have Java installed?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ java -version
+  openjdk version "1.8.0_72"
+  OpenJDK Runtime Environment (build 1.8.0_72-b15)
+  OpenJDK 64-Bit Server VM (build 25.72-b15, mixed mode)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If Java isn&#8217;t installed, get it:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>JRE, minimum version 1.8 <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Download</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="user">Create a user to host the Gerrit service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We will run the service as a non-privileged user on your system.
+First create the user and then become the user:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ sudo adduser gerrit2
+  $ sudo su gerrit2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t have root privileges you could skip this step and run Gerrit
+as your own user as well.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="download">Download Gerrit</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s time to download the archive that contains the Gerrit web and ssh service.</p>
+</div>
+<div class="paragraph">
+<p>You can choose from different versions to download from here:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.gerritcodereview.com/download/index.html">A list of releases available</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This tutorial is based on version 2.2.2, and you can download that from this link</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.gerritcodereview.com/download/gerrit-2.2.2.war">Link to the 2.2.2 war archive</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="initialization">Initialize the Site</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s time to run the initialization, and with the batch switch enabled, we don&#8217;t have to answer any questions at all:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  gerrit2@host:~$ java -jar gerrit.war init --batch -d ~/gerrit_testsite
+  Generating SSH host key ... rsa(simple)... done
+  Initialized /home/gerrit2/gerrit_testsite
+  Executing /home/gerrit2/gerrit_testsite/bin/gerrit.sh start
+  Starting Gerrit Code Review: OK
+  gerrit2@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the init is complete, you can review your settings in the
+file <code>'$site_path/etc/gerrit.config'</code>.</p>
+</div>
+<div class="paragraph">
+<p>Note that initialization also starts the server.  If any settings changes are
+made, the server must be restarted before they will take effect.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  gerrit2@host:~$ ~/gerrit_testsite/bin/gerrit.sh restart
+  Stopping Gerrit Code Review: OK
+  Starting Gerrit Code Review: OK
+  gerrit2@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The server can be also stopped and started by passing the <code>stop</code> and <code>start</code>
+commands to gerrit.sh.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  gerrit2@host:~$ ~/gerrit_testsite/bin/gerrit.sh stop
+  Stopping Gerrit Code Review: OK
+  gerrit2@host:~$
+  gerrit2@host:~$ ~/gerrit_testsite/bin/gerrit.sh start
+  Starting Gerrit Code Review: OK
+  gerrit2@host:~$</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="usersetup">Initial Login</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s time to exit the gerrit2 account as you now have Gerrit running on your
+host and setup your first workspace.</p>
+</div>
+<div class="paragraph">
+<p>Start a shell with the credentials of the account you will perform
+development under.</p>
+</div>
+<div class="paragraph">
+<p>Check whether there are any ssh keys already. You&#8217;re looking for two files,
+id_rsa and id_rsa.pub.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ls .ssh
+  authorized_keys  config  id_rsa  id_rsa.pub  known_hosts
+  user@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you have the files, you may skip the key generating step.</p>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t see the files in your listing, your will have to generate rsa
+keys for your ssh sessions:</p>
+</div>
+<div class="sect2">
+<h3 id="_ssh_key_generation">SSH key generation</h3>
+<div class="paragraph">
+<p><strong>Please don&#8217;t generate new keys if you already have a valid keypair!</strong>
+<strong>They will be overwritten!</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ssh-keygen -t rsa
+  Generating public/private rsa key pair.
+  Enter file in which to save the key (/home/user/.ssh/id_rsa):
+  Created directory '/home/user/.ssh'.
+  Enter passphrase (empty for no passphrase):
+  Enter same passphrase again:
+  Your identification has been saved in /home/user/.ssh/id_rsa.
+  Your public key has been saved in /home/user/.ssh/id_rsa.pub.
+  The key fingerprint is:
+  00:11:22:00:11:22:00:11:44:00:11:22:00:11:22:99 user@host
+  The key's randomart image is:
+  +--[ RSA 2048]----+
+  |     ..+.*=+oo.*E|
+  |      u.OoB.. . +|
+  |       ..*.      |
+  |       o         |
+  |      . S ..     |
+  |                 |
+  |                 |
+  |          ..     |
+  |                 |
+  +-----------------+
+  user@host:~$</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_registering_your_key_in_gerrit">Registering your key in Gerrit</h3>
+<div class="paragraph">
+<p>Open a browser and enter the canonical url of your Gerrit server.  You can
+find the url in the settings file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config gerrit.canonicalWebUrl
+  http://localhost:8080/
+  gerrit2@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Register a new account in Gerrit through the web interface with the
+email address of your choice.</p>
+</div>
+<div class="paragraph">
+<p>The default authentication type is OpenID.  If your Gerrit server is behind a
+proxy, and you are using an external OpenID provider, you will need to add the
+proxy settings in the configuration file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config --add http.proxy http://proxy:8080
+  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config --add http.proxyUsername username
+  gerrit2@host:~$ git config -f ~/gerrit_testsite/etc/gerrit.config --add http.proxyPassword password</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Refer to the Gerrit configuration guide for more detailed information about
+<a href="config-gerrit.html#auth">authentication</a> and
+<a href="config-gerrit.html#http.proxy">proxy</a> settings.</p>
+</div>
+<div class="paragraph">
+<p>The first user to sign-in and register an account will be
+automatically placed into the fully privileged Administrators group,
+permitting server management over the web and over SSH.  Subsequent
+users will be automatically registered as unprivileged users.</p>
+</div>
+<div class="paragraph">
+<p>Once signed in as your user, you find a little wizard to get you started.
+The wizard helps you fill out:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Real name (visible name in Gerrit)</p>
+</li>
+<li>
+<p>Register your email (it must be confirmed later)</p>
+</li>
+<li>
+<p>Select a username with which to communicate with Gerrit over ssh+git. Note
+that once saved, the username cannot be changed.</p>
+</li>
+<li>
+<p>The server will ask you for an RSA public key.
+That&#8217;s the key we generated above, and it&#8217;s time to make sure that Gerrit knows
+about our new key and can identify us by it.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ cat .ssh/id_rsa.pub
+  ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA1bidOd8LAp7Vp95M1b9z+LGO96OEWzdAgBPfZPq05jUh
+  jw0mIdUuvg5lhwswnNsvmnFhGbsUoXZui6jdXj7xPUWOD8feX2NNEjTAEeX7DXOhnozNAkk/Z98WUV2B
+  xUBqhRi8vhVmaCM8E+JkHzAc+7/HVYBTuPUS7lYPby5w95gs3zVxrX8d1++IXg/u/F/47zUxhdaELMw2
+  deD8XLhrNPx2FQ83FxrjnVvEKQJyD2OoqxbC2KcUGYJ/3fhiupn/YpnZsl5+6mfQuZRJEoZ/FH2n4DEH
+  wzgBBBagBr0ZZCEkl74s4KFZp6JJw/ZSjMRXsXXXWvwcTpaUEDii708HGw== John Doe@MACHINE
+  user@host:~$</pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Please take note of the extra line-breaks introduced in the key above
+for formatting purposes. Please be sure to copy and paste your key without
+line-breaks.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Copy the string starting with ssh-rsa to your clipboard and then paste it
+into the box for RSA keys. Make <strong>absolutely sure</strong> no extra spaces or line feeds
+are entered in the middle of the RSA string.</p>
+</div>
+<div class="paragraph">
+<p>Verify that the ssh connection works for you.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ssh user@localhost -p 29418
+  The authenticity of host '[localhost]:29418 ([127.0.0.1]:29418)' can't be established.
+  RSA key fingerprint is db:07:3d:c2:94:25:b5:8d:ac:bc:b5:9e:2f:95:5f:4a.
+  Are you sure you want to continue connecting (yes/no)? yes
+  Warning: Permanently added '[localhost]:29418' (RSA) to the list of known hosts.
+
+  ****    Welcome to Gerrit Code Review    ****
+
+  Hi user, you have successfully connected over SSH.
+
+  Unfortunately, interactive shells are disabled.
+  To clone a hosted Git repository, use:
+
+  git clone ssh://user@localhost:29418/REPOSITORY_NAME.git
+
+  user@host:~$</pre>
+</div>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_project_creation">Project creation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Your base Gerrit server is now running and you have a user that&#8217;s ready
+to interact with it.  You now have two options, either you create a new
+test project to work with or you already have a git with history that
+you would like to import into Gerrit and try out code review on.</p>
+</div>
+<div class="sect2">
+<h3 id="_new_project_from_scratch">New project from scratch</h3>
+<div class="paragraph">
+<p>If you choose to create a new repository from scratch, it&#8217;s easier for
+you to create a project with an initial commit in it. That way first
+time setup between client and server is easier.</p>
+</div>
+<div class="paragraph">
+<p>This is done via the SSH port:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ssh -p 29418 user@localhost gerrit create-project demo-project --empty-commit
+  user@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will create a repository that you can clone to work with.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_already_existing_project">Already existing project</h3>
+<div class="paragraph">
+<p>The other alternative is if you already have a git project that you
+want to try out Gerrit on.
+First you have to create the project.  This is done via the SSH port:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ ssh -p 29418 user@localhost gerrit create-project demo-project
+  user@host:~$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You need to make sure that at least initially your account is granted
+"Create Reference" privileges for the refs/heads/* reference.
+This is done via the web interface in the Admin/Projects/Access page
+that correspond to your project.</p>
+</div>
+<div class="paragraph">
+<p>After that it&#8217;s time to upload the previous history to the server:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~/my-project$ git push ssh://user@localhost:29418/demo-project *:*
+  Counting objects: 2011, done.
+  Writing objects: 100% (2011/2011), 456293 bytes, done.
+  Total 2011 (delta 0), reused 0 (delta 0)
+  To ssh://user@localhost:29418/demo-project
+   * [new branch]      master -&gt; master
+  user@host:~/my-project$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will create a repository that you can clone to work with.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_my_first_change">My first change</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Download a local clone of the repository and move into it</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~$ git clone ssh://user@localhost:29418/demo-project
+  Cloning into demo-project...
+  remote: Counting objects: 2, done
+  remote: Finding sources: 100% (2/2)
+  remote: Total 2 (delta 0), reused 0 (delta 0)
+  user@host:~$ cd demo-project
+  user@host:~/demo-project$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then make a change to it and upload it as a reviewable change in Gerrit.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~/demo-project$ date &gt; testfile.txt
+  user@host:~/demo-project$ git add testfile.txt
+  user@host:~/demo-project$ git commit -m "My pretty test commit"
+  [master ff643a5] My pretty test commit
+   1 files changed, 1 insertions(+), 0 deletions(-)
+   create mode 100644 testfile.txt
+  user@host:~/demo-project$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Usually when you push to a remote git, you push to the reference
+<code>'/refs/heads/branch'</code>, but when working with Gerrit you have to push to a
+virtual branch representing "code review before submission to branch".
+This virtual name space is known as /refs/for/&lt;branch&gt;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  user@host:~/demo-project$ git push origin HEAD:refs/for/master
+  Counting objects: 4, done.
+  Writing objects: 100% (3/3), 293 bytes, done.
+  Total 3 (delta 0), reused 0 (delta 0)
+  remote:
+  remote: New Changes:
+  remote:   http://localhost:8080/1
+  remote:
+  To ssh://user@localhost:29418/demo-project
+   * [new branch]      HEAD -&gt; refs/for/master
+  user@host:~/demo-project$</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should now be able to access your change by browsing to the http URL
+suggested above, <a href="http://localhost:8080/1" class="bare">http://localhost:8080/1</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_quick_installation_complete">Quick Installation Complete</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This covers the scope of getting Gerrit started and your first change uploaded.
+It doesn&#8217;t give any clue as to how the review workflow works, please read
+<a href="http://source.android.com/submit-patches/workflow">Default Workflow</a> to
+learn more about the workflow of Gerrit.</p>
+</div>
+<div class="paragraph">
+<p>To read more on the installation of Gerrit please see <a href="install.html">the detailed
+installation page</a>.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

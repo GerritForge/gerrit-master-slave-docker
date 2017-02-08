@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - REST API Developers' Notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - REST API Developers' Notes</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_testing_rest_api_functionality">Testing REST API Functionality</a>
+<ul class="sectlevel2">
+<li><a href="#_basic_testing">Basic Testing</a></li>
+<li><a href="#_sending_data_in_the_request">Sending Data in the Request</a></li>
+<li><a href="#_authentication">Authentication</a></li>
+<li><a href="#_verifying_header_content">Verifying Header Content</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This document is about developing the REST API.  For details of the
+actual APIs available in Gerrit, please see the
+<a href="rest-api.html">REST API interface reference</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing_rest_api_functionality">Testing REST API Functionality</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_basic_testing">Basic Testing</h3>
+<div class="paragraph">
+<p>Basic testing of REST API functionality can be done with <code>curl</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  curl http://localhost:8080/path/to/api/</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default, <code>curl</code> sends <code>GET</code> requests.  To test APIs with <code>PUT</code>, <code>POST</code>,
+or <code>DELETE</code>, an additional argument is required:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> curl -X PUT http://localhost:8080/path/to/api/
+ curl -X POST http://localhost:8080/path/to/api/
+ curl -X DELETE http://localhost:8080/path/to/api/</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sending_data_in_the_request">Sending Data in the Request</h3>
+<div class="paragraph">
+<p>Some REST APIs accept data in the request body of <code>PUT</code> and <code>POST</code> requests.</p>
+</div>
+<div class="paragraph">
+<p>Test data can be included from a local file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  curl -X PUT -d@testdata.txt --header "Content-Type: application/json" http://localhost:8080/path/to/api/</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that the <code>-d</code> option will remove the newlines from the content of the
+local file. If the content should be sent as-is then use the <code>--data-binary</code>
+option instead:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  curl -X PUT --data-binary @testdata.txt --header "Content-Type: text/plain" http://localhost:8080/path/to/api/</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example to set a Gerrit project&#8217;s <a href="rest-api-projects.html#set-project-description">description</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> curl -X PUT --digest --user john:2LlAB3K9B0PF --data-binary @project-desc.txt --header "Content-Type: application/json; charset=UTF-8" http://localhost:8080/a/projects/myproject/description</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_authentication">Authentication</h3>
+<div class="paragraph">
+<p>To test APIs that require authentication, the username and password must be specified on
+the command line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> curl --digest --user username:password http://localhost:8080/a/path/to/api/</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This makes it easy to switch users for testing of permissions.</p>
+</div>
+<div class="paragraph">
+<p>It is also possible to test with a username and password from the <code>.netrc</code>
+file (on Windows, <code>_netrc</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> curl --digest -n http://localhost:8080/a/path/to/api/</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In both cases, the password should be the user&#8217;s <a href="user-upload.html#http">HTTP password</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_verifying_header_content">Verifying Header Content</h3>
+<div class="paragraph">
+<p>To verify the headers returned from a REST API call, use <code>curl</code> in verbose mode:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  curl -v -n --digest -X DELETE http://localhost:8080/a/path/to/api/</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The headers on both the request and the response will be printed.</p>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

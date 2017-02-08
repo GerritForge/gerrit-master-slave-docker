@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<title>Gerrit Code Review - Error Messages</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Gerrit Code Review - Error Messages</h1>
+<div class="details">
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_error_messages">Error Messages</a></li>
+<li><a href="#_general_hints">General Hints</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>This page provides access to detailed explanations of Gerrit error
+messages. For each error message it is explained why the error is
+occurring and what can be done to solve it.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_error_messages">Error Messages</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="error-branch-not-found.html">branch &#8230;&#8203; not found</a></p>
+</li>
+<li>
+<p><a href="error-change-closed.html">change &#8230;&#8203; closed</a></p>
+</li>
+<li>
+<p><a href="error-change-does-not-belong-to-project.html">change &#8230;&#8203; does not belong to project &#8230;&#8203;</a></p>
+</li>
+<li>
+<p><a href="error-change-not-found.html">change &#8230;&#8203; not found</a></p>
+</li>
+<li>
+<p><a href="error-commit-already-exists.html">commit already exists</a></p>
+</li>
+<li>
+<p><a href="error-contains-banned-commit.html">contains banned commit &#8230;&#8203;</a></p>
+</li>
+<li>
+<p><a href="error-has-duplicates.html">&#8230;&#8203; has duplicates</a></p>
+</li>
+<li>
+<p><a href="error-invalid-author.html">invalid author</a></p>
+</li>
+<li>
+<p><a href="error-invalid-changeid-line.html">invalid Change-Id line format in commit message footer</a></p>
+</li>
+<li>
+<p><a href="error-invalid-committer.html">invalid committer</a></p>
+</li>
+<li>
+<p><a href="error-missing-changeid.html">missing Change-Id in commit message footer</a></p>
+</li>
+<li>
+<p><a href="error-missing-subject.html">missing subject; Change-Id must be in commit message footer</a></p>
+</li>
+<li>
+<p><a href="error-multiple-changeid-lines.html">multiple Change-Id lines in commit message footer</a></p>
+</li>
+<li>
+<p><a href="error-no-common-ancestry.html">no common ancestry</a></p>
+</li>
+<li>
+<p><a href="error-no-new-changes.html">no new changes</a></p>
+</li>
+<li>
+<p><a href="error-non-fast-forward.html">non-fast forward</a></p>
+</li>
+<li>
+<p><a href="error-not-a-gerrit-administrator.html">Not a Gerrit administrator</a></p>
+</li>
+<li>
+<p><a href="error-not-permitted-to-create.html">Not permitted to create &#8230;&#8203;</a></p>
+</li>
+<li>
+<p><a href="error-not-signed-off-by.html">not Signed-off-by author/committer/uploader in commit message footer</a></p>
+</li>
+<li>
+<p><a href="error-not-valid-ref.html">not valid ref</a></p>
+</li>
+<li>
+<p><a href="error-change-upload-blocked.html">One or more refs/for/ names blocks change upload</a></p>
+</li>
+<li>
+<p><a href="error-permission-denied.html">Permission denied (publickey)</a></p>
+</li>
+<li>
+<p><a href="error-prohibited-by-gerrit.html">prohibited by Gerrit</a></p>
+</li>
+<li>
+<p><a href="error-project-not-found.html">Project not found: &#8230;&#8203;</a></p>
+</li>
+<li>
+<p><a href="error-same-change-id-in-multiple-changes.html">same Change-Id in multiple changes</a></p>
+</li>
+<li>
+<p><a href="error-upload-denied.html">Upload denied for project \'&#8230;&#8203;'</a></p>
+</li>
+<li>
+<p><a href="error-not-allowed-to-upload-merges.html">you are not allowed to upload merges</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_general_hints">General Hints</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="error-push-fails-due-to-commit-message.html">push fails due to commit message</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>

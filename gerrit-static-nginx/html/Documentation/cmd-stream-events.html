@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<meta name="author" content="== NAME">
+<title>gerrit stream-events</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>gerrit stream-events</h1>
+<div class="details">
+<span id="author" class="author">== NAME</span><br>
+<span id="revnumber">version v2.13.5-2557-g91ad0fe7b6-dirty,</span>
+<span id="revdate">gerrit stream-events - Monitor events occurring in real time</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_synopsis">SYNOPSIS</a></li>
+<li><a href="#_description">DESCRIPTION</a></li>
+<li><a href="#_access">ACCESS</a></li>
+<li><a href="#_scripting">SCRIPTING</a></li>
+<li><a href="#_options">OPTIONS</a></li>
+<li><a href="#_examples">EXAMPLES</a></li>
+<li><a href="#_schema">SCHEMA</a></li>
+<li><a href="#events">EVENTS</a>
+<ul class="sectlevel2">
+<li><a href="#_assignee_changed">Assignee Changed</a></li>
+<li><a href="#_change_abandoned">Change Abandoned</a></li>
+<li><a href="#_change_merged">Change Merged</a></li>
+<li><a href="#_change_restored">Change Restored</a></li>
+<li><a href="#_comment_added">Comment Added</a></li>
+<li><a href="#_draft_published">Draft Published</a></li>
+<li><a href="#_dropped_output">Dropped Output</a></li>
+<li><a href="#_hashtags_changed">Hashtags Changed</a></li>
+<li><a href="#_project_created">Project Created</a></li>
+<li><a href="#_patchset_created">Patchset Created</a></li>
+<li><a href="#_ref_updated">Ref Updated</a></li>
+<li><a href="#_reviewer_added">Reviewer Added</a></li>
+<li><a href="#_reviewer_deleted">Reviewer Deleted</a></li>
+<li><a href="#_topic_changed">Topic Changed</a></li>
+</ul>
+</li>
+<li><a href="#_see_also">SEE ALSO</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_synopsis">SYNOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>ssh</em> -p &lt;port&gt; &lt;host&gt; <em>gerrit stream-events</em></pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">DESCRIPTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Provides a portal into the major events occurring on the server,
+outputting activity data in real-time to the client.  Events are
+filtered by the caller&#8217;s access permissions, ensuring the caller
+only receives events for changes they can view on the web, or in
+the project repository.</p>
+</div>
+<div class="paragraph">
+<p>Event output is in JSON, one event per line.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_access">ACCESS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Caller must be a member of the privileged 'Administrators' group,
+or have been granted
+<a href="access-control.html#capability_streamEvents">the 'Stream Events' global capability</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_scripting">SCRIPTING</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This command is intended to be used in scripts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_options">OPTIONS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--subscribe|-s</dt>
+<dd>
+<p>Type of the event to subscribe to.  Multiple --subscribe options
+may be specified to subscribe to multiple events. When this option
+is provided, only subscribed events are emitted and all other
+events are ignored. When this option is omitted, all events are
+emitted.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_examples">EXAMPLES</h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 review.example.com gerrit stream-events
+  {"type":"comment-added",change:{"project":"tools/gerrit", ...}, ...}
+  {"type":"comment-added",change:{"project":"tools/gerrit", ...}, ...}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Only subscribe to specific event types:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>  $ ssh -p 29418 review.example.com gerrit stream-events \
+      -s draft-published -s patchset-created -s ref-replicated</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_schema">SCHEMA</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The JSON messages consist of nested objects referencing the <strong>change</strong>,
+<strong>patchSet</strong>, <strong>account</strong> involved, and other attributes as appropriate.</p>
+</div>
+<div class="paragraph">
+<p>Note that any field may be missing in the JSON messages, so consumers of
+this JSON stream should deal with that appropriately.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="events">EVENTS</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_assignee_changed">Assignee Changed</h3>
+<div class="paragraph">
+<p>Sent when the assignee of a change has been modified.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"assignee-changed"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">changer</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">oldAssignee</dt>
+<dd>
+<p>Assignee before it was changed.</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_change_abandoned">Change Abandoned</h3>
+<div class="paragraph">
+<p>Sent when a change has been abandoned.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"change-abandoned"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">abandoner</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">reason</dt>
+<dd>
+<p>Reason for abandoning the change.</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_change_merged">Change Merged</h3>
+<div class="paragraph">
+<p>Sent when a change has been merged into the git repository.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"change-merged"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">submitter</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">newRev</dt>
+<dd>
+<p>The resulting revision of the merge.</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_change_restored">Change Restored</h3>
+<div class="paragraph">
+<p>Sent when an abandoned change has been restored.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"change-restored"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">restorer</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">reason</dt>
+<dd>
+<p>Reason for restoring the change.</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_comment_added">Comment Added</h3>
+<div class="paragraph">
+<p>Sent when a review comment has been posted on a change.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"comment-added"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">author</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">approvals</dt>
+<dd>
+<p>All <a href="json.html#approval">approval attributes</a> granted.</p>
+</dd>
+<dt class="hdlist1">comment</dt>
+<dd>
+<p>Review comment cover message.</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_draft_published">Draft Published</h3>
+<div class="paragraph">
+<p>Sent when a draft change has been published.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"draft-published"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">uploader</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_dropped_output">Dropped Output</h3>
+<div class="paragraph">
+<p>Sent to notify a client that events have been dropped.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"dropped-output"</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_hashtags_changed">Hashtags Changed</h3>
+<div class="paragraph">
+<p>Sent when the hashtags have been added to or removed from a change.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"hashtags-changed"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">editor</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">added</dt>
+<dd>
+<p>List of hashtags added to the change</p>
+</dd>
+<dt class="hdlist1">removed</dt>
+<dd>
+<p>List of hashtags removed from the change</p>
+</dd>
+<dt class="hdlist1">hashtags</dt>
+<dd>
+<p>List of hashtags on the change after tags were added or removed</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_project_created">Project Created</h3>
+<div class="paragraph">
+<p>Sent when a new project has been created.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"project-created"</p>
+</dd>
+<dt class="hdlist1">projectName</dt>
+<dd>
+<p>The created project name</p>
+</dd>
+<dt class="hdlist1">projectHead</dt>
+<dd>
+<p>The created project head name</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_patchset_created">Patchset Created</h3>
+<div class="paragraph">
+<p>Sent when a new change has been uploaded, or a new patch set has been uploaded
+to an existing change.</p>
+</div>
+<div class="paragraph">
+<p>Note that this event is also sent for changes or patch sets uploaded as draft,
+but is only visible to the change owner, any existing reviewers, and users who
+belong to a group that is granted the
+<a href="access-control.html#category_view_drafts">View Drafts</a> capability.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"patchset-created"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">uploader</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ref_updated">Ref Updated</h3>
+<div class="paragraph">
+<p>Sent when a reference is updated in a git repository.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"ref-updated"</p>
+</dd>
+<dt class="hdlist1">submitter</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">refUpdate</dt>
+<dd>
+<p><a href="json.html#refUpdate">refUpdate attribute</a></p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reviewer_added">Reviewer Added</h3>
+<div class="paragraph">
+<p>Sent when a reviewer is added to a change.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"reviewer-added"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">reviewer</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reviewer_deleted">Reviewer Deleted</h3>
+<div class="paragraph">
+<p>Sent when a reviewer (with a vote) is removed from a change.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"reviewer-deleted"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">patchSet</dt>
+<dd>
+<p><a href="json.html#patchSet">patchSet attribute</a></p>
+</dd>
+<dt class="hdlist1">reviewer</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">author</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">approvals</dt>
+<dd>
+<p>All <a href="json.html#approval">approval attributes</a> removed.</p>
+</dd>
+<dt class="hdlist1">comment</dt>
+<dd>
+<p>Review comment cover message.</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_topic_changed">Topic Changed</h3>
+<div class="paragraph">
+<p>Sent when the topic of a change has been changed.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">type</dt>
+<dd>
+<p>"topic-changed"</p>
+</dd>
+<dt class="hdlist1">change</dt>
+<dd>
+<p><a href="json.html#change">change attribute</a></p>
+</dd>
+<dt class="hdlist1">changer</dt>
+<dd>
+<p><a href="json.html#account">account attribute</a></p>
+</dd>
+<dt class="hdlist1">oldTopic</dt>
+<dd>
+<p>Topic name before it was changed.</p>
+</dd>
+<dt class="hdlist1">eventCreatedOn</dt>
+<dd>
+<p>Time in seconds since the UNIX epoch when this event was
+created.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_see_also">SEE ALSO</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="json.html">JSON Data Formats</a></p>
+</li>
+<li>
+<p><a href="access-control.html">Access Controls</a></p>
+</li>
+</ul>
+</div>
+<hr style="
+  height: 2px;
+  color: silver;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+">
+<div class="paragraph">
+<p>Part of <a href="index.html">Gerrit Code Review</a></p>
+</div>
+<script type="text/javascript">
+    decorate(document.getElementsByTagName('h1'));
+    decorate(document.getElementsByTagName('h2'));
+    decorate(document.getElementsByTagName('h3'));
+    decorate(document.getElementsByTagName('h4'));
+
+    var divs = document.getElementsByTagName('div');
+    var arr = new Array();
+    var excluded = getExcludedIds();
+    for(var i = 0; i < divs.length; i++) {
+      var d = divs[i];
+      var id = d.getAttribute('id');
+      if (id != null && !(id in excluded)) {
+        arr[arr.length] = d;
+      }
+    }
+    decorate(arr);
+
+    var anchors = document.getElementsByTagName('a');
+    arr = new Array();
+    for(var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      // if the anchor has no id there is no target to
+      // which we can link
+      if (a.getAttribute('id') != null) {
+        // if the anchor is empty there is no content which
+        // can receive the mouseover event, an empty anchor
+        // applies to the element that follows, move the
+        // element that follows into the anchor so that there
+        // is content which can receive the mouseover event
+        if (a.firstChild == null) {
+          var next = a.nextSibling;
+          if (next != null) {
+            next.parentNode.removeChild(next);
+            a.appendChild(next);
+          }
+        }
+        arr[arr.length] = a;
+      }
+    }
+    decorate(arr);
+
+    function decorate(e) {
+      for(var i = 0; i < e.length; i++) {
+        e[i].onmouseover = function (evt) {
+          var element = this;
+          // do nothing if the link icon is currently showing
+          var a = element.firstChild;
+          if (a != null && a instanceof Element
+              && a.getAttribute('id') == 'LINK') {
+            return;
+          }
+
+          // if there is no id there is no target to link to
+          var id = element.getAttribute('id');
+          if (id == null) {
+            return;
+          }
+
+          // create and show a link icon that links to this element
+          a = document.createElement('a');
+          a.setAttribute('id', 'LINK');
+          a.setAttribute('href', '#' + id);
+          a.setAttribute('style', 'position: absolute;'
+              + ' left: ' + (element.offsetLeft - 16 - 2 * 4) + 'px;'
+              + ' padding-left: 4px; padding-right: 4px;');
+          var span = document.createElement('span');
+          span.setAttribute('style', 'height: ' + element.offsetHeight + 'px;'
+              + ' display: inline-block; vertical-align: baseline;'
+              + ' font-size: 16px; text-decoration: none; color: grey;');
+          a.appendChild(span);
+          var link = document.createTextNode('🔗');
+          span.appendChild(link);
+          element.insertBefore(a, element.firstChild);
+
+          // remove the link icon when the mouse is moved away,
+          // but keep it shown if the mouse is over the element, the link or the icon
+          hide = function(evt) {
+            if (document.elementFromPoint(evt.clientX, evt.clientY) != element
+                && document.elementFromPoint(evt.clientX, evt.clientY) != a
+                && document.elementFromPoint(evt.clientX, evt.clientY) != span
+                && document.elementFromPoint(evt.clientX, evt.clientY) != link
+                && element.contains(a)) {
+              element.removeChild(a);
+            }
+          }
+          element.onmouseout = hide;
+          a.onmouseout = hide;
+          span.onmouseout = hide;
+          link.onmouseout = hide;
+        }
+      }
+    }
+
+    function getExcludedIds() {
+      var excluded = {};
+      excluded['header'] = true;
+      excluded['toc'] = true;
+      excluded['toctitle'] = true;
+      excluded['content'] = true;
+      excluded['preamble'] = true;
+      excluded['footer'] = true;
+      excluded['footer-text'] = true;
+      return excluded;
+    }
+</script>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v2.13.5-2557-g91ad0fe7b6-dirty<br>
+</div>
+</div>
+<link rel="stylesheet" href="./prettify.min.css">
+<script src="./prettify.min.js"></script>
+<script>prettyPrint()</script>
+</body>
+</html>
