@@ -8,9 +8,9 @@ RUN apt-get install -y openjdk-8-jdk && update-alternatives --set java /usr/lib/
 
 USER gerrit
 
-ADD gerrit.config /var/gerrit/etc/
-ADD secure.config /var/gerrit/etc/
-ADD replication.config /var/gerrit/etc/
+# ADD gerrit.config /var/gerrit/etc/
+# ADD secure.config /var/gerrit/etc/
+# ADD replication.config /var/gerrit/etc/
 
 RUN mkdir /var/gerrit/.ssh
 ADD id_rsa /var/gerrit/.ssh

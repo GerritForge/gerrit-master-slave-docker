@@ -1,7 +1,7 @@
 version: '2'
 services:
 
-  postgres:
+  postgres-green:
     image: postgres:9.5.4
     environment:
       - POSTGRES_USER=gerrit
@@ -10,15 +10,49 @@ services:
     networks:
       - gerrit-net
 
-  gerrit-master-nginx:
-    build: gerrit-master-nginx
+  postgres-blue:
+    image: postgres:9.5.4
+    environment:
+      - POSTGRES_USER=gerrit
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=reviewdb
+    networks:
+      - gerrit-net
+
+#  gerrit-master-nginx:
+#    build: gerrit-master-nginx
+#    ports:
+#      - "18080:8080"
+#      - "29418:29418"
+#    networks:
+#      - gerrit-net
+#    depends_on:
+#      - postgres
+
+  gerrit-master-nginx-blue:
+    build: gerrit-master-nginx-blue
     ports:
-      - "18080:8080"
-      - "29418:29418"
+      - "18019:8019"
+      - "29419:29419"
+#    volumes:
+#      - "./data/gerrit:/var/gerrit"
     networks:
       - gerrit-net
     depends_on:
-      - postgres
+      - postgres-blue
+#      - gerrit-master-nginx-green
+
+  gerrit-master-nginx-green:
+    build: gerrit-master-nginx-green
+    ports:
+      - "18020:8020"
+      - "29420:29420"
+#    volumes:
+#      - "data/gerrit:/var/gerrit"
+    networks:
+      - gerrit-net
+    depends_on:
+      - postgres-green
 
   gerrit-slave-nginx:
     build: gerrit-slave-nginx
@@ -34,17 +68,30 @@ services:
     networks:
       - gerrit-net
 
-  gerrit-haproxy:
-    build: gerrit-haproxy
+  gerrit-haproxy-http:
+    build: gerrit-haproxy-http
     ports:
       - "80:80"
     networks:
       - gerrit-net
     depends_on:
-      - gerrit-master-nginx
+#      - gerrit-master-nginx
+      - gerrit-master-nginx-green
+      - gerrit-master-nginx-blue
       - gerrit-slave-nginx
       - gerrit-slave-httpd
       - gerrit-static-nginx
+
+  gerrit-haproxy-ssh:
+    build: gerrit-haproxy-ssh
+    ports:
+      - "29418:29418"
+    networks:
+      - gerrit-net
+    depends_on:
+#      - gerrit-master-nginx
+      - gerrit-master-nginx-green
+      - gerrit-master-nginx-blue
 
   gerrit-static-nginx:
     build: gerrit-static-nginx
@@ -56,3 +103,6 @@ services:
 networks:
   gerrit-net:
     driver: bridge
+
+#volumes:
+#  gerrit:
