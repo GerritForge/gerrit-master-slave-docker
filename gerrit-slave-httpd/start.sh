@@ -1,7 +1,8 @@
 #!/bin/bash -ex
 
-chown -R gerrit: /var/gerrit/.ssh
+touch /var/gerrit/.ssh/authorized_keys
 chmod 600 /var/gerrit/.ssh/authorized_keys
+chown -R gerrit: /var/gerrit/.ssh
 
 /etc/init.d/ssh start
 /etc/init.d/apache2 start

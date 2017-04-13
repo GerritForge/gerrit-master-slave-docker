@@ -1,7 +1,8 @@
 #!/bin/bash -ex
 
-chown -R gerrit: /var/gerrit/.ssh
+touch /var/gerrit/.ssh/authorized_keys
 chmod 600 /var/gerrit/.ssh/authorized_keys
+chown -R gerrit: /var/gerrit/.ssh
 
 /etc/init.d/ssh start
 /etc/init.d/nginx start
@@ -9,4 +10,4 @@ chmod 600 /var/gerrit/.ssh/authorized_keys
 
 wait-for-it.sh -t 60 gerrit-master:8080 -- echo "Gerrit master is up"
 /etc/init.d/gerrit start &
-touch  /var/gerrit/logs/error_log && chown -R gerrit: /var/gerrit && tail -f /var/gerrit/logs/error_log
+touch /var/gerrit/logs/error_log && chown -R gerrit: /var/gerrit && tail -f /var/gerrit/logs/error_log
