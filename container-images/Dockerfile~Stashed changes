@@ -1,0 +1,25 @@
+FROM ubuntu:20.04
+
+# Add Gerrit packages repository
+# Add Gerrit packages repository
+RUN apt-get update && \
+    apt-get -y install gnupg2
+RUN echo "deb mirror://mirrorlist.gerritforge.com/bionic gerrit contrib" > /etc/apt/sources.list.d/GerritForge.list
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 847005AE619067D5
+
+RUN apt-get update
+RUN apt-key update
+RUN apt-get -y install openssh-client sudo
+
+# Install OpenJDK and Gerrit in two subsequent transactions
+# (pre-trans Gerrit script needs to have access to the Java command)
+RUN apt-get -y install openjdk-11-jdk
+RUN apt-get -y install gerrit=3.4.0-1
+
+USER gerrit
+RUN java -jar /var/gerrit/bin/gerrit.war init --batch --install-all-plugins -d /var/gerrit
+RUN java -jar /var/gerrit/bin/gerrit.war reindex -d /var/gerrit
+# Allow incoming traffic
+EXPOSE 29418 8080
+# Start Gerrit
+CMD /var/gerrit/bin/gerrit.sh start && tail -f /var/gerrit/logs/error_log

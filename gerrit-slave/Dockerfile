@@ -1,4 +1,4 @@
-FROM gerritforge/gerrit-ubuntu15.04:2.13.1
+FROM soloking/gerrit:3.4.0-ubuntu20
 
 USER root
 
